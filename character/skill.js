@@ -13812,7 +13812,353 @@ let lmCharacter = {
                 },
             },
         },
-        //十周年滕芳兰
+        //任婉
+        old_dcjuanji: {
+            trigger: {
+                player: ["phaseUseBegin", "phaseDrawBegin", "phaseDiscardBegin"],
+            },
+            filter(event, player) {
+                if (event.name == "phaseUse") {
+                    const card = new lib.element.VCard({ name: "sha" });
+                    return player.hasUseTarget(card, false);
+                }
+                if (event.name == "phaseDiscard") {
+                    return player.countCards("h") != player.getHandcardLimit();
+                }
+                return true;
+            },
+            audio: "dcjuanji",
+            async cost(event, trigger, player) {
+                const name = trigger.name.slice(5);
+                event.result =
+                    name == "Draw"
+                        ? await player.chooseBool(get.prompt(event.skill)).set("prompt2", "摸体力上限张牌").forResult()
+                        : name == "Use"
+                            ? await player
+                                .chooseTarget(get.prompt(event.skill))
+                                .set("prompt2", "失去1点体力并视为对一名角色使用一张【杀】")
+                                .set("filterTarget", (event, player, target) => {
+                                    const card = new lib.element.VCard({ name: "sha" });
+                                    return player.canUse(card, target, false);
+                                })
+                                .set("ai", target => {
+                                    const card = new lib.element.VCard({ name: "sha" }),
+                                        player = get.player(),
+                                        eff1 = get.effect(target, card, player, player),
+                                        eff2 = get.effect(player, { name: "losehp" }, player, player);
+                                    return Math.max(0, eff1 - eff2);
+                                })
+                                .forResult()
+                            : await player
+                                .chooseCardTarget({
+                                    filterCard(card, player) {
+                                        const num = get.event("numx");
+                                        return num > 0 && lib.filter.cardDiscardable(card, player, "old_dcjuanji");
+                                    },
+                                    prompt: get.prompt(event.skill),
+                                    prompt2: "将手牌调整至手牌上限，然后弃置一名角色区域里至多两张牌",
+                                    numx: player.countCards("h") - player.getHandcardLimit(),
+                                    selectCard() {
+                                        const num = get.event("numx");
+                                        if (num > 0) {
+                                            return num;
+                                        }
+                                        return -1;
+                                    },
+                                    filterTarget(card, player, target) {
+                                        return player == target || target.countCards("hej");
+                                    },
+                                    ai1(card) {
+                                        return 10 - get.value(card);
+                                    },
+                                    ai2(target) {
+                                        const player = get.player();
+                                        return get.effect(target, { name: "guohe" }, player, player);
+                                    },
+                                })
+                                .forResult();
+            },
+            async content(event, trigger, player) {
+                const name = trigger.name.slice(5);
+                if (name == "Draw") {
+                    await player.draw(player.maxHp);
+                } else if (name == "Use") {
+                    const {
+                        targets: [target],
+                    } = event;
+                    const card = new lib.element.VCard({ name: "sha" });
+                    await player.loseHp();
+                    await player.useCard(card, target, false);
+                } else {
+                    const {
+                        cards,
+                        targets: [target],
+                    } = event;
+                    if (cards?.length) {
+                        await player.discard(cards);
+                    } else {
+                        await player.drawTo(player.getHandcardLimit());
+                    }
+                    if (target.countCards("hej")) {
+                        await player.discardPlayerCard(target, "hej", [1, 2], true);
+                    }
+                }
+            },
+        },
+        old_dcrenshuang: {
+            trigger: {
+                player: ["dying", "dyingAfter"],
+            },
+            audio: "dcrenshuang",
+            filter(event, player, name) {
+                if (name == "dyingAfter") {
+                    return player.isIn();
+                }
+                return game.getRoundHistory("everything", evt => evt.name == "dying" && evt.player == player).indexOf(event) == 0;
+            },
+            forced: true,
+            async content(event, trigger, player) {
+                if (event.triggername == "dying") {
+                    await player.recoverTo(1);
+                    if (player.getAllHistory("custom", evt => evt.old_dcrenshuang).length < 3) {
+                        player.getHistory("custom").push({
+                            old_dcrenshuang: true,
+                        });
+                        await player.gainMaxHp();
+                    }
+                } else {
+                    await player.link(false);
+                    await player.turnOver(false);
+                    const cards = get.inpileVCardList(info => info[0] == "trick" && player.hasUseTarget(info[2]));
+                    if (!cards?.length) {
+                        return;
+                    }
+                    const result = await player
+                        .chooseButton(["纫霜：选择要视为使用的牌", [cards, "vcard"]], true)
+                        .set("ai", button => {
+                            return get.player().getUseValue(button.link[2]);
+                        })
+                        .forResult();
+                    if (result?.bool) {
+                        const card = new lib.element.VCard({ name: result.links[0][2] });
+                        if (player.hasUseTarget(card)) {
+                            await player.chooseUseTarget(card, true);
+                        }
+                    }
+                }
+            },
+        },
+        //新杀谋邓艾
+        old_dcsbzhouxi: {
+            audio: "dcsbzhouxi",
+            enable: "phaseUse",
+            usable: 1,
+            filterCard(card, player, event) {
+                return game.players.every(current => current == player || !player.canUse(card, current, true, true));
+            },
+            filter(event, player) {
+                return player.countCards("h", card => get.info("old_dcsbzhouxi")?.filterCard(card, player, event));
+            },
+            selectCard: -1,
+            manualConfirm: true,
+            position: "h",
+            async content(event, trigger, player) {
+                let num = Math.min(3, event.cards.length),
+                    select = [];
+                const bool1 =
+                    game.countPlayer(current => {
+                        return player.canUse("shunshou", current, true) && get.effect(current, { name: "shunshou" }, player, player) > 0;
+                    }) < num,
+                    bool2 = game.hasPlayer(current => {
+                        return player.canUse("shunshou", current, false) && get.distance(player, current) == 2 && get.effect(current, { name: "shunshou" }, player, player) > 0;
+                    });
+                while (num > 0) {
+                    num--;
+                    const choiceList = [`计算与其他角色距离-${select.length + 1}`, `视为对至多${select.length + 1}名角色使用【顺手牵羊】`, `视为对至多${select.length + 1}名角色使用【杀】`],
+                        controls = ["选项一", "选项二", "选项三"];
+                    for (const chosen of select) {
+                        const index = controls.indexOf(chosen);
+                        choiceList[index] = `<span style="opacity:0.5;">${choiceList[index]}</span>`;
+                    }
+                    const result = await player
+                        .chooseControl(controls.removeArray(select))
+                        .set("prompt", `骤袭：请选择一项（还可选择${num}项）`)
+                        .set("choiceList", choiceList)
+                        .set("ai", () => {
+                            return get.event("res");
+                        })
+                        .set(
+                            "res",
+                            (() => {
+                                if (controls.includes("选项一") && (num > 1 || (num > 0 && bool1 && bool2))) {
+                                    return "选项一";
+                                }
+                                return controls[controls.length - 1];
+                            })()
+                        )
+                        .forResult();
+                    const control = result.control;
+                    select.push(control);
+                    game.log(player, "选择了", `#g${choiceList[["选项一", "选项二", "选项三"].indexOf(control)]}`);
+                }
+                let count = 0;
+                while (select.length) {
+                    let result = select.shift();
+                    switch (result) {
+                        case "选项一": {
+                            player.addTempSkill("old_dcsbzhouxi_range");
+                            player.addMark("old_dcsbzhouxi_range", count, false);
+                            count++;
+                            break;
+                        }
+                        case "选项二": {
+                            const card = new lib.element.VCard({ name: "shunshou" });
+                            if (player.hasUseTarget(card)) {
+                                count++;
+                                await player.chooseUseTarget(card, [1, count], true);
+                            }
+                            break;
+                        }
+                        case "选项三": {
+                            const card = new lib.element.VCard({ name: "sha" });
+                            if (player.hasUseTarget(card)) {
+                                count++;
+                                await player.chooseUseTarget(card, [1, count], true, false);
+                            }
+                            break;
+                        }
+                    }
+                }
+                if (count >= 3) {
+                    if (player.getStat("skill")[event.name]) {
+                        delete player.getStat("skill")[event.name];
+                        game.log(player, "重置了", "#g【骤袭】");
+                    }
+                }
+            },
+            subSkill: {
+                range: {
+                    charlotte: true,
+                    onremove: true,
+                    intro: {
+                        markcount(storage) {
+                            return storage ? `-${storage}` : null;
+                        },
+                        content: "计算与其他角色距离-#",
+                    },
+                    mod: {
+                        globalFrom(from, to, num) {
+                            return num - from.countMark("old_dcsbzhouxi_range");
+                        },
+                    },
+                },
+            },
+            ai: {
+                order: 6,
+                result: {
+                    player(player) {
+                        if (
+                            game.hasPlayer(current => {
+                                if (get.distance(player, current) > 2 || get.effect(current, { name: "shunshou" }, player, player) <= 0) {
+                                    return false;
+                                }
+                                return player.canUse("shunshou", current, false) || player.canUse("sha", current, false);
+                            })
+                        ) {
+                            if (player.hasSkill("old_dcsbshijin") && !player.getStorage("old_dcsbshijin", false)) {
+                                const num = player.countCards("h", card => get.info("old_dcsbzhouxi")?.filterCard(card, player, get.event()));
+                                if (num < 3 && player.getHistory("sourceDamage").length) {
+                                    return 0;
+                                }
+                            }
+                            return 1;
+                        }
+                        return 0;
+                    },
+                },
+            },
+        },
+        old_dcsbshijin: {
+            audio: "dcsbshijin",
+            enable: "phaseUse",
+            manualConfirm: true,
+            limited: true,
+            skillAnimation: true,
+            animationColor: "thunder",
+            onChooseToUse(event) {
+                if (!game.online && !event.shijin_record) {
+                    event.set("shijin_record", event.player.getHistory("sourceDamage"));
+                }
+            },
+            filter(event, player) {
+                return event.shijin_record?.length;
+            },
+            async content(event, trigger, player) {
+                player.awakenSkill(event.name);
+                let cards = [];
+                while (true) {
+                    const card = get.cardPile(card => cards.every(cardx => get.type2(cardx) != get.type2(card)));
+                    if (card) {
+                        cards.push(card);
+                    } else {
+                        break;
+                    }
+                }
+                if (cards.length) {
+                    await player.gain(cards, "gain2");
+                }
+                player.addTempSkill("old_dcsbshijin_defend", { player: "phaseBeginStart" });
+                player
+                    .when({
+                        player: "phaseBegin",
+                    })
+                    .step(async (event, trigger, player) => {
+                        const cards = player.getDiscardableCards(player, "h").filter(card => {
+                            return get.name(card) == "sha" || get.type2(card) == "trick";
+                        });
+                        if (cards.length) {
+                            await player.discard(cards);
+                            await player.loseHp(cards.length);
+                        } else {
+                            player.restoreSkill("old_dcsbshijin");
+                            game.log(player, "重置了", "#g【恃矜】");
+                        }
+                    });
+            },
+            ai: {
+                order: 5,
+                result: {
+                    player: 1,
+                },
+            },
+            subSkill: {
+                defend: {
+                    charlotte: true,
+                    mark: true,
+                    intro: {
+                        content: "受到伤害时，防止之并摸一张牌",
+                    },
+                    trigger: {
+                        player: "damageBegin3",
+                    },
+                    forced: true,
+                    locked: false,
+                    async content(event, trigger, player) {
+                        trigger.cancel();
+                        await player.draw();
+                    },
+                    ai: {
+                        filterDamage: true,
+                        skillTagFilter(player, tag, arg) {
+                            if (arg.player.hasSkillTag("jueqing", false, player)) {
+                                return false;
+                            }
+                        },
+                    },
+                },
+            },
+        },
+        //新杀滕芳兰
         old_dcaichen: {
             audio: 2,
             init(player) {
@@ -19863,6 +20209,169 @@ let lmCharacter = {
                 },
             },
         },
+        // old_potzhuangshi: {
+        //     audio: "potzhuangshi",
+        //     audioname: ["pot_weiyan_achieve"],
+        //     trigger: {
+        //         player: "phaseUseBegin",
+        //     },
+        //     async cost(event, trigger, player) {
+        //         const result = await player
+        //             .chooseButton(
+        //                 [
+        //                     get.prompt(event.skill),
+        //                     [
+        //                         [
+        //                             ["losehp", "失去任意点体力，令你此阶段使用的前等量张牌不计入次数限制"],
+        //                             ["discard", "弃置任意张手牌，令你此阶段使用的前等量张牌无距离限制且不可被响应"],
+        //                         ],
+        //                         "textbutton",
+        //                     ],
+        //                 ],
+        //                 [1, 2]
+        //             )
+        //             .set("filterButton", button => {
+        //                 const player = get.player();
+        //                 if (button.link == "discard") {
+        //                     return player.countCards("h");
+        //                 }
+        //                 return true;
+        //             })
+        //             .set("ai", button => {
+        //                 const player = get.player(),
+        //                     num = Math.floor(player.countCards("h") / 2);
+        //                 if (button.link == "discard") {
+        //                     return num;
+        //                 }
+        //                 return player.hp > 1;
+        //             })
+        //             .forResult();
+        //         event.result = {
+        //             bool: true,
+        //             cost_data: result.bool ? result.links : "nouse",
+        //         };
+        //     },
+        //     async content(event, trigger, player) {
+        //         const select = event.cost_data;
+        //         if (select == "nouse") {
+        //             await player.gainMaxHp();
+        //             await player.recover();
+        //         } else {
+        //             if (select.includes("losehp")) {
+        //                 const { result } = await player
+        //                     .chooseNumbers(
+        //                         get.translation(event.name),
+        //                         [
+        //                             {
+        //                                 prompt: "失去任意点体力值，令你此阶段使用的前等量张牌不计入次数限制",
+        //                                 min: 1,
+        //                                 max: player.getHp(),
+        //                             },
+        //                         ],
+        //                         true
+        //                     )
+        //                     .set("processAI", () => {
+        //                         const player = get.player();
+        //                         let num = Math.floor(player.countCards("h") / 2);
+        //                         return [num];
+        //                     });
+        //                 if (typeof result?.numbers?.[0] != "number") {
+        //                     return;
+        //                 }
+        //                 const number = result.numbers[0];
+        //                 await player.loseHp(number);
+        //                 player.addTempSkill("old_potzhuangshi_limit", "phaseChange");
+        //                 player.addMark("old_potzhuangshi_limit", number, false);
+        //                 player.addTip("old_potzhuangshi_limit", `不计次数 ${number}`);
+        //             }
+        //             if (select.includes("discard")) {
+        //                 const { result } = await player
+        //                     .chooseToDiscard(get.translation(event.name), [1, Infinity], "h", true)
+        //                     .set("prompt2", "弃置任意张手牌，令你此阶段使用的前等量张牌无距离限制且不可被响应")
+        //                     .set("ai", card => {
+        //                         const player = get.player();
+        //                         let num = Math.floor(player.countCards("h") / 2);
+        //                         if (ui.selected.cards.length < num) {
+        //                             return 7 - get.value(card);
+        //                         }
+        //                         return 0;
+        //                     });
+        //                 if (!result?.cards?.length) {
+        //                     return;
+        //                 }
+        //                 const number = result.cards.length;
+        //                 player.addTempSkill("old_potzhuangshi_directHit", "phaseChange");
+        //                 player.addMark("old_potzhuangshi_directHit", number, false);
+        //                 player.addTip("old_potzhuangshi_directHit", `不可响应 ${number}`);
+        //             }
+        //             trigger.set("usedZhuangshi", true);
+        //         }
+        //     },
+        //     subSkill: {
+        //         limit: {
+        //             trigger: {
+        //                 player: "useCard0",
+        //             },
+        //             charlotte: true,
+        //             filter(event, player) {
+        //                 return player.hasMark("old_potzhuangshi_limit");
+        //             },
+        //             forced: true,
+        //             popup: false,
+        //             firstDo: true,
+        //             async content(event, trigger, player) {
+        //                 if (trigger.addCount !== false) {
+        //                     trigger.addCount = false;
+        //                     player.getStat("card")[trigger.card.name]--;
+        //                 }
+        //                 player.removeMark("old_potzhuangshi_limit", 1, false);
+        //                 const num = player.countMark("old_potzhuangshi_limit");
+        //                 if (num > 0) {
+        //                     player.addTip("old_potzhuangshi_limit", `不计次数 ${num}`);
+        //                 } else {
+        //                     player.removeTip("old_potzhuangshi_limit");
+        //                 }
+        //             },
+        //             onremove(player, skill) {
+        //                 player.clearMark(skill, false);
+        //                 player.removeTip(skill);
+        //             },
+        //         },
+        //         directHit: {
+        //             trigger: {
+        //                 player: "useCard0",
+        //             },
+        //             charlotte: true,
+        //             filter(event, player) {
+        //                 return player.hasMark("old_potzhuangshi_directHit");
+        //             },
+        //             forced: true,
+        //             popup: false,
+        //             firstDo: true,
+        //             async content(event, trigger, player) {
+        //                 trigger.directHit.addArray(game.players);
+        //                 player.removeMark("old_potzhuangshi_directHit", 1, false);
+        //                 const num = player.countMark("old_potzhuangshi_directHit");
+        //                 if (num > 0) {
+        //                     player.addTip("old_potzhuangshi_directHit", `不可响应 ${num}`);
+        //                 } else {
+        //                     player.removeTip("old_potzhuangshi_directHit");
+        //                 }
+        //             },
+        //             onremove(player, skill) {
+        //                 player.clearMark(skill, false);
+        //                 player.removeTip(skill);
+        //             },
+        //             mod: {
+        //                 targetInRange(card, player) {
+        //                     if (player.hasMark("old_potzhuangshi_directHit")) {
+        //                         return true;
+        //                     }
+        //                 },
+        //             },
+        //         },
+        //     },
+        // },
         old_potzhuangshi: {
             audio: "potzhuangshi",
             audioname: ["pot_weiyan_achieve"],
@@ -19870,95 +20379,72 @@ let lmCharacter = {
                 player: "phaseUseBegin",
             },
             async cost(event, trigger, player) {
-                const result = await player
-                    .chooseButton(
-                        [
-                            get.prompt(event.skill),
-                            [
-                                [
-                                    ["losehp", "失去任意点体力，令你此阶段使用的前等量张牌不计入次数限制"],
-                                    ["discard", "弃置任意张手牌，令你此阶段使用的前等量张牌无距离限制且不可被响应"],
-                                ],
-                                "textbutton",
-                            ],
-                        ],
-                        [1, 2]
-                    )
-                    .set("filterButton", button => {
+                const { bool: bool1, cards } = await player
+                    .chooseToDiscard(get.prompt(event.skill), [1, Infinity], "h")
+                    .set("prompt2", "弃置任意张手牌，令你此阶段使用的前等量张牌无距离限制且不可被响应")
+                    .set("ai", card => {
                         const player = get.player();
-                        if (button.link == "discard") {
-                            return player.countCards("h");
+                        let num = Math.floor(player.countCards("h") / 2);
+                        if (ui.selected.cards.length < num) {
+                            if (get.tag(card, "damage")) {
+                                return 0.1;
+                            }
+                            return 7 - get.value(card);
                         }
-                        return true;
+                        return 0;
                     })
-                    .set("ai", button => {
-                        const player = get.player(),
-                            num = Math.floor(player.countCards("h") / 2);
-                        if (button.link == "discard") {
-                            return num;
+                    .set("chooseonly", true)
+                    .forResult();
+                if (bool1 && cards.length) {
+                    game.broadcastAll(cards => {
+                        cards.forEach(card => card.addGaintag("old_potzhuangshi_tag"));
+                    }, cards);
+                }
+                const { bool: bool2, numbers } = await player
+                    .chooseNumbers(get.prompt(event.skill), [
+                        {
+                            prompt: "失去任意点体力值，令你此阶段使用的前等量张牌不计入次数限制",
+                            min: 1,
+                            max: player.getHp(),
+                        },
+                    ])
+                    .set("processAI", () => {
+                        const player = get.player();
+                        if (player.hp < 2) {
+                            return false;
                         }
-                        return player.hp > 1;
+                        let num = Math.min(Math.floor(player.countCards("h") / 2), player.hp - 1);
+                        return [num];
                     })
                     .forResult();
                 event.result = {
                     bool: true,
-                    cost_data: result.bool ? result.links : "nouse",
+                    cards: cards,
+                    cost_data: numbers,
                 };
+                player.removeGaintag("old_potzhuangshi_tag");
             },
             async content(event, trigger, player) {
-                const select = event.cost_data;
-                if (select == "nouse") {
-                    await player.gainMaxHp();
-                    await player.recover();
-                } else {
-                    if (select.includes("losehp")) {
-                        const { result } = await player
-                            .chooseNumbers(
-                                get.translation(event.name),
-                                [
-                                    {
-                                        prompt: "失去任意点体力值，令你此阶段使用的前等量张牌不计入次数限制",
-                                        min: 1,
-                                        max: player.getHp(),
-                                    },
-                                ],
-                                true
-                            )
-                            .set("processAI", () => {
-                                const player = get.player();
-                                let num = Math.floor(player.countCards("h") / 2);
-                                return [num];
-                            });
-                        if (typeof result?.numbers?.[0] != "number") {
-                            return;
-                        }
-                        const number = result.numbers[0];
+                const { cards, cost_data: numbers } = event;
+                if (cards || numbers) {
+                    trigger.set("usedZhuangshi", true);
+                    if (cards) {
+                        await player.modedDiscard(cards);
+                        const number = cards.length;
+                        player.addTempSkill("old_potzhuangshi_directHit", "phaseChange");
+                        player.addMark("old_potzhuangshi_directHit", number, false);
+                        player.addTip("old_potzhuangshi_directHit", `不可响应 ${number}`);
+                    }
+                    if (numbers) {
+                        const number = numbers[0];
                         await player.loseHp(number);
                         player.addTempSkill("old_potzhuangshi_limit", "phaseChange");
                         player.addMark("old_potzhuangshi_limit", number, false);
                         player.addTip("old_potzhuangshi_limit", `不计次数 ${number}`);
                     }
-                    if (select.includes("discard")) {
-                        const { result } = await player
-                            .chooseToDiscard(get.translation(event.name), [1, Infinity], "h", true)
-                            .set("prompt2", "弃置任意张手牌，令你此阶段使用的前等量张牌无距离限制且不可被响应")
-                            .set("ai", card => {
-                                const player = get.player();
-                                let num = Math.floor(player.countCards("h") / 2);
-                                if (ui.selected.cards.length < num) {
-                                    return 7 - get.value(card);
-                                }
-                                return 0;
-                            });
-                        if (!result?.cards?.length) {
-                            return;
-                        }
-                        const number = result.cards.length;
-                        player.addTempSkill("old_potzhuangshi_directHit", "phaseChange");
-                        player.addMark("old_potzhuangshi_directHit", number, false);
-                        player.addTip("old_potzhuangshi_directHit", `不可响应 ${number}`);
-                    }
-                    trigger.set("usedZhuangshi", true);
+                } else {
+                    await player.gainMaxHp();
+                    await player.recover();
                 }
             },
             subSkill: {
@@ -19989,6 +20475,14 @@ let lmCharacter = {
                     onremove(player, skill) {
                         player.clearMark(skill, false);
                         player.removeTip(skill);
+                    },
+                    ai: {
+                        presha: true,
+                        skillTagFilter(player, tag, arg) {
+                            if (!player.hasMark("old_potzhuangshi_limit")) {
+                                return false;
+                            }
+                        },
                     },
                 },
                 directHit: {
@@ -20026,7 +20520,6 @@ let lmCharacter = {
                 },
             },
         },
-
         //朱儁
         diy_juxiang: {
             audio: "zjjuxiang",
@@ -20522,6 +21015,9 @@ let lmCharacter = {
         old_potzhongao_info: "使命技，①游戏开始时，你获得〖狂骨〗。②成功：你杀死一名角色，升级〖狂骨〗，回复X点体力并摸X张牌，体力值已满则改为摸等量张牌（X为你剩余的“壮誓”次数）。③失败：你进入濒死，或你未于出牌阶段开始时执行〖壮誓〗，失去〖壮誓〗并获得〖困奋〗，然后你回复1点体力并摸两张牌。",
         old_potzhuangshi: "壮誓",
         old_potzhuangshi_info: "出牌阶段开始时，你可以执行任意项：1.失去任意点体力，令你此阶段使用的前等量张牌不计入次数限制；2.弃置任意张手牌，令你此阶段使用的前等量张牌无距离限制且不可被响应。若均不执行，你增加1点体力上限并回复1点体力。",
+        old_potzhuangshi_tag: "已选择弃置",
+        old_mb_chenzhi: "旧陈祇",
+        old_mb_chenzhi_prefix: "旧",
 
         oldx_clan_xuncai: "旧族荀采",
         oldx_clan_xuncai_prefix: "旧|族",
@@ -20818,6 +21314,19 @@ let lmCharacter = {
         old_dc_tengfanglan_prefix: "旧",
         old_dcaichen: "哀尘",
         old_dcaichen_info: "锁定技。若牌堆剩余数：大于80，当你每次发动〖落宠〗弃置你区域内的牌后，你摸两张牌；大于40，你跳过弃牌阶段；小于40，你不能响应♠牌。",
+        old_dc_sb_dengai: "旧新杀谋邓艾",
+        old_dc_sb_dengai_ab: "旧谋邓艾",
+        old_dc_sb_dengai_prefix: "旧|谋",
+        old_dcsbzhouxi: "骤袭",
+        old_dcsbzhouxi_info: "出牌阶段限一次，你弃置所有当前无法指定其他角色为目标的手牌，并根据弃牌数依次选择等量项：1.本回合计算与其他角色距离-X；2.视为对至多X名角色使用【顺手牵羊】；3.视为对至多X名角色使用【杀】。若你执行了所有选项，此技能视为未发动过（X未此项被选择的次序）。",
+        old_dcsbshijin: "恃矜",
+        old_dcsbshijin_info: "限定技，出牌阶段，若你本回合造成过伤害，你可以获得每种类型的牌各一张，且直到你的下个回合开始前，你受到伤害时防止之并摸一张牌。你的下个回合开始时，弃置所有【杀】和锦囊牌并失去等量体力，若你未因此失去体力，此技能视为未发动过。",
+        old_renwan: "旧任婉",
+        old_renwan_prefix: "旧",
+        old_dcjuanji: "狷急",
+        old_dcjuanji_info: "摸牌阶段开始时，你可以摸体力上限张牌；出牌阶段开始时，你可以失去1点体力，然后视为对一名角色使用一张【杀】；弃牌阶段开始时，你可以调整手牌至手牌上限，然后弃置一名角色区域里至多两张牌。",
+        old_dcrenshuang: "纫霜",
+        old_dcrenshuang_info: "锁定技，①你每轮首次进入濒死时，回复体力至1点并增加1点体力上限（至多以此法增加3点）。②你脱离濒死时，复原武将牌并视为使用一张普通锦囊牌。",
 
         old_tw_huojun: "旧TW霍峻",
         old_tw_huojun_ab: "旧霍峻",

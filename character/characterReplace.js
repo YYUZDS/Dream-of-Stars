@@ -41,7 +41,7 @@ let lmCharacter = {//武将切换
     shenpei: ["old_shenpei"],
     majun: ["old_yj_majun"],
     nanhualaoxian: ["old_ol_nanhualaoxian"],
-    dengai: ["old_ol_sb_dengai"],
+    dengai: ["old_ol_sb_dengai", "old_dc_sb_dengai"],
     zhangliao: ["old_sb_zhangliao"],
     luxun: ["old_sb_luxun"],
     guojia: ["old_sb_guojia"],
@@ -139,6 +139,8 @@ let lmCharacter = {//武将切换
     tw_zhugejun: ["old_dc_zhugejun"],
     madai: ["old_ol_madai"],
     pot_weiyan: ["old_pot_weiyan"],
+    mb_chenzhi: ["old_mb_chenzhi"],
+    renwan: ["old_renwan"],
 
     shen_huatuo: ["old_dc_shen_huatuo"],
     shen_lusu: ["shen_lusu", "old_shen_lusu"],
