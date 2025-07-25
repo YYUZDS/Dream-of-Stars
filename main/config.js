@@ -313,6 +313,11 @@ export let config = {
 		init: true,
 		intro: "开启后，将斗地主郑玄数值调整为与其他模式相同。",
 	},
+	zrEnhance: {
+		name: "增强【笮融】",
+		init: false,
+		intro: "开启后，修改浮图的全场最高判定。",
+	},
 	tmEnhance: {
 		name: "增强【天命】",
 		init: false,

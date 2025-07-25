@@ -1966,6 +1966,31 @@ export async function precontent(config, pack) {
             },
         };
     }
+    //笮融增强
+    if (lib.config.extension_星之梦_zrEnhance) {
+        Object.assign(lib.skill.mbfutu, {
+            isMax(player, name) {
+                let count = current => {
+                    let history = _status.globalHistory?.[_status.globalHistory.length - 1]?.everything,
+                        count = 0;
+                    if (!history?.length) {
+                        return count;
+                    }
+                    for (let evt of history) {
+                        if (evt._cancelled || evt.name != name) {
+                            continue;
+                        }
+                        if (evt?.source != current || typeof evt.num != "number") {
+                            continue;
+                        }
+                        count += evt.num;
+                    }
+                    return count;
+                };
+                return count(player) >= 0 && !game.hasPlayer(current => count(current) > count(player));
+            },
+        });
+    }
     //虚拟偶像增强
     if (lib.config.extension_星之梦_vtbEnhance) {
         //小乐
@@ -2150,7 +2175,7 @@ export async function precontent(config, pack) {
         };
         lib.translate.vtbshanwu_info = "当其他角色成为【杀】的第一个目标时，你可以弃置一张【闪】，然后取消此【杀】的所有目标。当你成为其他角色使用【杀】或普通锦囊牌的目标后，你可以打出一张【闪】令此牌对你无效，然后你摸一张牌。你可以将一张装备牌当作【闪】使用或打出。";
     }
-    //梦孙策制衡
+    //梦孙策制衡语音
     lib.skill.rezhiheng = {
         audio: 2,
         audioname2: { shen_caopi: "rezhiheng_shen_caopi", new_simayi: "rezhiheng_new_simayi", jsrg_sunce: "rezhiheng_jsrg_sunce" },
@@ -2236,7 +2261,7 @@ export async function precontent(config, pack) {
             threaten: 1.55,
         },
     };
-    //荆周瑜
+    //荆周瑜雄姿语音
     lib.skill.jxxiongzi = {
         audio: "sbyingzi",
         trigger: {
