@@ -54,7 +54,7 @@ let lmCharacter = {//武将切换
     tengfanglan: ["old_tengfanglan"],
     dengzhong: ["dengzhong", "old_dengzhong"],
     wangyan: ["wangyan", "old_wangyan"],
-    luyusheng: ["old_ol_luyusheng"],
+    luyusheng: ["old_ol_luyusheng", "old_mb_luyusheng"],
     hujinding: ["old_ol_hujinding"],
     feiyi: ["old_ol_feiyi"],
     ol_pengyang: ["old_ol_pengyang"],

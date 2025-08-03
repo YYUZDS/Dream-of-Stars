@@ -556,6 +556,7 @@ let lmCharacter = {
             trigger: { global: "roundStart", player: "phaseEnd" },
             inherit: "junkguixin",
         },
+
         //界张角
         minihuangtian: {
             audio: "huangtian2",
@@ -12612,34 +12613,43 @@ let lmCharacter = {
                     (skill, from, to) => {
                         const { filter: filterFrom, ...otherFrom } = from.effect;
                         const { filter: filterTo, ...otherTo } = to.effect;
-                        lib.skill[skill] = { nopop: true, old_olhedao: true, charlotte: true, onremove: true, ...otherFrom, ...otherTo };
-                        lib.skill[skill].filter = function (...args) {
-                            return (filterFrom ? filterFrom(...args) : true) && (filterTo ? filterTo(...args) : true);
-                        };
-                        lib.skill[skill].init = (player, skill) => (player.storage[skill] = player.storage[skill] || [0, skill]);
-                        lib.skill[skill].intro = {
-                            markcount: (storage = [0]) => storage[0],
-                            content(storage, player) {
-                                const book = storage?.[1];
-                                if (!book) {
-                                    return "查无此书";
-                                }
-                                return [
-                                    "此书还可使用" + storage[0] + "次",
-                                    (() => {
-                                        if (!player.isUnderControl(true) && get.info(book)?.nopop) {
-                                            return "此书仍是个秘密";
-                                        }
-                                        return lib.translate[book + "_info"];
-                                    })(),
-                                ]
-                                    .map(str => "<li>" + str)
-                                    .join("<br>");
+                        lib.skill[skill] = {
+                            nopop: true,
+                            old_olhedao: true,
+                            charlotte: true,
+                            init(player, skill) {
+                                player.storage[skill] ??= [0, []];
                             },
+                            onremove: true,
+                            filter(...args) {
+                                return (filterFrom ? filterFrom(...args) : true) && (filterTo ? filterTo(...args) : true);
+                            },
+                            markimage: "image/card/tianshu2.png",
+                            intro: {
+                                markcount: (storage = [0]) => storage[0],
+                                content(storage = [0, []], player, book) {
+                                    const [count, targets] = storage;
+                                    if (!book) {
+                                        return "查无此书";
+                                    }
+                                    return [
+                                        `此书还可使用${count}次`,
+                                        (() => {
+                                            if (!get.info(book)?.nopop || [player, ...targets].some(i => i.isUnderControl(true))) {
+                                                return lib.translate[`${book}_info`];
+                                            }
+                                            return "此书仍是个秘密";
+                                        })(),
+                                    ]
+                                        .map(str => `<li>${str}`)
+                                        .join("<br>");
+                                },
+                            },
+                            ...otherFrom,
+                            ...otherTo,
                         };
-                        lib.skill[skill].markimage = "image/card/tianshu2.png";
                         lib.translate[skill] = "天书";
-                        lib.translate[skill + "_info"] = from.name + "，" + to.name + "。";
+                        lib.translate[`${skill}_info`] = `${from.name}，${to.name}。`;
                         game.finishSkill(skill);
                     },
                     skill,
@@ -12693,6 +12703,7 @@ let lmCharacter = {
                     const [skill] = result.links;
                     player.removeSkill(skill);
                     target.addSkill(skill);
+                    target.storage[skill][1].add(player);
                     lib.skill.old_olhedao.tianshuClear(skill, target, -1);
                 }
             },
@@ -20115,6 +20126,278 @@ let lmCharacter = {
                 },
             },
         },
+        //手杀陆郁生
+        old_mbrunwei: {
+            audio: "mbrunwei",
+            logAudio: index => (typeof index === "number" ? "mbrunwei" + index + ".mp3" : 2),
+            enable: "phaseUse",
+            usable: 1,
+            chooseButton: {
+                dialog(event, player) {
+                    return ui.create.dialog(get.prompt2("old_mbrunwei"));
+                },
+                chooseControl(event, player) {
+                    return [1, 2, 3, "cancel2"];
+                },
+                check() {
+                    return 2;
+                },
+                backup(result, player) {
+                    return {
+                        num: result.control,
+                        log: false,
+                        delay: false,
+                        async content(event, trigger, player) {
+                            const num = lib.skill.old_mbrunwei_backup.num,
+                                skill = "old_mbrunwei";
+                            const cards = get.cards(num, true);
+                            player.logSkill("old_mbrunwei", null, null, null, [get.rand(1, 2)]);
+                            await player.showCards(cards, `${get.translation(player)}发动了〖${get.translation(skill)}〗`);
+                            const used = player.getHistory("useSkill", evt => evt.skill == skill && evt.event.getParent("phaseUse") == event.getParent("phaseUse")).length > 1;
+                            if (
+                                used &&
+                                !game.hasPlayer(target => {
+                                    return !target.hasHistory("gain", evt => evt.cards?.length);
+                                })
+                            ) {
+                                return;
+                            }
+                            const red = cards.filter(card => get.color(card, false) == "red"),
+                                black = cards.filter(card => get.color(card, false) == "black");
+                            event.videoId = lib.status.videoId++;
+                            const func = (id, red, black) => {
+                                //创建新对话框
+                                const dialog = ui.create.dialog(`润微：选择一名角色令其获得其中一种颜色的牌`);
+                                //添加显示牌的部分，该部分不可点击
+                                dialog.addNewRow({ item: get.translation("black"), retio: 1 }, { item: black, ratio: 3 }, { item: get.translation("red"), retio: 1 }, { item: red, ratio: 3 });
+                                //对移动端和PC端对话框高度分别做适配，加了addNewRow的默认高度有点高
+                                dialog.css({
+                                    position: "absolute",
+                                    top: get.is.phoneLayout() ? "35%" : "45%",
+                                });
+                                //正常添加按钮
+                                dialog.add([
+                                    [
+                                        ["black", "黑色"],
+                                        ["red", "红色"],
+                                    ],
+                                    "tdnodes",
+                                ]);
+                                dialog.videoId = id;
+                                return dialog;
+                            };
+                            if (player.isOnline2()) {
+                                player.send(func, event.videoId, red, black);
+                            } else {
+                                func(event.videoId, red, black);
+                            }
+                            const result = await player
+                                .chooseButtonTarget({
+                                    dialog: event.videoId,
+                                    forced: true,
+                                    black: black,
+                                    red: red,
+                                    used: used,
+                                    targetsx: game.filterPlayer(target => !target.hasHistory("gain", evt => evt.cards?.length)),
+                                    filterButton(button) {
+                                        return get.event()[button.link]?.length;
+                                    },
+                                    filterTarget(card, player, target) {
+                                        if (get.event().used) {
+                                            return get.event().targetsx.includes(target);
+                                        }
+                                        return true;
+                                    },
+                                    ai1(button) {
+                                        return get.event()[button.link]?.length;
+                                    },
+                                    ai2(target) {
+                                        if (!get.event().used && get.player() == target) {
+                                            return 114514;
+                                        }
+                                        return get.attitude(get.player(), target);
+                                    },
+                                })
+                                .forResult();
+                            game.broadcastAll("closeDialog", event.videoId);
+                            if (result?.links && result?.targets) {
+                                const target = result.targets[0],
+                                    gain = result.links[0] == "black" ? black : red;
+                                player.line(target);
+                                player.addTempSkill("old_mbrunwei_used", "phaseUseAfter");
+                                player.addMark("old_mbrunwei_used", gain.length, false);
+                                player.addTip("old_mbrunwei_used", `润微  ${gain.length}`);
+                                let gaintag = [];
+                                if (player == target) {
+                                    gaintag = ["old_mbrunwei"];
+                                    player
+                                        .when({ player: "phaseUseEnd" })
+                                        .filter(evt => event.getParent("phaseUse") == evt)
+                                        .then(() => {
+                                            const cards = player.getCards("h", card => card.hasGaintag("old_mbrunwei"));
+                                            if (cards.length) {
+                                                player.logSkill("old_mbrunwei", null, null, null, [4]);
+                                                player.modedDiscard(cards).set("discarder", player);
+                                            }
+                                        });
+                                }
+                                await target.gain(gain, "gain2").set("gaintag", gaintag);
+                            }
+                        },
+                    };
+                },
+            },
+            ai: {
+                order: 10,
+                result: {
+                    player(player) {
+                        const used = player.hasHistory("useSkill", evt => evt.skill == "old_mbrunwei" && evt.event.getParent("phaseUse") == get.event().getParent("phaseUse")); //
+                        if (!used) {
+                            return 1;
+                        } else if (
+                            game.hasPlayer(target => {
+                                return !target.hasHistory("gain", evt => evt.cards.length) && get.attitude(player, target) > 0;
+                            })
+                        ) {
+                            return 1;
+                        }
+                        return 0;
+                    },
+                },
+            },
+            subSkill: {
+                used: {
+                    onremove(player, skill) {
+                        delete player.storage[skill];
+                        player.removeTip(skill);
+                    },
+                    intro: {
+                        markcount: "mark",
+                        content: "再失去#张牌重置技能",
+                    },
+                    trigger: {
+                        player: "loseAfter",
+                        global: ["loseAsyncAfter", "equipAfter", "gainAfter", "addToExpansionAfter", "addJudgeAfter"],
+                    },
+                    filter(event, player) {
+                        return event.getl(player)?.cards2?.length;
+                    },
+                    silent: true,
+                    content() {
+                        const num = trigger.getl(player)?.cards2?.length;
+                        if (num >= player.countMark(event.name)) {
+                            player.logSkill("old_mbrunwei", null, null, null, [3]);
+                            player.removeSkill(event.name);
+                            delete player.getStat().skill.old_mbrunwei;
+                            game.log(player, "重置了", `#g〖${get.translation(event.name)}〗`);
+                        } else {
+                            player.removeMark(event.name, num, false);
+                            player.addTip(event.name, `润微  ${player.countMark(event.name)}`);
+                        }
+                    },
+                },
+            },
+        },
+        old_mbshuanghuai: {
+            audio: "mbshuanghuai",
+            logAudio: index => (typeof index === "number" ? "mbshuanghuai" + index + ".mp3" : 3),
+            init(player, skill) {
+                const history = player.getAllHistory("useSkill", evt => evt.skill == skill && evt.targets);
+                if (history.length) {
+                    const target = history[history.length - 1].targets[0];
+                    if (target) {
+                        player.storage[skill] = target;
+                        player.markSkill(skill);
+                        player.addTip(skill, `霜怀 ${get.translation(target)}`);
+                    }
+                }
+            },
+            onremove(player, skill) {
+                delete player.storage[skill];
+                player.removeTip(skill);
+            },
+            trigger: { global: "damageBegin4" },
+            usable: 1,
+            filter(event, player) {
+                return get.distance(player, event.player) <= 1;
+            },
+            popup: false,
+            logTarget: "player",
+            async cost(event, trigger, player) {
+                const result = await player
+                    .chooseButton([
+                        get.prompt2(event.skill, trigger.player),
+                        [
+                            [
+                                ["cancel", `防止此伤害`],
+                                ["tao", `令其从弃牌堆获得一张【桃】`],
+                            ],
+                            "textbutton",
+                        ],
+                    ])
+                    .set("filterButton", button => {
+                        return get.event().links.includes(button.link);
+                    })
+                    .set(
+                        "links",
+                        ["cancel", "tao"].filter(link => {
+                            if (link == "tao") {
+                                const card = get.discardPile(cardx => cardx.name == "tao");
+                                if (!card) {
+                                    return false;
+                                }
+                            }
+                            return true;
+                        })
+                    )
+                    .set("ai", button => {
+                        const trigger = get.event().getTrigger(),
+                            eff = get.damageEffect(trigger.player, trigger.source, get.player());
+                        if (eff > 0) {
+                            return 0;
+                        }
+                        if (trigger.player.hasSkillTag("maixie") && trigger.num === 1 && button.link == "tao") {
+                            return 1 + Math.random();
+                        }
+                        return Math.random();
+                    })
+                    .forResult();
+                if (result.bool) {
+                    event.result = {
+                        bool: true,
+                        cost_data: result.links[0],
+                    };
+                }
+            },
+            async content(event, trigger, player) {
+                const link = event.cost_data,
+                    target = trigger.player,
+                    last = player.storage[event.name];
+                player.logSkill("old_mbshuanghuai", target, null, null, [link == "cancel" ? 1 : 2]);
+                if (link == "cancel") {
+                    trigger.cancel();
+                } else {
+                    const card = get.discardPile("tao");
+                    if (card) {
+                        await target.gain(card, "gain2");
+                    }
+                }
+                if (last && last == target) {
+                    return;
+                }
+                if (last && last != target) {
+                    player.logSkill("old_mbshuanghuai", null, null, null, [3]);
+                    await player.loseHp();
+                }
+                player.storage[event.name] = target;
+                player.markSkill(event.name);
+                player.addTip(event.name, `霜怀 ${get.translation(target)}`);
+            },
+            intro: {
+                content: "player",
+                markcount: () => 0,
+            },
+        },
         //朱儁
         diy_juxiang: {
             audio: "zjjuxiang",
@@ -20613,6 +20896,12 @@ let lmCharacter = {
         old_potzhuangshi_tag: "已选择弃置",
         old_mb_chenzhi: "旧陈祇",
         old_mb_chenzhi_prefix: "旧",
+        old_mb_luyusheng: "旧势陆郁生",
+        old_mb_luyusheng_prefix: "旧|势",
+        old_mbrunwei: "润微",
+        old_mbrunwei_info: "出牌阶段限一次，你可以展示牌堆顶至多三张牌，令一名角色获得其中一种颜色的所有牌。若如此做，本阶段你再失去X张牌后（X为其因此获得的牌数），该技能视为未发动过但不能以本回合获得过牌的角色为目标。若获得牌的角色为你，本阶段结束时，你弃置以此法获得的牌。",
+        old_mbshuanghuai: "霜怀",
+        old_mbshuanghuai_info: "每回合限一次，当与你距离1以内的角色受到伤害时，你可以选择一项：1.防止此伤害；2.令其从弃牌堆中获得一张【桃】。若该角色与你上一次发动时不同，你失去1点体力。",
 
         oldx_clan_xuncai: "旧族荀采",
         oldx_clan_xuncai_prefix: "旧|族",

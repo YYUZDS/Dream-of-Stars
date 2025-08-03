@@ -88,28 +88,6 @@ window.lm_import(function (lib, game, ui, get, ai, _status) {
 		"我来助你！",
 		"你干嘛？哎呦！",
 	];
-	lib.emotionList = {
-		lm_emotion: 22,
-		disorder_emotion: 14,
-		other1_emotion: 19,
-		other2_emotion: 21,
-		other3_emotion: 19,
-		other4_emotion: 9,
-		biexiao_emotion: 18,
-		chaijun_emotion: 43,
-		maoshu_emotion: 20,
-		xiaowu_emotion: 14,
-		xiaokuo_emotion: 8,
-		shibing_emotion: 15,
-		guojia_emotion: 20,
-		zhenji_emotion: 20,
-		wanglang_emotion: 20,
-		xiaosha_emotion: 20,
-		xiaotao_emotion: 20,
-		xiaojiu_emotion: 20,
-		mobile_emotion: 15,
-		huangdou_emotion: 50,
-	};
 	lib.translate.hehua = "荷花";
 	lib.translate.yanhua = "烟花";
 	lib.translate.denglong = "灯笼";
@@ -149,7 +127,9 @@ window.lm_import(function (lib, game, ui, get, ai, _status) {
 		ipbar.style.position = "relative";
 
 		var button = ui.create.div(".menubutton.large.highlight.connectbutton.connectbutton1.pointerdiv", game.online ? "退出联机" : "开始游戏", ui.window, function () {
-			if (button.clicked) return;
+			if (button.clicked) {
+				return;
+			}
 			if (game.online) {
 				if (game.onlinezhu) {
 					game.send("startGame");
@@ -162,15 +142,13 @@ window.lm_import(function (lib, game, ui, get, ai, _status) {
 			} else {
 				// var num = 0;
 				// for (var i of game.connectPlayers) {
-				//     if (
-				//         !i.nickname &&
-				//         !i.classList.contains("unselectable2")
-				//     )
-				//         num++;
+				// 	if (!i.nickname && !i.classList.contains("unselectable2")) {
+				// 		num++;
+				// 	}
 				// }
 				// if (num >= lib.configOL.number - 1) {
-				//     alert("至少要有两名玩家才能开始游戏！");
-				//     return;
+				// 	alert("至少要有两名玩家才能开始游戏！");
+				// 	return;
 				// }
 				game.resume();
 			}
@@ -186,26 +164,46 @@ window.lm_import(function (lib, game, ui, get, ai, _status) {
 		var shareButton = ui.create.div(".menubutton.large.highlight.connectbutton.connectbutton2.pointerdiv", "分享房间", ui.window, function () {
 			var text = `无名杀-联机-${lib.translate[get.mode()]}-${game.connectPlayers.filter(p => p.avatar).length}/${game.connectPlayers.filter(p => !p.classList.contains("unselectable2")).length}\n${get.connectNickname()}邀请你加入${game.roomId}房间\n联机地址:${game.ip}\n请先通过游戏内菜单-开始-联机中启用“读取邀请链接”选项`;
 			window.focus();
-			if (navigator.clipboard && lib.node) {
+			const fallbackCopyTextToClipboard = function (text) {
+				const textArea = document.createElement("textarea");
+				textArea.value = text;
+				textArea.style.position = "fixed";
+				textArea.style.top = "0";
+				textArea.style.left = "0";
+				textArea.style.width = "1px";
+				textArea.style.height = "1px";
+				textArea.style.padding = "0";
+				textArea.style.border = "none";
+				textArea.style.outline = "none";
+				textArea.style.boxShadow = "none";
+				textArea.style.background = "transparent";
+				document.body.appendChild(textArea);
+				textArea.focus();
+				textArea.select();
+				try {
+					const successful = document.execCommand("copy");
+					if (!successful) {
+						console.error("Unable to copy using execCommand");
+						game.promises.prompt(`###分享内容复制失败，请自行复制以下内容###${text}`, true);
+					} else {
+						game.alert("分享内容复制成功");
+					}
+				} catch (err) {
+					console.error("Unable to copy using execCommand:", err);
+				}
+				document.body.removeChild(textArea);
+			};
+			if ("clipboard" in navigator) {
 				navigator.clipboard
 					.writeText(text)
 					.then(() => {
-						game.alert(`分享内容复制成功`);
+						game.alert("分享内容复制成功");
 					})
-					.catch(e => {
-						game.alert(`分享内容复制失败${e || ""}`);
+					.catch(() => {
+						fallbackCopyTextToClipboard(text);
 					});
 			} else {
-				var input = ui.create.node("textarea", ui.window, {
-					opacity: "0",
-				});
-				input.value = text;
-				input.focus();
-				input.select();
-				var result = document.execCommand("copy");
-				input.blur();
-				ui.window.removeChild(input);
-				game.alert(`分享内容复制${result ? "成功" : "失败"}`);
+				fallbackCopyTextToClipboard(text);
 			}
 		});
 
