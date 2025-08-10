@@ -556,7 +556,6 @@ let lmCharacter = {
             trigger: { global: "roundStart", player: "phaseEnd" },
             inherit: "junkguixin",
         },
-
         //界张角
         minihuangtian: {
             audio: "huangtian2",
@@ -13419,6 +13418,42 @@ let lmCharacter = {
                 },
             },
         },
+        //OL刘璋
+        old_olfengwei: {
+            audio: "olfengwei",
+            trigger: { global: "roundStart" },
+            forced: true,
+            async content(event, trigger, player) {
+                const nums = Array.from({ length: 4 }).map((_, i) => get.cnNumber(i + 1) + "张");
+                const { result } = await player
+                    .chooseControl(nums)
+                    .set("prompt", "奉蔚：请选择摸牌数")
+                    .set("ai", () => 3);
+                const next = player.draw(result.index + 1);
+                next.gaintag.add("old_olfengwei_debuff");
+                await next;
+                player.addTempSkill("old_olfengwei_debuff", "roundStart");
+            },
+            subSkill: {
+                debuff: {
+                    charlotte: true,
+                    trigger: { player: "damageBegin2" },
+                    filter(event, player) {
+                        if (!event.card) {
+                            return false;
+                        }
+                        return player.hasCard(card => card.hasGaintag("old_olfengwei_debuff"), "h");
+                    },
+                    silent: true,
+                    content() {
+                        trigger.num++;
+                    },
+                    onremove(player, skill) {
+                        player.removeGaintag(skill);
+                    },
+                },
+            },
+        },
         //任婉
         old_dcjuanji: {
             trigger: {
@@ -17916,6 +17951,368 @@ let lmCharacter = {
                 },
             },
         },
+        //赵娥
+        old_twyanshi: {
+            audio: "old_twyanshi",
+            trigger: { global: "phaseBefore", player: "enterGame" },
+            forced: true,
+            locked: false,
+            direct: true,
+            onremove: true,
+            intro: {
+                content: "players",
+            },
+            filter(event, player) {
+                return game.hasPlayer(current => current != player) && (event.name != "phase" || game.phaseNumber == 0);
+            },
+            group: ["old_twyanshi_hurt", "old_twyanshi_damage"],
+            content() {
+                "step 0";
+                player.chooseTarget("言誓：选择一名其他角色", lib.filter.notMe, true).set("ai", target => get.attitude(_status.event.player, target));
+                "step 1";
+                if (result.bool) {
+                    var target = result.targets[0];
+                    player.logSkill("old_twyanshi", target);
+                    player.markAuto("old_twyanshi", [target]);
+                }
+            },
+            mod: {
+                targetInRange(card, player, target) {
+                    if (target.hasMark("old_twyanshi_mark")) {
+                        return true;
+                    }
+                },
+            },
+            subSkill: {
+                hurt: {
+                    audio: "twyanshi",
+                    trigger: {
+                        global: "damageEnd",
+                    },
+                    forced: true,
+                    locked: false,
+                    filter(event, player) {
+                        if (!event.source || !event.source.isIn()) {
+                            return false;
+                        }
+                        return (player == event.player && !player.getStorage("old_twyanshi").includes(event.source)) || (player != event.source && player.getStorage("old_twyanshi").includes(event.player));
+                    },
+                    content() {
+                        trigger.source.addMark("old_twyanshi_mark", 1);
+                    },
+                },
+                damage: {
+                    audio: "old_twyanshi",
+                    trigger: {
+                        source: ["damageBegin1", "damageSource"],
+                    },
+                    forced: true,
+                    locked: false,
+                    filter(event, player) {
+                        return event.player.hasMark("old_twyanshi_mark");
+                    },
+                    content() {
+                        "step 0";
+                        if (event.triggername == "damageBegin1") {
+                            trigger.num++;
+                        } else {
+                            player.draw(trigger.num);
+                            trigger.player.removeMark("old_twyanshi_mark", trigger.player.countMark("old_twyanshi_mark"));
+                        }
+                    },
+                },
+                mark: {
+                    marktext: "誓",
+                    intro: {
+                        name: "誓",
+                        name2: "誓",
+                        content: "mark",
+                    },
+                },
+            },
+        },
+        old_twrenchou: {
+            audio: "twrenchou",
+            trigger: { global: "die" },
+            forced: true,
+            forceDie: true,
+            filter(event, player) {
+                if (!event.source || !event.source.isIn()) {
+                    return false;
+                }
+                if (event.player == player) {
+                    return player.getStorage("old_twyanshi").some(i => i.isIn() && i.hp > 0);
+                }
+                if (player.getStorage("old_twyanshi").includes(event.player)) {
+                    return player.isIn() && player.hp > 0;
+                }
+                return false;
+            },
+            logTarget: "source",
+            line: false,
+            skillAnimation: true,
+            animationColor: "water",
+            global: "old_twrenchou_ai",
+            content() {
+                "step 0";
+                var avengers = [];
+                if (trigger.player == player) {
+                    avengers = player.getStorage("old_twyanshi").filter(i => i.isIn() && i.hp > 0);
+                }
+                if (player.getStorage("old_twyanshi").includes(trigger.player)) {
+                    avengers = [player];
+                }
+                event.avengers = avengers;
+                "step 1";
+                var avenger = event.avengers.shift();
+                avenger.line(trigger.source, "fire");
+                trigger.source.damage(avenger, avenger.hp);
+                "step 2";
+                if (event.avengers.length && trigger.source.isIn()) {
+                    event.goto(1);
+                }
+            },
+            ai: {
+                combo: "old_twyanshi",
+            },
+            subSkill: {
+                ai: {
+                    ai: {
+                        effect: {
+                            target(card, player, target) {
+                                if (!get.tag(card, "damage")) {
+                                    return;
+                                }
+                                if (target.hp > 1) {
+                                    return;
+                                }
+                                var num = 0;
+                                game.filterPlayer(current => {
+                                    if (current.getStorage("old_twyanshi").some(i => target == i)) {
+                                        num += current.hp;
+                                    }
+                                });
+                                var targets = target.getStorage("old_twyanshi").filter(i => i.isIn());
+                                for (var targetx of targets) {
+                                    num += targetx.hp;
+                                }
+                                if (num >= player.hp) {
+                                    return 0;
+                                }
+                                if (num > 0) {
+                                    return [1, 0, 0, 0.5 - 1.5 * num];
+                                }
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        //TW葛玄
+        old_twdanfa: {
+            audio: "twdanfa",
+            intro: {
+                content: "expansion",
+                markcount: "expansion",
+            },
+            onremove(player, skill) {
+                const cards = player.getExpansions(skill);
+                if (cards.length) {
+                    player.loseToDiscardpile(cards);
+                }
+            },
+            check: () => true,
+            trigger: { player: ["useCardAfter", "respondAfter"] },
+            filter(event, player) {
+                return event.cards?.some(card => get.owner(card) == player || !get.owner(card)) && !player.getExpansions("old_twdanfa").some(card => get.suit(card) == get.suit(event.card));
+            },
+            async content(event, trigger, player) {
+                await player
+                    .addToExpansion(
+                        trigger.cards.filter(card => get.owner(card) == player || !get.owner(card)),
+                        "gain2"
+                    )
+                    .set("gaintag", [event.name]);
+                await player.draw();
+            },
+        },
+        old_twlingbao: {
+            audio: "twlingbao",
+            enable: "phaseUse",
+            filter(event, player) {
+                return (
+                    player
+                        .getExpansions("old_twdanfa")
+                        .map(card => get.suit(card))
+                        .unique().length > 1
+                );
+            },
+            chooseButton: {
+                dialog(event, player) {
+                    return ui.create.dialog("灵宝", player.getExpansions("old_twdanfa"));
+                },
+                filter(button) {
+                    const buttons = ui.selected.buttons;
+                    if (!buttons.length) {
+                        return true;
+                    }
+                    return get.suit(buttons[0].link) != get.suit(button.link);
+                },
+                complexSelect: true,
+                check(button) {
+                    const card = button.link;
+                    const suits = get
+                        .player()
+                        .getHistory("lose", evt => {
+                            return evt.getParent().name == "discard" && evt.getParent(2).skill == "old_twlingbao_backup";
+                        })
+                        .map(evt => evt.cards.map(card => get.suit(card)))
+                        .flat();
+                    if (!suits.includes(get.suit(card))) {
+                        return 2;
+                    }
+                    return 1;
+                },
+                select: 2,
+                backup(links, player) {
+                    return {
+                        audio: "twlingbao",
+                        filterCard(card) {
+                            return links.includes(card);
+                        },
+                        selectCard: -1,
+                        position: "x",
+                        async content(event, trigger, player) {
+                            const cards = links,
+                                colors = cards.map(card => get.color(card)).unique();
+                            await player.draw(2);
+                            if (colors.length == 1 && colors[0] == "red") {
+                                const result = await player
+                                    .chooseTarget(`灵宝：令一名角色从牌堆中获得两张基本牌`, true)
+                                    .set("ai", target => get.effect(target, { name: "wuzhong" }, get.player(), get.player()))
+                                    .forResult();
+                                if (result?.targets?.length) {
+                                    const target = result.targets[0];
+                                    player.line(target);
+                                    const gain = [];
+                                    while (gain.length < 2) {
+                                        const card = get.cardPile(cardx => get.type(cardx) == "basic" && !gain.includes(cardx));
+                                        if (card) {
+                                            gain.push(card);
+                                        } else {
+                                            break;
+                                        }
+                                    }
+                                    if (gain.length) {
+                                        await target.gain(gain, "gain2");
+                                    }
+                                }
+                            }
+                            if (colors.length == 1 && colors[0] == "black" && game.hasPlayer(target => target.countDiscardableCards(player, "hej"))) {
+                                const result = await player
+                                    .chooseTarget(`灵宝：你弃置一名角色至多两个不同区域的共计至多两张牌`, true, (card, player, target) => {
+                                        return target.countDiscardableCards(player, "hej");
+                                    })
+                                    .set("ai", target => get.effect(target, { name: "guohe_copy" }, get.player(), get.player()))
+                                    .forResult();
+                                if (result?.targets?.length) {
+                                    const target = result.targets[0];
+                                    player.line(target);
+                                    await player.discardPlayerCard(target, "hej", [1, 2], true);
+                                }
+                            }
+                            if (colors.length > 1) {
+                                const canDiscard = game.hasPlayer(target => target.countDiscardableCards(target, "hej"));
+                                const result = await player
+                                    .chooseTarget(`灵宝：你令一名角色摸两张牌` + (canDiscard ? `，另一名角色弃置一张牌` : ``), true, (card, player, target) => {
+                                        if (!ui.selected.targets.length) {
+                                            return true;
+                                        }
+                                        return target.countDiscardableCards(target, "hej");
+                                    })
+                                    .set("selectTarget", canDiscard ? 2 : 1)
+                                    .set("ai", target => {
+                                        const player = get.player();
+                                        if (!ui.selected.targets.length) {
+                                            return get.effect(target, { name: "wuzhong" }, player, player);
+                                        }
+                                        return get.effect(target, { name: "guohe_copy" }, player, player);
+                                    })
+                                    .set("complexTarget", true)
+                                    .set("complexSelect", true)
+                                    .set("targetprompt", ["摸牌", "弃牌"])
+                                    .forResult();
+                                if (result?.targets?.length) {
+                                    const draw = result.targets[0],
+                                        discard = result.targets[1];
+                                    player.line(result.targets);
+                                    await draw.draw(2);
+                                    if (discard) {
+                                        await discard.chooseToDiscard("he", true);
+                                    }
+                                }
+                            }
+                            const suits = player
+                                .getHistory("lose", evt => {
+                                    return evt.getParent().name == "discard" && evt.getParent(2).skill == "old_twlingbao_backup";
+                                })
+                                .map(evt => evt.cards.map(card => get.suit(card)))
+                                .flat();
+                            if (suits.length != suits.unique().length) {
+                                player.tempBanSkill("old_twlingbao");
+                            }
+                        },
+                    };
+                },
+            },
+            ai: {
+                order: 7,
+                result: {
+                    player: 1,
+                },
+            },
+            subSkill: {
+                backup: {},
+            },
+        },
+        old_twsidao: {
+            audio: "twsidao",
+            trigger: {
+                global: "phaseBefore",
+                player: ["enterGame", "phaseZhunbei"],
+            },
+            filter(event, player) {
+                if (event.name == "phaseZhunbei") {
+                    const card = player.storage.old_twsidao;
+                    return card?.isInPile() && player.hasUseTarget(card);
+                }
+                return (event.name != "phase" || game.phaseNumber == 0) && !player.storage.old_twsidao;
+            },
+            async cost(event, trigger, player) {
+                if (trigger.name == "phaseZhunbei") {
+                    event.result = { bool: true };
+                } else {
+                    const { result } = await player.chooseButton(["请选择你的初始法宝", [["gx_lingbaoxianhu", "gx_taijifuchen", "gx_chongyingshenfu"], "vcard"]], true).set("ai", button => {
+                        return button.link[2] == "gx_chongyingshenfu" ? 2 : 1;
+                    });
+                    event.result = {
+                        bool: result?.bool,
+                        cost_data: result?.links,
+                    };
+                }
+            },
+            async content(event, trigger, player) {
+                if (trigger.name == "phaseZhunbei") {
+                    await player.chooseUseTarget(player.storage.old_twsidao, "nopopup", true);
+                } else {
+                    const name = event.cost_data[0][2];
+                    const card = game.createCard2(name, "heart", 1);
+                    game.broadcastAll(name => lib.inpile.add(name), name);
+                    player.storage.old_twsidao = card;
+                    await player.chooseUseTarget(card, "nopopup", true);
+                }
+            },
+        },
         //幻诸葛亮
         old_twhunyou: {
             audio: "twhunyou",
@@ -21061,6 +21458,11 @@ let lmCharacter = {
         old_ol_madai_prefix: "旧|界",
         old_olqianxi: "潜袭",
         old_olqianxi_info: "准备阶段，你可以摸一张牌并展示一张牌。若如此做，距离为1的其他角色本回合不能使用或打出与“潜袭”牌颜色相同的手牌，你本回合使用“潜袭”牌造成的伤害+1。",
+        old_ol_liuzhang: "旧OL刘璋",
+        old_ol_liuzhang_ab: "旧刘璋",
+        old_ol_liuzhang_prefix: "旧",
+        old_olfengwei: "奉蔚",
+        old_olfengwei_info: "锁定技，每轮开始时，你摸至多四张牌。若你有本轮获得的“奉蔚”牌，则你受到牌造成的伤害+1。",
 
         old_re_caorui: "旧界曹叡",
         old_re_caorui_prefix: "旧|界",
@@ -21252,10 +21654,16 @@ let lmCharacter = {
         old_twxiongxi_info: "每回合每名角色限一次，出牌阶段，你可以弃置X张牌对一名其他角色造成1点伤害（X为你的暴虐值与暴虐值上限之差）。",
         old_twxiongjun: "凶军",
         old_twxiongjun_info: "锁定技，当你造成伤害后，所有拥有【凶军】的角色摸一张牌。",
-        old_xia_tongyuan: "旧侠童渊",
-        old_xia_tongyuan_prefix: "旧|侠",
-        old_twchuanshu: "传术",
-        old_twchuanshu_info: "准备阶段，你可以选择一名角色。直到你的下回合开始，其获得以下效果：1.当其拼点牌亮出时，此牌点数+3；2.其使用的下一张【杀】对除你外的角色造成伤害时，此伤害+1；3.若其不为你，其使用的下一张【杀】结算结束后，你摸等同于其因此【杀】造成的伤害值数的牌。",
+        // old_xia_tongyuan: "旧侠童渊",
+        // old_xia_tongyuan_prefix: "旧|侠",
+        // old_twchuanshu: "传术",
+        // old_twchuanshu_info: "准备阶段，你可以选择一名角色。直到你的下回合开始，其获得以下效果：1.当其拼点牌亮出时，此牌点数+3；2.其使用的下一张【杀】对除你外的角色造成伤害时，此伤害+1；3.若其不为你，其使用的下一张【杀】结算结束后，你摸等同于其因此【杀】造成的伤害值数的牌。",
+        old_xia_zhaoe: "旧赵娥",
+        old_xia_zhaoe_prefix: "旧",
+        old_twyanshi: "言誓",
+        old_twyanshi_info: "①游戏开始时，你选择一名其他角色，称为“言誓”角色。②当你或“言誓”角色受到二者之外角色造成的伤害后，伤害来源获得1枚“誓”标记。③你对有“誓”的角色使用牌无距离限制。④当你对有“誓”的角色造成伤害时，此伤害+1，且当你对这些角色造成伤害后，你摸等同于伤害值的牌并移去其所有“誓”。",
+        old_twrenchou: "刃仇",
+        old_twrenchou_info: "锁定技。当你或“言誓”角色死亡时，若二者中的另一名角色A存活，A对杀死你或其的角色造成X点伤害（X为A的体力值）。",
         old_xia_guanyu: "旧侠关羽",
         old_xia_guanyu_prefix: "旧|侠",
         old_twzhongyi: "忠义",
@@ -21268,7 +21676,6 @@ let lmCharacter = {
         old_twhunyou_info: "限定技，当你处于濒死状态时，你可以将体力值回复至1点，若如此做，本回合当你受到伤害时或失去体力时，取消之；当前回合结束后，你入幻：摸X张牌并进行一个额外的回合（X为〖北定〗记录牌名数，且至多为7）。",
         old_twchanggui: "怅归",
         old_twchanggui_info: "锁定技，结束阶段，若你的体力值为全场最低且不等于体力上限，你须退幻：将体力上限调整为当前体力值。",
-
         old_huan_caoang: "旧幻曹昂",
         old_huan_caoang_prefix: "旧|幻",
         old_twchihui: "炽灰",
@@ -21281,7 +21688,6 @@ let lmCharacter = {
         old_twliyuan_info: "你可将一张与你已废除的装备栏对应副类别的装备牌当【杀】使用或打出（无距离和次数限制），然后你摸两张牌。",
         old_twjifa: "冀筏",
         old_twjifa_info: "锁定技，当你进入濒死状态时，你减X点体力上限（X为你上次发动〖赴曦〗选择的项数），保留〖煌烛〗或〖离渊〗直到下次入幻， 然后退幻：将体力值回复至体力上限。",
-
         old_huan_weiyan: "旧幻魏延",
         old_huan_weiyan_prefix: "旧|幻",
         old_twpiankuang: "偏狂",
@@ -21297,6 +21703,15 @@ let lmCharacter = {
         old_twshelie_info: "①摸牌阶段，你可放弃摸牌并亮出牌堆顶的五张牌，然后选择获得其中每种花色的牌各一张。②每轮限一次。结束阶段，若你本回合使用的花色数不小于你的体力值，你执行一个额外的摸牌阶段或出牌阶段。",
         old_twgongxin: "攻心",
         old_twgongxin_info: "出牌阶段限一次。你可以观看一名其他角色的手牌，然后你可以展示其中一张牌并选择一项：1.弃置此牌；2.将此牌置于牌堆顶。若该角色手牌中的花色数因此减少，你选择一种颜色，其于本回合不能使用或打出该颜色的牌。",
+        old_tw_gexuan: "旧TW葛玄",
+        old_tw_gexuan_ab: "旧葛玄",
+        old_tw_gexuan_prefix: "旧",
+        old_twdanfa: "丹法",
+        old_twdanfa_info: "当你使用或打出的牌结算结束后，若此牌花色与你拥有的「丹」均不相同，你可以将此牌置于你的武将牌上，称为「丹」，然后摸一张牌。",
+        old_twlingbao: "灵宝",
+        old_twlingbao_info: "出牌阶段，你可以弃置两张花色不同的「丹」并摸两张牌，然后根据其情况执行如下效果：均为红色，你令一名角色从牌堆中获得两张基本牌；均为黑色，你弃置一名角色至多两个不同区域的共计至多两张牌；颜色不同，你令一名角色摸两张牌，另一名角色弃一张牌。然后若你于本回合弃置过两张相同花色的「丹」，则此技能失效直到回合结束。",
+        old_twsidao: "司道",
+        old_twsidao_info: "游戏开始时，你选择一张“法宝”置入装备区。准备阶段，若你以此法选择的法宝在牌堆/弃牌堆中，则你使用之。",
 
         old_gaowang: "旧高望",
         old_gaowang_prefix: "旧",

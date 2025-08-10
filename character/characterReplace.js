@@ -107,7 +107,7 @@ let lmCharacter = {//武将切换
     gaoshun: ["old_sb_gaoshun"],
     jikang: ["lm_jikang"],
     ol_dongzhao: ["unlock_dongzhao"],
-    liuzhang: ["mx_fh_liuzhang"],
+    liuzhang: ["mx_fh_liuzhang", "old_ol_liuzhang"],
     dc_zhangren: ["old_zhangren"],
     xuelingyun: ["old_ol_xuelingyun"],
     dingfeng: ["old_star_dingfengn"],
@@ -141,6 +141,8 @@ let lmCharacter = {//武将切换
     pot_weiyan: ["old_pot_weiyan"],
     mb_chenzhi: ["old_mb_chenzhi"],
     renwan: ["old_renwan"],
+    gexuan: ["old_tw_gexuan"],
+    xia_zhaoe: ["old_tw_xia_zhaoe"],
 
     shen_huatuo: ["old_dc_shen_huatuo"],
     shen_lusu: ["shen_lusu", "old_shen_lusu"],
