@@ -13541,6 +13541,158 @@ let lmCharacter = {
                 }
             },
         },
+        //族杨修
+        old_clanjiewu: {
+            audio: "clanjiewu",
+            trigger: { player: "phaseUseBegin" },
+            async cost(event, trigger, player) {
+                event.result = await player
+                    .chooseTarget(get.prompt(event.skill), "令一名角色的手牌在本阶段对你可见")
+                    .set("ai", target => {
+                        let items = target.getCards("h");
+                        let count = [...new Set(items.map(item => get.suit(item, target)))].length;
+                        const player = get.player();
+                        return (get.effect(target, { name: "draw" }, target, player) * items) / (count + 1);
+                    })
+                    .forResult();
+            },
+            async content(event, trigger, player) {
+                const target = event.targets[0];
+                player.markAuto(event.name + "_effect", target);
+                player.addSkill(event.name + "_effect");
+                target.addSkill(event.name + "_view");
+                const func = target => target.markSkill("old_clanjiewu_view", null, null, true);
+                event.isMine() ? func(target) : player.isOnline2() && player.send(func, target);
+                player
+                    .when({ global: "phaseUseAfter" })
+                    .filter(evt => evt === trigger)
+                    .then(() => player.removeSkill("old_clanjiewu_effect"));
+            },
+            subSkill: {
+                effect: {
+                    charlotte: true,
+                    onremove(player, skill) {
+                        if (player.storage[skill]) {
+                            Array.isArray(player.storage[skill]) && player.storage[skill].forEach(i => i.removeSkill("old_clanjiewu_view"));
+                            delete player.storage[skill];
+                        }
+                    },
+                    audio: "clanjiewu",
+                    trigger: { player: "useCardToPlayered" },
+                    filter: (event, player) => event.isFirstTarget,
+                    async cost(event, trigger, player) {
+                        event.result = await player
+                            .chooseTarget(get.prompt(event.skill), "选择一名「捷悟」角色展示其一张手牌")
+                            .set("filterTarget", (card, player, target) => target.hasCard(true, "h") && player.getStorage("old_clanjiewu_effect").includes(target))
+                            .set("ai", target => {
+                                let items = target.getCards("h");
+                                let count = [...new Set(items.map(item => get.suit(item, target)))].length;
+                                const player = get.player();
+                                return (4 - count) * get.effect(target, { name: "draw" }, target, player);
+                            })
+                            .forResult();
+                    },
+                    async content(event, trigger, player) {
+                        const target = event.targets[0];
+                        let cards;
+                        if (target === player) {
+                            cards = await player.chooseCard("h", true, `捷悟：展示你的一张手牌`).forResultCards();
+                        } else {
+                            cards = await player.choosePlayerCard(target, true, "h", `捷悟：展示${get.translation(target)}的一张手牌`).forResultCards();
+                        }
+                        if (!cards?.length) {
+                            return;
+                        }
+                        const card = cards[0];
+                        await player.showCards(card, `${get.translation(player)}对${get.translation(target)}发动了【捷悟】`).set("old_clanjiewu", true);
+                        if (get.suit(trigger.card, player) === get.suit(card, target)) {
+                            await player.draw();
+                        }
+                        if (
+                            game.getGlobalHistory("everything", evt => {
+                                return evt.name === "showCards" && evt.cards.length && evt.cards.some(c => c === card) && evt?.old_clanjiewu;
+                            }).length > 1
+                        ) {
+                            let cardsx;
+                            if ((target.countCards("h") !== player.countCards("h") && target !== player) || target === player) {
+                                const putee = player.countCards("h") > target.countCards("h") || target === player ? player : target;
+                                if (!putee.countCards("he")) {
+                                    return;
+                                }
+                                if (player !== putee) {
+                                    cardsx = await player.choosePlayerCard(putee, true, "he", "捷悟：将" + get.translation(putee) + "的一张牌置于牌堆顶").forResultCards();
+                                } else {
+                                    cardsx = await player.chooseCard("he", true, "捷悟：将你的一张牌置于牌堆顶").forResultCards();
+                                }
+                                const card = cardsx[0];
+                                putee.$throw(get.position(card) == "h" ? 1 : card, 1000);
+                                game.log(player, "将", putee === player ? "" : get.translation(putee) + "的", get.position(card) == "h" ? "一张牌" : card, "置于牌堆顶");
+                                await putee.lose(card, ui.cardPile, "insert");
+                            }
+                        }
+                    },
+                    ai: {
+                        viewHandcard: true,
+                        skillTagFilter(player, tag, arg) {
+                            if (!player.getStorage("old_clanjiewu_effect").includes(arg)) {
+                                return false;
+                            }
+                        },
+                    },
+                },
+                view: {
+                    charlotte: true,
+                    intro: {
+                        markcount: (content, player) => player.countCards("h").toString(),
+                        mark(dialog, content, player) {
+                            const hs = player.getCards("h");
+                            hs.length > 0 ? dialog.addSmall(hs) : dialog.addText("没有手牌");
+                        },
+                    },
+                },
+            },
+        },
+        old_clangaoshi: {
+            audio: "clangaoshi",
+            trigger: { player: "phaseJieshuBegin" },
+            filter: (event, player) => player.hasHistory("useSkill", evt => ["tdojiewu", "tdojiewu_effect"].includes(evt.skill)),
+            prompt(event, player) {
+                return get.prompt("old_clangaoshi") + "（可亮出" + get.cnNumber(player.getHistory("useSkill", evt => ["tdojiewu", "tdojiewu_effect"].includes(evt.skill)).length) + "张牌）";
+            },
+            async content(event, trigger, player) {
+                const num = player.getHistory("useSkill", evt => {
+                    return ["tdojiewu", "tdojiewu_effect"].includes(evt.skill);
+                }).length;
+                const names = player.getHistory("useCard", evt => evt.isPhaseUsing()).map(evt => evt.card.name);
+                let cards = get.cards(num);
+                await game.cardsGotoOrdering(cards);
+                await player.showCards(cards, `${get.translation(player)}发动了【高视】`);
+                //game.log(player, "亮出了牌堆顶的", cards);
+                while (cards.some(card => player.hasUseTarget(card))) {
+                    const links = await player
+                        .chooseButton([`高视：是否使用其中一张牌？`, cards])
+                        .set("filterButton", button => {
+                            const player = get.player(),
+                                card = button.link;
+                            return player.hasUseTarget(card) && !get.event().names.includes(card.name);
+                        })
+                        .set("names", names)
+                        .set("ai", button => {
+                            return get.player().getUseValue(button.link);
+                        })
+                        .forResultLinks();
+                    if (!links?.length) break;
+                    cards.remove(links[0]);
+                    player.$gain2(links[0], false);
+                    await game.delayx();
+                    await player.chooseUseTarget(links[0], true, false);
+                }
+                if (!cards.length) await player.draw(2);
+            },
+            ai: {
+                combo: "old_clanjiewu",
+            },
+        },
         //任婉
         old_dcjuanji: {
             trigger: {
@@ -21558,6 +21710,12 @@ let lmCharacter = {
         old_clandandao_info: "锁定技，你判定后，当前回合角色本回合手牌上限+3。",
         old_clanqingli: "清励",
         old_clanqingli_info: "锁定技，每回合结束时，你将手牌摸至手牌上限（至多摸5张）。",
+        old_clan_yangxiu: "旧族杨修",
+        old_clan_yangxiu_prefix: "旧|族",
+        old_clanjiewu: "捷悟",
+        old_clanjiewu_info: "出牌阶段开始时，你可以令一名角色的手牌此阶段始终对你可见。然后你此阶段使用牌指定目标后，你可以展示「捷悟」角色一张手牌，若：两张牌花色相同，你摸一张牌，若此牌本回合以此法展示过的次数大于1，你将你与其之中手牌较多的角色一张牌置于牌堆顶（若该角色为你，则改为将你的一张牌置于牌堆顶）。",
+        old_clangaoshi: "高视",
+        old_clangaoshi_info: "结束阶段，你可以亮出牌堆顶X张牌（X为本回合你发动〖捷悟〗的次数），然后你可以使用其中任意张你本回合出牌阶段未使用过的牌名的牌，若你因此使用了所有亮出牌，你摸两张牌。",
 
         old_re_caorui: "旧界曹叡",
         old_re_caorui_prefix: "旧|界",

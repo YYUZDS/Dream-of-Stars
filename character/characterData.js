@@ -100,7 +100,9 @@ let lmCharacter = {//武将信息
     old_kongshu: ["female", "qun", 3, ["olleiluan", "olfuchao"], ["character:kongshu", "die:kongshu"]],
     old_ol_madai: ["male", "shu", 4, ["mashu", "old_olqianxi"], ["character:ol_madai", "die:kol_madai"]],
     old_ol_liuzhang: ["male", "qun", 3, ["old_olfengwei", "olzonghu"], ["character:ol_liuzhang", "die:ol_liuzhang"]],
-    old_clan_xunshuang: ["male", "qun", 3, ["old_clanyangji", "old_clandandao", "old_clanqingli", "clandaojie"], ["character:clan_xunshuang", "die:clan_xunshuang", "颍川荀氏"]],
+    old_clan_xunshuang: ["male", "qun", 3, ["old_clanyangji", "old_clandandao", "old_clanqingli", "clandaojie"], ["character:clan_xunshuang", "die:clan_xunshuang", "clan:颍川荀氏"]],
+    old_clan_yangxiu: ["male", "wei", 3, ["old_clanjiewu", "old_clangaoshi", "clanquhuo"], ["character:clan_yangxiu", "die:clan_yangxiu", "clan:弘农杨氏"]],
+
     //十周年
     old_re_zhangchunhua: ["female", "wei", 3, ["rejueqing", "reshangshi"], ["character:re_zhangchunhua", "die:re_zhangchunhua"]],
     old_re_caorui: ["male", "wei", 3, ["huituo", "remingjian", "rexingshuai"], ["character:re_caorui", "re_caorui", "zhu"]],
