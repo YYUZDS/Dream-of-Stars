@@ -395,10 +395,21 @@ export async function precontent(config, pack) {
         async content(event, trigger) {
             game.broadcastAll(
                 (phasename, player) => {
+                    // 只对主玩家处理，非主玩家直接返回
+                    if (player !== game.me) return;
                     if (phasename === "phaseAfter") {
                         if (player.tphaseTip) {
-                            player.tphaseTip.remove(); // 直接移除 DOM 元素
-                            player.tphaseTip = null;   // 清除引用
+                            // 添加向右淡出动画
+                            player.tphaseTip.classList.remove("active");
+                            player.tphaseTip.classList.add("fade-out-right");
+
+                            // 动画结束后移除元素
+                            setTimeout(() => {
+                                if (player.tphaseTip && player.tphaseTip.parentNode) {
+                                    player.tphaseTip.remove();
+                                }
+                                player.tphaseTip = null;
+                            }, 800); // 与动画持续时间匹配
                         }
                     } else {
                         const config = lib.config.extension_星之梦_tphaseTipStyle;
@@ -421,23 +432,59 @@ export async function precontent(config, pack) {
                         const imgSrc = phase[phasename];
                         if (!player.tphaseTip) {
                             const addStyle = () => {
+                                // 检查样式是否已添加
+                                if (document.getElementById('tphaseTip-styles')) return;
+
                                 const style = document.createElement("style");
+                                style.id = 'tphaseTip-styles';
                                 style.textContent = `
                                 .tphaseTip {
-                                    display: none;
+                                    position: fixed;
                                     left: 40px;
                                     bottom: 190px;
-                                    width: 80px;
-                                    position: fixed;
-                                    transition: all 1s;
+                                    width: 85px;
+                                    opacity: 0;
                                     pointer-events: none;
+                                    z-index: 4;
                                 }
                                 .tphaseTip.active {
-                                    display: block;
+                                    opacity: 1;
                                 }
                                 .tphaseTip img {
                                     max-width: 100%;
                                     height: auto;
+                                }
+                                
+                                /* 从左淡入动画 */
+                                @keyframes tphaseTip-fadeInLeft {
+                                    from {
+                                        opacity: 0;
+                                        transform: translateX(-20px);
+                                    }
+                                    to {
+                                        opacity: 1;
+                                        transform: translateX(0);
+                                    }
+                                }
+                                
+                                /* 向右淡出动画 */
+                                @keyframes tphaseTip-fadeOutRight {
+                                    from {
+                                        opacity: 1;
+                                        transform: translateX(0);
+                                    }
+                                    to {
+                                        opacity: 0;
+                                        transform: translateX(80px);
+                                    }
+                                }
+                                
+                                .tphaseTip.fade-in-left {
+                                    animation: tphaseTip-fadeInLeft 0.8s ease-out forwards;
+                                }
+                                
+                                .tphaseTip.fade-out-right {
+                                    animation: tphaseTip-fadeOutRight 0.8s ease-in forwards;
                                 }
                             `;
                                 document.head.appendChild(style);
@@ -450,16 +497,16 @@ export async function precontent(config, pack) {
                             player.tphaseTip = document.createElement("div");
                             player.tphaseTip.className = "tphaseTip";
                             document.body.appendChild(player.tphaseTip);
-
                             const img = document.createElement("img");
                             img.src = imgSrc;
                             img.alt = phasename;
                             player.tphaseTip.appendChild(img);
-                            // 如果是主玩家，则显示
-                            if (player == game.me) {
+                            // 执行淡入动画
+                            player.tphaseTip.classList.add("fade-in-left");
+                            setTimeout(() => {
                                 player.tphaseTip.classList.add("active");
-                            }
-
+                            }, 10);
+                            // 客户端同步
                             if (lib.node && lib.node.clients) {
                                 lib.node.clients.forEach(c => {
                                     if (!c.gameOptions) c.gameOptions = {};
@@ -470,12 +517,26 @@ export async function precontent(config, pack) {
                                 });
                             }
                         } else {
-                            // 更新图片
-                            const img = player.tphaseTip.querySelector("img");
-                            if (img) {
-                                img.src = imgSrc;
-                                img.alt = phasename;
-                            }
+                            // 先添加向右淡出动画
+                            player.tphaseTip.classList.remove("active", "fade-in-left");
+                            player.tphaseTip.classList.add("fade-out-right");
+                            // 动画结束后更新图片并重新从左淡入
+                            setTimeout(() => {
+                                const img = player.tphaseTip.querySelector("img");
+                                if (img) {
+                                    img.src = imgSrc;
+                                    img.alt = phasename;
+                                }
+                                // 移除淡出类，添加淡入类
+                                player.tphaseTip.classList.remove("fade-out-right");
+                                void player.tphaseTip.offsetWidth; // 触发重绘
+                                player.tphaseTip.classList.add("fade-in-left");
+
+                                // 短暂延迟后添加active类
+                                setTimeout(() => {
+                                    player.tphaseTip.classList.add("active");
+                                }, 10);
+                            }, 800); // 等待淡出动画完成
                         }
                     }
                 },
@@ -1633,7 +1694,7 @@ export async function precontent(config, pack) {
                 else
                     player
                         .chooseControl()
-                        .set("choiceList", ["将三张牌交给一名其他角色", "弃置三张牌"])
+                        .set("choiceList", ["将三张牌交给一名其他角色", "弃置三张手牌"])
                         .set("ai", function () {
                             if (
                                 game.hasPlayer(function (current) {
@@ -2140,9 +2201,9 @@ export async function precontent(config, pack) {
                     await player.draw();
                 }
             },
-            group: ["vtbshanwu_1", "vtbshanwu_2"],
+            group: ["vtbshanwu_shan", "vtbshanwu_qingguo"],
             subSkill: {
-                1: {
+                shan: {
                     audio: "vtbshanwu",
                     trigger: {
                         global: "useCardToTarget",
@@ -2161,7 +2222,7 @@ export async function precontent(config, pack) {
                     content() {
                         "step 0";
                         player
-                            .chooseToDiscard(get.prompt("vtbshanwu_1"), "弃置一张【闪】，取消此【杀】对" + get.translation(trigger.targets) + "的目标", { name: "shan" })
+                            .chooseToDiscard(get.prompt("vtbshanwu_shan"), "弃置一张【闪】，取消此【杀】对" + get.translation(trigger.targets) + "的目标", { name: "shan" })
                             .set("logSkill", "vtbshanwu")
                             .set("ai", card => {
                                 if (_status.event.goon) return 6 - get.value(card);
@@ -2211,7 +2272,7 @@ export async function precontent(config, pack) {
                         expose: 0.2,
                     },
                 },
-                2: {
+                qingguo: {
                     audio: "vtbshanwu",
                     inherit: "reqingguo",
                     mod: {
@@ -2229,7 +2290,7 @@ export async function precontent(config, pack) {
                             return Math.max(num, [6.5, 4, 3][Math.min(geti(), 2)]);
                         },
                         aiUseful() {
-                            return lib.skill.vtbshanwu.subSkill.vtbshanwu_2.mod.aiValue.apply(this, arguments);
+                            return lib.skill.vtbshanwu.subSkill.qingguo.mod.aiValue.apply(this, arguments);
                         },
                     },
                     filterCard(card) {
@@ -2365,307 +2426,4 @@ export async function precontent(config, pack) {
             },
         },
     };
-    //自用ai简易调整
-    //九鼎-刘备
-    lib.skill.jdsbzhangwu = {
-        audio: "sbzhangwu",
-        enable: "phaseUse",
-        filter(event, player) {
-            return player.countMark("sbrende");
-        },
-        limited: true,
-        chooseButton: {
-            dialog(event, player) {
-                return ui.create.dialog("###章武###" + get.translation("jdsbzhangwu_info"));
-            },
-            chooseControl(event, player) {
-                return Array.from({
-                    length: player.countMark("sbrende"),
-                })
-                    .map((_, i) => get.cnNumber(i + 1, true))
-                    .concat(["cancel2"]);
-            },
-            check(event, player) {
-                const choices = Array.from({
-                    length: player.countMark("sbrende"),
-                }).map((_, i) => get.cnNumber(i + 1, true));
-                return choices.length - 1;
-            },
-            backup(result, player) {
-                return {
-                    num: result.index + 1,
-                    audio: "sbzhangwu",
-                    filterCard: () => false,
-                    selectCard: -1,
-                    skillAnimation: "epic",
-                    animationColor: "orange",
-                    async content(event, trigger, player) {
-                        player.awakenSkill("jdsbzhangwu");
-                        const num = lib.skill.jdsbzhangwu_backup.num;
-                        player.removeMark("sbrende", num);
-                        await player.draw(num);
-                        player.tempBanSkill("sbrende", { player: "dying" });
-                        player.addTempSkill("new_repaoxiao2");
-                    },
-                };
-            },
-            prompt(result, player) {
-                return `移去${result.index + 1}枚“仁望”并摸等量张牌`;
-            },
-        },
-        ai: {
-            order: 9,
-            combo: "sbrende",
-            result: {
-                player(player, target) {
-                    return player.hp < 2 && player.countMark("sbrende") > 5 ? 1 : 0;
-                },
-            },
-        },
-        subSkill: {
-            backup: {},
-        },
-    };
-    lib.skill.sbrende = {
-        audio: 3,
-        enable: ["chooseToUse", "chooseToRespond"],
-        maxNum: 8,
-        filter(event, player) {
-            if (event.type == "wuxie" || player.hasSkill("sbrende_used")) return false;
-            if (player.countMark("sbrende") < 2) return false;
-            for (var name of lib.inpile) {
-                if (get.type(name) != "basic") continue;
-                var card = { name: name, isCard: true };
-                if (event.filterCard(card, player, event)) return true;
-                if (name == "sha") {
-                    for (var nature of lib.inpile_nature) {
-                        card.nature = nature;
-                        if (event.filterCard(card, player, event)) return true;
-                    }
-                }
-            }
-            return false;
-        },
-        group: ["sbrende_give", "sbrende_gain"],
-        chooseButton: {
-            dialog(event, player) {
-                var dialog = ui.create.dialog("仁德");
-                if (event.type == "phase") {
-                    dialog._chosenOpt = [];
-                    var table = document.createElement("div");
-                    table.classList.add("add-setting");
-                    table.style.margin = "0";
-                    table.style.width = "100%";
-                    table.style.position = "relative";
-                    var list = ["视为使用基本牌", "交给其他角色牌"];
-                    for (var i of list) {
-                        var td = ui.create.div(".shadowed.reduce_radius.pointerdiv.tdnode");
-                        td.innerHTML = "<span>" + i + "</span>";
-                        td.link = i;
-                        if (i == list[0]) {
-                            td.classList.add("bluebg");
-                            dialog._chosenOpt.add(td);
-                        }
-                        td.addEventListener(lib.config.touchscreen ? "touchend" : "click", function () {
-                            if (_status.dragged) return;
-                            if (_status.clicked) return;
-                            if (_status.justdragged) return;
-                            _status.tempNoButton = true;
-                            _status.clicked = true;
-                            setTimeout(function () {
-                                _status.tempNoButton = false;
-                            }, 500);
-                            var link = this.link;
-                            if (link == "交给其他角色牌") game.uncheck();
-                            var current = this.parentNode.querySelector(".bluebg");
-                            if (current) {
-                                current.classList.remove("bluebg");
-                                dialog._chosenOpt.remove(current);
-                            }
-                            dialog._chosenOpt.add(this);
-                            this.classList.add("bluebg");
-                            game.check();
-                        });
-                        table.appendChild(td);
-                        dialog.buttons.add(td);
-                    }
-                    dialog.content.appendChild(table);
-                }
-                var cards = [];
-                for (var name of lib.inpile) {
-                    if (get.type(name) != "basic") continue;
-                    var card = { name: name, isCard: true };
-                    if (event.filterCard(card, player, event)) cards.push(["基本", "", name]);
-                    if (name == "sha") {
-                        for (var nature of lib.inpile_nature) {
-                            card.nature = nature;
-                            if (event.filterCard(card, player, event)) cards.push(["基本", "", name, nature]);
-                        }
-                    }
-                }
-                dialog.add([cards, "vcard"]);
-                return dialog;
-            },
-            check(button, player) {
-                if (typeof button.link == "string") return -1;
-                if (_status.event.getParent().type != "phase") return 1;
-                return _status.event.player.getUseValue({
-                    name: button.link[2],
-                    nature: button.link[3],
-                });
-            },
-            select() {
-                var opts = _status.event.dialog._chosenOpt;
-                return opts && opts.length && opts[0].link == "交给其他角色牌" ? 0 : 1;
-            },
-            backup(links, player) {
-                var isUse = links.length == 1;
-                var backup = get.copy(lib.skill["sbrende_" + (isUse ? "use" : "give")]);
-                if (isUse) backup.viewAs = { name: links[0][2], nature: links[0][3], isCard: true };
-                return backup;
-            },
-            prompt(links, player) {
-                var isUse = links.length == 1;
-                return isUse ? "移去2枚“仁望”，视为使用或打出" + (get.translation(links[0][3]) || "") + get.translation(links[0][2]) : "###仁德###出牌阶段每名角色限一次。你可以将任意张牌交给一名其他角色，然后你获得等量“仁望”标记（至多为" + lib.skill.sbrende.maxNum + "）";
-            },
-        },
-        hiddenCard(player, name) {
-            return get.type(name) == "basic" && player.countMark("sbrende") > 1 && player.hasSkill("sbrende_used");
-        },
-        marktext: "仁",
-        intro: {
-            name: "仁望",
-            name2: "仁望",
-            content: "mark",
-        },
-        ai: {
-            respondSha: true,
-            respondShan: true,
-            save: true,
-            skillTagFilter(player) {
-                return player.countMark("sbrende") > 1 && !player.hasSkill("sbrende_used");
-            },
-            order(item, player) {
-                if (_status.event.type == "phase" && lib.skill.sbzhangwu.ai.result.player(player) > 0) return 9.1;
-                return 0.5;
-            },
-            result: {
-                player(player) {
-                    if (_status.event.dying) {
-                        return get.attitude(player, _status.event.dying);
-                    }
-                    return _status.event.type == "phase" && player.countMark("sbrende") <= 2 ? 0 : 1;
-                },
-            },
-        },
-        subSkill: {
-            backup: {},
-            used: { charlotte: true },
-            given: { onremove: true },
-            use: {
-                audio: "sbrende",
-                filterCard: () => false,
-                selectCard: -1,
-                popname: true,
-                log: false,
-                precontent() {
-                    player.logSkill("sbrende_use");
-                    player.removeMark("sbrende", 2);
-                    player.addTempSkill("sbrende_used");
-                },
-            },
-            give: {
-                audio: "sbrende",
-                enable: "phaseUse",
-                filterCard: true,
-                selectCard: [1, Infinity],
-                position: "he",
-                discard: false,
-                lose: false,
-                delay: false,
-                filter(event, player) {
-                    if (player.countMark("sbrende") < 2 || player.hasSkill("sbrende_used")) return true;
-                    for (var name of lib.inpile) {
-                        if (get.type(name) != "basic") continue;
-                        var card = { name: name, isCard: true };
-                        if (event.filterCard(card, player, event)) return false;
-                        if (name == "sha") {
-                            for (var nature of lib.inpile_nature) {
-                                card.nature = nature;
-                                if (event.filterCard(card, player, event)) return false;
-                            }
-                        }
-                    }
-                    return true;
-                },
-                filterTarget(card, player, target) {
-                    if (player.getStorage("sbrende_given").includes(target)) return false;
-                    return player != target;
-                },
-                prompt(event) {
-                    return "出牌阶段每名角色限一次。你可以将任意张牌交给一名其他角色，然后你获得等量“仁望”标记（至多为" + lib.skill.sbrende.maxNum + "）";
-                },
-                check(card) {
-                    var player = get.owner(card);
-                    if (ui.selected.cards.length && ui.selected.cards[0].name == "du") return 0;
-                    if (ui.selected.cards.length + player.countMark("sbrende") > lib.skill.sbrende.maxNum) return 0;
-                    if (!ui.selected.cards.length && card.name == "du") return 20;
-                    if (ui.selected.cards.length >= Math.max(2, player.countCards("he") - player.hp)) return 0;
-                    if (player.countCards("he") <= 1) {
-                        var players = game.filterPlayer();
-                        for (var i = 0; i < players.length; i++) {
-                            if (players[i].hasSkill("haoshi") && !players[i].isTurnedOver() && !players[i].hasJudge("lebu") && get.attitude(player, players[i]) >= 3 && get.attitude(players[i], player) >= 3) {
-                                return 11 - get.value(card);
-                            }
-                        }
-                        if (player.countCards("he") > player.hp) return 10 - get.value(card);
-                        if (player.countCards("he") > 2) return 6 - get.value(card);
-                        return -1;
-                    }
-                    return 18 - (ui.selected.cards.length + player.countMark("sbrende")) - get.value(card);
-                },
-                content() {
-                    player.addTempSkill("sbrende_given", "phaseUseAfter");
-                    player.markAuto("sbrende_given", [target]);
-                    player.markAuto("sbrende_givenx", [target]);
-                    player.give(cards, target);
-                    var num = Math.min(lib.skill.sbrende.maxNum - player.countMark("sbrende"), cards.length);
-                    if (num > 0) player.addMark("sbrende", num);
-                },
-                ai: {
-                    order(skill, player) {
-                        return player.countMark("sbrende") < 4 ? 9.8 : 5.8;
-                    },
-                    result: {
-                        target(player, target) {
-                            if (!player.hasFriend() && player.hasSkill("sbzhangwu") && ui.selected.cards.length && get.value(ui.selected.cards[0]) > (lib.skill.sbzhangwu.filterTarget(null, player, target) ? 3 : 5)) return -0.1;
-                            if (target.hasSkillTag("nogain")) return 0;
-                            if (ui.selected.cards.length && ui.selected.cards[0].name == "du") {
-                                if (target.hasSkillTag("nodu")) return 0;
-                                return -10;
-                            }
-                            if (target.hasJudge("lebu")) return 0;
-                            var nh = target.countCards("h");
-                            return Math.max(1, 5 - nh);
-                        },
-                    },
-                    threaten: 1.1,
-                },
-            },
-            gain: {
-                audio: "sbrende",
-                trigger: { player: "phaseUseBegin" },
-                forced: true,
-                locked: false,
-                filter(event, player) {
-                    return player.countMark("sbrende") < lib.skill.sbrende.maxNum;
-                },
-                content() {
-                    var num = Math.min(lib.skill.sbrende.maxNum - player.countMark("sbrende"), 2);
-                    if (num > 0) player.addMark("sbrende", num);
-                },
-            },
-        },
-    };
-
 }
