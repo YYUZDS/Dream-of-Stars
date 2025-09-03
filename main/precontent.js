@@ -459,7 +459,7 @@ export async function precontent(config, pack) {
                                 @keyframes tphaseTip-fadeInLeft {
                                     from {
                                         opacity: 0;
-                                        transform: translateX(-20px);
+                                        transform: translateX(-30px);
                                     }
                                     to {
                                         opacity: 1;
@@ -475,7 +475,7 @@ export async function precontent(config, pack) {
                                     }
                                     to {
                                         opacity: 0;
-                                        transform: translateX(80px);
+                                        transform: translateX(70px);
                                     }
                                 }
                                 
