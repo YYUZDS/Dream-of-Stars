@@ -3828,9 +3828,15 @@ let lmCharacter = {
                         global: "useCardToTarget",
                     },
                     filter(event, player) {
-                        if (get.type(event.card) == "equip") return false;
-                        if (!event.targets || event.targets.length != 1) return false;
-                        if (!event.targets[0].hasMark("old_mbjiejian_mark")) return false;
+                        if (event.player == player || get.type(event.card) == "equip") {
+                            return false;
+                        }
+                        if (!event.targets || event.targets.length != 1) {
+                            return false;
+                        }
+                        if (!event.targets[0].hasMark("old_mbjiejian_mark")) {
+                            return false;
+                        }
                         return true;
                     },
                     prompt2: "将此牌转移给自己",
@@ -18851,7 +18857,7 @@ let lmCharacter = {
             async cost(event, trigger, player) {
                 if (trigger.name == "phaseZhunbei") {
                     const list = Array.from({ length: 5 })
-                        .map((_, i) => `equip${i}`)
+                        .map((_, i) => `equip${i + 1}`)
                         .filter(i => player.hasDisabledSlot(i))
                         .concat(["cancel2"]);
                     const control = await player
@@ -20672,7 +20678,6 @@ let lmCharacter = {
                 if (cards || numbers) {
                     trigger.set("usedZhuangshi", true);
                     if (cards) {
-                        await player.modedDiscard(cards);
                         const number = cards.length;
                         player.addTempSkill("old_potzhuangshi_directHit", "phaseChange");
                         player.addMark("old_potzhuangshi_directHit", number, false);
@@ -20680,15 +20685,25 @@ let lmCharacter = {
                     }
                     if (numbers) {
                         const number = numbers[0];
-                        await player.loseHp(number);
                         player.addTempSkill("old_potzhuangshi_limit", "phaseChange");
                         player.addMark("old_potzhuangshi_limit", number, false);
                         player.addTip("old_potzhuangshi_limit", `不计次数 ${number}`);
+                    }
+                    if (cards) {
+                        await player.modedDiscard(cards);
+                    }
+                    if (numbers) {
+                        const number = numbers[0];
+                        await player.loseHp(number);
                     }
                 } else {
                     await player.gainMaxHp();
                     await player.recover();
                 }
+            },
+            onremove(player) {
+                player.removeSkill("old_potzhuangshi_directHit");
+                player.removeSkill("old_potzhuangshi_limit");
             },
             subSkill: {
                 limit: {
@@ -21293,7 +21308,7 @@ let lmCharacter = {
         old_mb_wangjing: "旧王经",
         old_mb_wangjing_prefix: "旧",
         old_mbjiejian: "节谏",
-        old_mbjiejian_info: "准备阶段，你可将任意张手牌交给任意名其他角色，并令这些角色获得“节谏”标记。“节谏”角色成为一张非装备牌的唯一目标时，你可将此牌转移给你，然后摸一张牌。“节谏”角色的回合结束时，移去其“节谏”标记，若其体力值不小于X（X为你交给其牌时其的体力值），你摸两张牌。",
+        old_mbjiejian_info: "准备阶段，你可将任意张手牌交给任意名其他角色，并令这些角色获得“节谏”标记。“节谏”角色成为一张非你使用的非装备牌的唯一目标时，你可将此牌转移给你，然后摸一张牌。“节谏”角色的回合结束时，移去其“节谏”标记，若其体力值不小于X（X为你交给其牌时其的体力值），你摸两张牌。",
         old_mbjiejian_tag: "已分配",
         oldx_sp_jianggan: "旧蒋干",
         oldx_sp_jianggan_prefix: "旧",
