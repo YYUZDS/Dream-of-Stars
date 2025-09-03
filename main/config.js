@@ -1,10 +1,6 @@
 import { lib, game, ui, get, ai, _status } from '../../../noname.js'
 export let config = {
-	// supCharacter_head:{
-	// 	name:"禁用头像",
-	// 	intro:"将充当头像的武将禁用",
-	// 	init:true
-	// },//:{前面填武将包英文名
+	//部分功能搬运自各扩展，侵删
 	fgx0: {
 		name: "<font size='4'>---------实用功能---------</font>",
 		clear: true,
