@@ -459,7 +459,7 @@ export async function precontent(config, pack) {
                                 @keyframes tphaseTip-fadeInLeft {
                                     from {
                                         opacity: 0;
-                                        transform: translateX(-25px);
+                                        transform: translateX(-30px);
                                     }
                                     to {
                                         opacity: 1;
@@ -475,7 +475,7 @@ export async function precontent(config, pack) {
                                     }
                                     to {
                                         opacity: 0;
-                                        transform: translateX(75px);
+                                        transform: translateX(70px);
                                     }
                                 }
                                 
@@ -551,6 +551,173 @@ export async function precontent(config, pack) {
         charlotte: true,
         locked: true,
     };
+    // lib.skill._tphaseTip = {
+    //     trigger: {
+    //         global: ["phaseBegin", "phaseZhunbeiBefore", "phaseJudgeBefore", "phaseDrawBefore", "phaseUseBefore", "phaseDiscardBefore", "phaseJieshuBefore", "phaseEnd", "phaseAfter"],
+    //     },
+    //     filter: function (event, player) {
+    //         const config = lib.config.extension_星之梦_tphaseTipStyle;
+    //         return config && lib.config.extension_星之梦_tphaseTip;
+    //     },
+    //     async content(event, trigger) {
+    //         game.broadcastAll(
+    //             (phasename, player) => {
+    //                 // 只对主玩家处理，非主玩家直接返回
+    //                 if (player !== game.me) return;
+    //                 if (phasename === "phaseAfter") {
+    //                     if (player.tphaseTip) {
+    //                         // 添加向右淡出动画
+    //                         player.tphaseTip.classList.remove("active");
+    //                         player.tphaseTip.classList.add("fade-out-right");
+
+    //                         // 动画结束后移除元素
+    //                         setTimeout(() => {
+    //                             if (player.tphaseTip && player.tphaseTip.parentNode) {
+    //                                 player.tphaseTip.remove();
+    //                             }
+    //                             player.tphaseTip = null;
+    //                         }, 800); // 与动画持续时间匹配
+    //                     }
+    //                 } else {
+    //                     const config = lib.config.extension_星之梦_tphaseTipStyle;
+    //                     const basePath = "extension/星之梦/image/JDTS/";
+    //                     const imageTypes = ["hhks", "zbjd", "pdjd", "mpjd", "cpjd", "qpjd", "jsjd", "hhjs"];
+    //                     const phases = ["Begin", "ZhunbeiBefore", "JudgeBefore", "DrawBefore", "UseBefore", "DiscardBefore", "JieshuBefore", "End"];
+    //                     const phaseStyles = {
+    //                         "1": {},
+    //                         "2": {}
+    //                     };
+    //                     [1, 2].forEach(version => {
+    //                         const ext = version === 1 ? "jpg" : "png";
+    //                         phases.forEach((phase, index) => {
+    //                             const key = `phase${phase}`;
+    //                             phaseStyles[version][key] = `${basePath}${imageTypes[index]}.${ext}`;
+    //                         });
+    //                     });
+    //                     // 根据配置选择对应的图片路径
+    //                     const phase = phaseStyles[config] || phaseStyles["1"];
+    //                     const imgSrc = phase[phasename];
+    //                     if (!player.tphaseTip) {
+    //                         const addStyle = () => {
+    //                             // 检查样式是否已添加
+    //                             if (document.getElementById('tphaseTip-styles')) return;
+
+    //                             const style = document.createElement("style");
+    //                             style.id = 'tphaseTip-styles';
+    //                             style.textContent = `
+    //                             .tphaseTip {
+    //                                 position: fixed;
+    //                                 left: 40px;
+    //                                 bottom: 190px;
+    //                                 width: 85px;
+    //                                 opacity: 0;
+    //                                 pointer-events: none;
+    //                                 z-index: 4;
+    //                             }
+    //                             .tphaseTip.active {
+    //                                 opacity: 1;
+    //                             }
+    //                             .tphaseTip img {
+    //                                 max-width: 100%;
+    //                                 height: auto;
+    //                             }
+
+    //                             /* 从左淡入动画 */
+    //                             @keyframes tphaseTip-fadeInLeft {
+    //                                 from {
+    //                                     opacity: 0;
+    //                                     transform: translateX(-25px);
+    //                                 }
+    //                                 to {
+    //                                     opacity: 1;
+    //                                     transform: translateX(0);
+    //                                 }
+    //                             }
+
+    //                             /* 向右淡出动画 */
+    //                             @keyframes tphaseTip-fadeOutRight {
+    //                                 from {
+    //                                     opacity: 1;
+    //                                     transform: translateX(0);
+    //                                 }
+    //                                 to {
+    //                                     opacity: 0;
+    //                                     transform: translateX(75px);
+    //                                 }
+    //                             }
+
+    //                             .tphaseTip.fade-in-left {
+    //                                 animation: tphaseTip-fadeInLeft 0.8s ease-out forwards;
+    //                             }
+
+    //                             .tphaseTip.fade-out-right {
+    //                                 animation: tphaseTip-fadeOutRight 0.8s ease-in forwards;
+    //                             }
+    //                         `;
+    //                             document.head.appendChild(style);
+    //                         };
+    //                         if (!game.phaseStyle) {
+    //                             game.phaseStyle = true;
+    //                             addStyle();
+    //                         }
+    //                         // 创建并附加到 document.body
+    //                         player.tphaseTip = document.createElement("div");
+    //                         player.tphaseTip.className = "tphaseTip";
+    //                         document.body.appendChild(player.tphaseTip);
+    //                         const img = document.createElement("img");
+    //                         img.src = imgSrc;
+    //                         img.alt = phasename;
+    //                         player.tphaseTip.appendChild(img);
+    //                         // 执行淡入动画
+    //                         player.tphaseTip.classList.add("fade-in-left");
+    //                         setTimeout(() => {
+    //                             player.tphaseTip.classList.add("active");
+    //                         }, 10);
+    //                         // 客户端同步
+    //                         if (lib.node && lib.node.clients) {
+    //                             lib.node.clients.forEach(c => {
+    //                                 if (!c.gameOptions) c.gameOptions = {};
+    //                                 if (!c.gameOptions.phaseTip) {
+    //                                     c.send(addStyle);
+    //                                     c.gameOptions.phaseTip = true;
+    //                                 }
+    //                             });
+    //                         }
+    //                     } else {
+    //                         // 先添加向右淡出动画
+    //                         player.tphaseTip.classList.remove("active", "fade-in-left");
+    //                         player.tphaseTip.classList.add("fade-out-right");
+    //                         // 动画结束后更新图片并重新从左淡入
+    //                         setTimeout(() => {
+    //                             const img = player.tphaseTip.querySelector("img");
+    //                             if (img) {
+    //                                 img.src = imgSrc;
+    //                                 img.alt = phasename;
+    //                             }
+    //                             // 移除淡出类，添加淡入类
+    //                             player.tphaseTip.classList.remove("fade-out-right");
+    //                             void player.tphaseTip.offsetWidth; // 触发重绘
+    //                             player.tphaseTip.classList.add("fade-in-left");
+
+    //                             // 短暂延迟后添加active类
+    //                             setTimeout(() => {
+    //                                 player.tphaseTip.classList.add("active");
+    //                             }, 10);
+    //                         }, 800); // 等待淡出动画完成
+    //                     }
+    //                 }
+    //             },
+    //             event.triggername,
+    //             trigger.player
+    //         );
+    //     },
+    //     direct: true,
+    //     popup: false,
+    //     forced: true,
+    //     forceDie: true,
+    //     charlotte: true,
+    //     locked: true,
+    // };
     //前缀Prefix添加
     lib.namePrefix.set("凌", {
         color: "#8470FF",
