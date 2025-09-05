@@ -395,21 +395,10 @@ export async function precontent(config, pack) {
         async content(event, trigger) {
             game.broadcastAll(
                 (phasename, player) => {
-                    // 只对主玩家处理，非主玩家直接返回
-                    if (player !== game.me) return;
                     if (phasename === "phaseAfter") {
                         if (player.tphaseTip) {
-                            // 添加向右淡出动画
-                            player.tphaseTip.classList.remove("active");
-                            player.tphaseTip.classList.add("fade-out-right");
-
-                            // 动画结束后移除元素
-                            setTimeout(() => {
-                                if (player.tphaseTip && player.tphaseTip.parentNode) {
-                                    player.tphaseTip.remove();
-                                }
-                                player.tphaseTip = null;
-                            }, 800); // 与动画持续时间匹配
+                            player.tphaseTip.remove(); // 直接移除 DOM 元素
+                            player.tphaseTip = null;   // 清除引用
                         }
                     } else {
                         const config = lib.config.extension_星之梦_tphaseTipStyle;
@@ -432,59 +421,24 @@ export async function precontent(config, pack) {
                         const imgSrc = phase[phasename];
                         if (!player.tphaseTip) {
                             const addStyle = () => {
-                                // 检查样式是否已添加
-                                if (document.getElementById('tphaseTip-styles')) return;
-
                                 const style = document.createElement("style");
-                                style.id = 'tphaseTip-styles';
                                 style.textContent = `
                                 .tphaseTip {
-                                    position: fixed;
+                                    display: none;
                                     left: 40px;
                                     bottom: 190px;
                                     width: 85px;
-                                    opacity: 0;
+                                    position: fixed;
+                                    transition: all 1s;
                                     pointer-events: none;
-                                    z-index: 4;
+                                    z-index: 3;
                                 }
                                 .tphaseTip.active {
-                                    opacity: 1;
+                                    display: block;
                                 }
                                 .tphaseTip img {
                                     max-width: 100%;
                                     height: auto;
-                                }
-                                
-                                /* 从左淡入动画 */
-                                @keyframes tphaseTip-fadeInLeft {
-                                    from {
-                                        opacity: 0;
-                                        transform: translateX(-30px);
-                                    }
-                                    to {
-                                        opacity: 1;
-                                        transform: translateX(0);
-                                    }
-                                }
-                                
-                                /* 向右淡出动画 */
-                                @keyframes tphaseTip-fadeOutRight {
-                                    from {
-                                        opacity: 1;
-                                        transform: translateX(0);
-                                    }
-                                    to {
-                                        opacity: 0;
-                                        transform: translateX(70px);
-                                    }
-                                }
-                                
-                                .tphaseTip.fade-in-left {
-                                    animation: tphaseTip-fadeInLeft 0.8s ease-out forwards;
-                                }
-                                
-                                .tphaseTip.fade-out-right {
-                                    animation: tphaseTip-fadeOutRight 0.8s ease-in forwards;
                                 }
                             `;
                                 document.head.appendChild(style);
@@ -497,16 +451,16 @@ export async function precontent(config, pack) {
                             player.tphaseTip = document.createElement("div");
                             player.tphaseTip.className = "tphaseTip";
                             document.body.appendChild(player.tphaseTip);
+
                             const img = document.createElement("img");
                             img.src = imgSrc;
                             img.alt = phasename;
                             player.tphaseTip.appendChild(img);
-                            // 执行淡入动画
-                            player.tphaseTip.classList.add("fade-in-left");
-                            setTimeout(() => {
+                            // 如果是主玩家，则显示
+                            if (player == game.me) {
                                 player.tphaseTip.classList.add("active");
-                            }, 10);
-                            // 客户端同步
+                            }
+
                             if (lib.node && lib.node.clients) {
                                 lib.node.clients.forEach(c => {
                                     if (!c.gameOptions) c.gameOptions = {};
@@ -517,26 +471,12 @@ export async function precontent(config, pack) {
                                 });
                             }
                         } else {
-                            // 先添加向右淡出动画
-                            player.tphaseTip.classList.remove("active", "fade-in-left");
-                            player.tphaseTip.classList.add("fade-out-right");
-                            // 动画结束后更新图片并重新从左淡入
-                            setTimeout(() => {
-                                const img = player.tphaseTip.querySelector("img");
-                                if (img) {
-                                    img.src = imgSrc;
-                                    img.alt = phasename;
-                                }
-                                // 移除淡出类，添加淡入类
-                                player.tphaseTip.classList.remove("fade-out-right");
-                                void player.tphaseTip.offsetWidth; // 触发重绘
-                                player.tphaseTip.classList.add("fade-in-left");
-
-                                // 短暂延迟后添加active类
-                                setTimeout(() => {
-                                    player.tphaseTip.classList.add("active");
-                                }, 10);
-                            }, 800); // 等待淡出动画完成
+                            // 更新图片
+                            const img = player.tphaseTip.querySelector("img");
+                            if (img) {
+                                img.src = imgSrc;
+                                img.alt = phasename;
+                            }
                         }
                     }
                 },
