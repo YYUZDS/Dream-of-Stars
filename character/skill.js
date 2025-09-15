@@ -8387,57 +8387,57 @@ let lmCharacter = {
             },
         },
         //谋陆逊
-        old_sblianying: {
-            audio: "sblianying",
-            trigger: {
-                global: "phaseEnd",
-            },
-            filter(event, player) {
-                if (player == event.player) return false;
-                return true;
-            },
-            frequent: true,
-            async content(event, trigger, player) {
-                let num = 0;
-                num++;
-                player.getHistory("lose", evt => {
-                    if (evt.cards2) num += evt.cards2.length;
-                });
-                num = Math.min(5, num);
-                const { cards } = await game.cardsGotoOrdering(get.cards(num));
-                if (!cards.length) return;
-                do {
-                    const {
-                        result: { bool, links },
-                    } =
-                        cards.length == 1
-                            ? { result: { links: cards.slice(0), bool: true } }
-                            : await player.chooseCardButton("连营：请选择要分配的牌", true, cards, [1, cards.length]).set("ai", () => {
-                                if (ui.selected.buttons.length == 0) return 1;
-                                return 0;
-                            });
-                    if (!bool) return;
-                    cards.removeArray(links);
-                    const togive = links.slice(0);
-                    const {
-                        result: { targets },
-                    } = await player
-                        .chooseTarget("选择一名角色获得" + get.translation(links), true)
-                        .set("ai", target => {
-                            const att = get.attitude(_status.event.player, target);
-                            if (_status.event.enemy) {
-                                return -att;
-                            } else if (att > 0) {
-                                return att / (1 + target.countCards("h"));
-                            } else {
-                                return att / 100;
-                            }
-                        })
-                        .set("enemy", get.value(togive[0], player, "raw") < 0);
-                    if (targets.length) await targets[0].gain(togive, "gain2");
-                } while (cards.length > 0);
-            },
-        },
+        // old_sblianying: {
+        //     audio: "sblianying",
+        //     trigger: {
+        //         global: "phaseEnd",
+        //     },
+        //     filter(event, player) {
+        //         if (player == event.player) return false;
+        //         return true;
+        //     },
+        //     frequent: true,
+        //     async content(event, trigger, player) {
+        //         let num = 0;
+        //         num++;
+        //         player.getHistory("lose", evt => {
+        //             if (evt.cards2) num += evt.cards2.length;
+        //         });
+        //         num = Math.min(5, num);
+        //         const { cards } = await game.cardsGotoOrdering(get.cards(num));
+        //         if (!cards.length) return;
+        //         do {
+        //             const {
+        //                 result: { bool, links },
+        //             } =
+        //                 cards.length == 1
+        //                     ? { result: { links: cards.slice(0), bool: true } }
+        //                     : await player.chooseCardButton("连营：请选择要分配的牌", true, cards, [1, cards.length]).set("ai", () => {
+        //                         if (ui.selected.buttons.length == 0) return 1;
+        //                         return 0;
+        //                     });
+        //             if (!bool) return;
+        //             cards.removeArray(links);
+        //             const togive = links.slice(0);
+        //             const {
+        //                 result: { targets },
+        //             } = await player
+        //                 .chooseTarget("选择一名角色获得" + get.translation(links), true)
+        //                 .set("ai", target => {
+        //                     const att = get.attitude(_status.event.player, target);
+        //                     if (_status.event.enemy) {
+        //                         return -att;
+        //                     } else if (att > 0) {
+        //                         return att / (1 + target.countCards("h"));
+        //                     } else {
+        //                         return att / 100;
+        //                     }
+        //                 })
+        //                 .set("enemy", get.value(togive[0], player, "raw") < 0);
+        //             if (targets.length) await targets[0].gain(togive, "gain2");
+        //         } while (cards.length > 0);
+        //     },
+        // },
         //谋夏侯渊
         old_sbzhengzi: {
             audio: "sbzhengzi",
@@ -17215,6 +17215,184 @@ let lmCharacter = {
                 }
             },
         },
+        //陆凯
+        old_bushi: {
+            audio: "lkbushi",
+            getBushi: function (player) {
+                if (!player.storage.old_bushi) return ["spade", "heart", "club", "diamond"];
+                return player.storage.old_bushi;
+            },
+            onremove: true,
+            trigger: {
+                player: "phaseZhunbeiBegin",
+            },
+            direct: true,
+            locked: false,
+            content: function () {
+                "step 0"
+                var list = lib.skill.old_bushi.getBushi(player);
+                list = list.map(function (i) {
+                    return ["", "", "lukai_" + i];
+                });
+                var next = player.chooseToMove("卜筮：是否调整【卜筮】的花色顺序？");
+                next.set("list", [
+                    ["无次数限制/使用打出摸牌<br>成为目标拿牌/结束阶段或被指定时拿牌", [list, "vcard"], function (list) {
+                        var list2 = list.map(function (i) {
+                            return get.translation(i[2].slice(6));
+                        });
+                        return "你使用" + list2[0] + "牌无次数限制；使用或打出" + list2[1] + "时，摸两张牌；<br>结束阶段，或当你成为" + list2[2] + "牌目标后，获得一张" + list2[3] + "牌";
+                    }],
+                ]);
+                next.set("processAI", function () {
+                    var player = _status.event.player;
+                    var list = lib.skill.old_bushi.getBushi(player);
+                    var list2 = [];
+                    var hs = player.getCards("hs", function (card) {
+                        return player.hasValueTarget(card);
+                    });
+                    list.sort(function (a, b) {
+                        return hs.filter((i) => get.suit(i) == b).length - hs.filter((i) => get.suit(i) == a).length;
+                    });
+                    list2.push(list.shift());
+                    hs = player.getCards("hs", "sha");
+                    list.sort(function (a, b) {
+                        return hs.filter((i) => get.suit(i) == b).length - hs.filter((i) => get.suit(i) == a).length;
+                    });
+                    list2.unshift(list.shift());
+                    list.randomSort();
+                    list2.addArray(list);
+                    return [list2.map((i) => ["", "", "lukai_" + i])]
+                });
+                "step 1"
+                if (result.bool) {
+                    var list = lib.skill.old_bushi.getBushi(player), list2 = result.moved[0].map(function (i) {
+                        return i[2].slice(6);
+                    });
+                    for (var i = 0; i < 4; i++) {
+                        if (list[i] != list2[i]) {
+                            player.logSkill("old_bushi");
+                            player.storage.old_bushi = list2;
+                            var str = "#g";
+                            for (var j = 0; j < 4; j++) {
+                                str += get.translation(list2[j]);
+                                if (j != 3) str += "/";
+                            }
+                            game.log(player, "将", "#g【卜筮】", "的花色序列改为", str);
+                            game.delayx();
+                            break;
+                        }
+                    }
+                }
+            },
+            mark: true,
+            marktext: "筮",
+            intro: {
+                content: function (storage, player) {
+                    var list = lib.skill.old_bushi.getBushi(player).map((i) => get.translation(i));
+                    return "①你使用" + list[0] + "牌无次数限制；当你使用或打出" + list[1] + "牌后，你摸两张牌；结束阶段，或当你成为" + list[2] + "牌的目标后，你从牌堆或弃牌堆获得一张" + list[3] + "牌。②准备阶段开始时，你可调整此技能中四种花色的对应顺序。";
+                },
+            },
+            group: ["old_bushi_unlimit", "old_bushi_draw", "old_bushi_gain"],
+            subSkill: {
+                unlimit: {
+                    mod: {
+                        cardUsable: function (card, player) {
+                            var list = lib.skill.old_bushi.getBushi(player);
+                            if (list[0] == get.suit(card)) return Infinity;
+                        },
+                    },
+                    trigger: {
+                        player: "useCard1",
+                    },
+                    forced: true,
+                    popup: false,
+                    silent: true,
+                    firstDo: true,
+                    filter: function (event, player) {
+                        if (event.addCount === false) return true;
+                        var list = lib.skill.old_bushi.getBushi(player);
+                        return (list[0] == get.suit(event.card));
+                    },
+                    content: function () {
+                        trigger.addCount = false;
+                        var stat = player.getStat().card, name = trigger.card.name;
+                        if (stat[name] && typeof stat[name] == "number") stat[name]--;
+                    },
+                    sub: true,
+                },
+                draw: {
+                    audio: "lkbushi",
+                    trigger: {
+                        player: ["useCard", "respond"],
+                    },
+                    forced: true,
+                    locked: false,
+                    filter: function (event, player) {
+                        var list = lib.skill.old_bushi.getBushi(player);
+                        return list[1] == get.suit(event.card);
+                    },
+                    content: function () {
+                        player.draw(2);
+                    },
+                    sub: true,
+                },
+                gain: {
+                    audio: "lkbushi",
+                    trigger: {
+                        player: "phaseJieshuBegin",
+                        target: "useCardToTargeted",
+                    },
+                    filter: function (event, player) {
+                        var list = lib.skill.old_bushi.getBushi(player);
+                        if (event.name != "phaseJieshu")
+                            return list[2] == get.suit(event.card) && !event.excluded.contains(player);
+                        else return true;
+                    },
+                    forced: true,
+                    locked: false,
+                    content: function () {
+                        var list = lib.skill.old_bushi.getBushi(player);
+                        var card = get.cardPile(function (card) {
+                            return get.suit(card, false) == list[3];
+                        });
+                        if (card) player.gain(card, "gain2");
+                    },
+                    sub: true,
+                },
+            },
+        },
+        old_zhongzhuang: {
+            audio: "lkzhongzhuang",
+            trigger: {
+                source: ["damageBegin1", "damageBegin4"],
+            },
+            forced: true,
+            filter: function (event, player, name) {
+                // if (!event.card || event.card.name != "sha" || event.getParent().type != "card") return false;
+                var range = player.getAttackRange();
+                if (name == "damageBegin1") return range < 3;
+                return range > 3 && event.num > 1;
+            },
+            content: function () {
+                if (event.triggername == "damageBegin1") trigger.num++;
+                else trigger.num = 1;
+            },
+            global: "old_zhongzhuang_ai",
+            subSkill: {
+                ai: {
+                    ai: {
+                        filterDamage: true,
+                        skillTagFilter: function (player, tag, arg) {
+                            // if (arg && arg.card && arg.card.name == "sha") {
+                            if (arg) {
+                                if (arg.player && arg.player.hasSkill("old_zhongzhuang") && arg.player.getAttackRange() > 3) return true;
+                            }
+                            return false;
+                        },
+                    },
+                },
+            },
+        },
         //TW霍峻
         old_twjieyu: {
             audio: "twjieyu",
@@ -21497,10 +21675,10 @@ let lmCharacter = {
         old_sb_gaoshun_prefix: "旧|谋",
         old_sbxianzhen: "陷阵",
         old_sbxianzhen_info: "出牌阶段限一次。你可以选择一名其他角色，你于本阶段获得如下效果：⒈你对其使用牌无距离限制；⒉当你使用【杀】指定其为目标后，你可以与其拼点：若你赢，此【杀】无视防具且不计入次数，且若你本回合以此法对其造成的伤害小于2，你对其造成1点伤害；若其拼点牌为【杀】，则你获得之；若其拼点牌为其最后的手牌，则此【杀】对其造成伤害时，此伤害+1。",
-        old_sb_luxun: "旧谋陆逊",
-        old_sb_luxun_prefix: "旧|谋",
-        old_sblianying: "连营",
-        old_sblianying_info: "其他角色的回合结束时，你可以观看牌堆顶的X张牌，然后将这些牌交给任意角色（X为你本回合失去的牌数+1，至多为5）。",
+        // old_sb_luxun: "旧谋陆逊",
+        // old_sb_luxun_prefix: "旧|谋",
+        // old_sblianying: "连营",
+        // old_sblianying_info: "其他角色的回合结束时，你可以观看牌堆顶的X张牌，然后将这些牌交给任意角色（X为你本回合失去的牌数+1，至多为5）。",
         old_sb_xiahouyuan: "旧谋夏侯渊",
         old_sb_xiahouyuan_prefix: "旧|谋",
         old_sbzhengzi: "整辎",
@@ -21546,7 +21724,7 @@ let lmCharacter = {
         old_potzhuangshi: "壮誓",
         old_potzhuangshi_info: "出牌阶段开始时，你可以执行任意项：1.失去任意点体力，令你此阶段使用的前等量张牌不计入次数限制；2.弃置任意张手牌，令你此阶段使用的前等量张牌无距离限制且不可被响应。若均不执行，你增加1点体力上限并回复1点体力。",
         old_potzhuangshi_tag: "已选择弃置",
-        old_mb_chenzhi: "旧陈祇",
+        old_mb_chenzhi: "旧陈祗",
         old_mb_chenzhi_prefix: "旧",
         old_mb_luyusheng: "旧势陆郁生",
         old_mb_luyusheng_prefix: "旧|势",
@@ -21882,6 +22060,12 @@ let lmCharacter = {
         old_dcjuanji_info: "摸牌阶段开始时，你可以摸体力上限张牌；出牌阶段开始时，你可以失去1点体力，然后视为对一名角色使用一张【杀】；弃牌阶段开始时，你可以调整手牌至手牌上限，然后弃置一名角色区域里至多两张牌。",
         old_dcrenshuang: "纫霜",
         old_dcrenshuang_info: "锁定技，①你每轮首次进入濒死时，回复体力至1点并增加1点体力上限（至多以此法增加3点）。②你脱离濒死时，复原武将牌并视为使用一张普通锦囊牌。",
+        old_lukai: "旧陆凯",
+        old_lukai_prefix: "旧",
+        old_bushi: "卜筮",
+        old_bushi_info: "①你使用♠牌无次数限制；当你使用或打出♥牌后，你摸两张牌；结束阶段，或当你成为♣牌的目标后，你从牌堆或弃牌堆获得一张♦牌。②准备阶段，你可调整此技能中四种花色的对应顺序。",
+        old_zhongzhuang: "忠壮",
+        old_zhongzhuang_info: "锁定技，当你造成伤害时，若你的攻击范围：小于3，你令此伤害+1；大于3，你将此伤害值改为1",
 
         old_tw_huojun: "旧TW霍峻",
         old_tw_huojun_ab: "旧霍峻",
@@ -21980,6 +22164,9 @@ let lmCharacter = {
         old_twlingbao_info: "出牌阶段，你可以弃置两张花色不同的「丹」并摸两张牌，然后根据其情况执行如下效果：均为红色，你令一名角色从牌堆中获得两张基本牌；均为黑色，你弃置一名角色至多两个不同区域的共计至多两张牌；颜色不同，你令一名角色摸两张牌，另一名角色弃一张牌。然后若你于本回合弃置过两张相同花色的「丹」，则此技能失效直到回合结束。",
         old_twsidao: "司道",
         old_twsidao_info: "游戏开始时，你选择一张“法宝”置入装备区。准备阶段，若你以此法选择的法宝在牌堆/弃牌堆中，则你使用之。",
+        old_jsrg_huangfusong: "旧TW起皇甫嵩",
+        old_jsrg_huangfusong_ab: "旧起皇甫嵩",
+        old_jsrg_huangfusong_prefix: "旧|起",
 
         old_gaowang: "旧高望",
         old_gaowang_prefix: "旧",

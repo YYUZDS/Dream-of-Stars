@@ -58,7 +58,7 @@ let lmCharacter = {//武将信息
     old_sb_zhangliao: ["male", "wei", 4, ["old_sbtuxi", "old_sbdengfeng"], ["character:sb_zhangliao", "die:sb_zhangliao"]],
     old_sb_guojia: ["male", "wei", 3, ["sbtiandu", "old_sbyiji"], ["character:sb_guojia", "die:sb_guojia"]],
     old_sb_gaoshun: ["male", "qun", 4, ["old_sbxianzhen", "sbjinjiu"], ["character:sb_gaoshun", "die:sb_gaoshun"]],
-    old_sb_luxun: ["male", "wu", 3, ["sbqianxun", "old_sblianying"], ["character:sb_luxun", "die:sb_luxun"]],
+    // old_sb_luxun: ["male", "wu", 3, ["sbqianxun", "old_sblianying"], ["character:sb_luxun", "die:sb_luxun"]],
     old_sb_xiahouyuan: ["male", "wei", 4, ["sbshensu", "old_sbzhengzi"], ["character:sb_xiahouyuan", "die:sb_xiahouyuan", "name:夏侯|渊"]],
     old_sb_lvbu: ["male", "qun", 4, ["old_sbwushuang", "old_sbliyu"], ["character:sb_lvbu", "die:sb_lvbu"]],
     old_pot_taishici: ["male", "wu", 4, ["old_pothanzhan", "old_potzhanlie", "old_potzhenfeng"], ["character:pot_taishici", "die:pot_taishici", "太史|慈"]],
@@ -132,7 +132,7 @@ let lmCharacter = {//武将信息
     old_dc_tengfanglan: ["female", "wu", 3, ["dcluochong", "old_dcaichen"], ["character:dc_tengfanglan", "die:dc_tengfanglan"]],
     old_dc_sb_dengai: ["male", "wei", 4, ["old_dcsbzhouxi", "old_dcsbshijin"], ["character:dc_sb_dengai", "die:dc_sb_dengai"]],
     old_renwan: ["female", "wei", 3, ["old_dcjuanji", "old_dcrenshuang"], ["character:renwan", "die:renwan"]],
-
+    old_lukai: ["male", "wu", 4, ["old_bushi", "old_zhongzhuang"], ["character:lukai", "die:lukai"]],
     //海外
     old_tw_huojun: ["male", "shu", 4, ["twsidai", "old_twjieyu"], ["character:tw_huojun", "die:tw_huojun"]],
     old_tw_guohuai: ["male", "wei", 4, ["old_twjingce", "old_yuzhang"], ["character:tw_guohuai", "die:tw_guohuai"]],
@@ -150,6 +150,7 @@ let lmCharacter = {//武将信息
     old_tw_shen_lvmeng: ["male", "shen", 3, ["old_twgongxin", "old_twshelie"], ["character:tw_shen_lvmeng", "die:tw_shen_lvmeng", "wu"]],
     old_huan_caoang: ["male", "wei", "3/4", ["old_twchihui", "old_twfuxi"], ["character:huan_caoang", "die:huan_caoang"]],
     old_tw_gexuan: ["male", "qun", 3, ["old_twdanfa", "old_twlingbao", "old_twsidao"], ["character:tw_gexuan", "die:tw_gexuan"]],
+    old_jsrg_huangfusong: ["male", "qun", 4, ["twguanhuo", "twjuxia"], ["character:jsrg_huangfusong", "die:jsrg_huangfusong", "name:皇甫|嵩"]],
     //其他
     diy_zhujun: ["male", "qun", 4, ["xinyangjie", "diy_juxiang", "houfeng"], ["character:sp_zhujun"]],
     diy_liaohua: ["male", "shu", 4, ["redangxian", "diy_fuli"], ["character:xin_liaohua"]],
