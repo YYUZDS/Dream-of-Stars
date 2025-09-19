@@ -147,6 +147,8 @@ let lmCharacter = {//武将切换
     yangxiu: ["old_clan_yangxiu"],
     huangfusong: ["old_wu_huangfusong", "old_jsrg_huangfusong"],
     lukai: ["old_lukai"],
+    zhangqiying: ["oldx_zhangqiying"],
+    clan_wangmingshan: ["old_clan_wangmingshan"],
 
     shen_huatuo: ["old_dc_shen_huatuo"],
     shen_lusu: ["shen_lusu", "old_shen_lusu"],

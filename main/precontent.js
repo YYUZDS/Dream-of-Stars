@@ -438,7 +438,7 @@ export async function precontent(config, pack) {
                                 .tphaseTip {
                                     position: fixed;
                                     left: 40px;
-                                    bottom: 190px;
+                                    bottom: 195px;
                                     width: 85px;
                                     opacity: 0;
                                     pointer-events: none;
