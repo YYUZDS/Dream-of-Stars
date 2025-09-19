@@ -310,29 +310,21 @@ export async function precontent(config, pack) {
     //官方势力
     if (lib.config.extension_星之梦_guanfangshili) {
         Object.defineProperty(lib, "group", {
-            get: () => {
-                if (get.mode() === "guozhan") return ["wei", "shu", "wu", "qun", "jin"];
-                return ["wei", "shu", "wu", "qun", "jin"];
-            },
+            get: () => ["wei", "shu", "wu", "qun", "jin"],
             set: () => { },
         });
-        lib.skill.guanfangshili = {
-            trigger: {
-                global: "gameStart",
-                player: "enterGame",
-            },
+        lib.skill._slyh = {
+            trigger: { global: "gameStart", player: "enterGame" },
             forced: true,
             popup: false,
             silent: true,
             priority: Infinity,
-            filter: (_, player) => {
-                if (get.mode() === "guozhan") return false;
-                return player.group && !lib.group.includes(player.group);
+            filter(_, player) {
+                return get.mode() !== "guozhan" && player.group && !lib.group.includes(player.group);
             },
             async content(event, trigger, player) {
-                const list = lib.group.slice(0, 5);
                 const result = await player
-                    .chooseControl(list)
+                    .chooseControl(lib.group.slice(0, 5))
                     .set("ai", () => get.event().controls.randomGet())
                     .set("prompt", "请选择你的势力")
                     .forResult();
