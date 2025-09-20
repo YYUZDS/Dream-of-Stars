@@ -18225,7 +18225,7 @@ let lmCharacter = {
             },
         },
         old_zhenyi: {
-            group: ["zhenyi_spade", "zhenyi_club", "zhenyi_heart"],
+            group: ["old_zhenyi_spade", "old_zhenyi_club", "old_zhenyi_heart"],
             trigger: {
                 player: "damageEnd",
             },
@@ -18265,7 +18265,7 @@ let lmCharacter = {
                 combo: "old_falu",
             },
         },
-        zhenyi_spade: {
+        old_zhenyi_spade: {
             trigger: {
                 global: "judge",
             },
@@ -18330,7 +18330,7 @@ let lmCharacter = {
                 expose: 0.5,
             },
         },
-        zhenyi_club: {
+        old_zhenyi_club: {
             audio: "xinfu_zhenyi",
             enable: "chooseToUse",
             sourceSkill: "old_zhenyi",
@@ -18353,7 +18353,7 @@ let lmCharacter = {
                 player.removeMark("old_falu_club");
             },
         },
-        zhenyi_heart: {
+        old_zhenyi_heart: {
             trigger: {
                 source: "damageBegin1",
             },
@@ -23073,12 +23073,12 @@ let lmCharacter = {
         old_dianhua_info: "准备阶段或结束阶段，你可以观看牌堆顶的X张牌（X为你的「紫薇」「后土」「玉清」「勾陈」标记数的总和）。若如此做，你将这些牌以任意顺序放回牌堆顶或牌堆底。",
         old_zhenyi: "真仪",
         old_zhenyi_info: "你可以在以下时机弃置相应的标记来发动以下效果：一名角色的判定牌生效前，你可以弃置一枚「紫薇」，然后将判定结果改为任意花色且点数为5；你的回合外，你可以弃置一枚「后土」，然后将你的一张手牌当【桃】使用；当你造成伤害时，你可以弃置一枚「玉清」，然后令此伤害+1；当你受到伤害后，你可以弃置一张「勾陈」，然后你从牌堆中随机获得三种类型的牌各一张。",
-        zhenyi_spade: "真仪",
-        zhenyi_spade_info: "",
-        zhenyi_club: "真仪",
-        zhenyi_club_info: "",
-        zhenyi_heart: "真仪",
-        zhenyi_heart_info: "",
+        old_zhenyi_spade: "真仪",
+        old_zhenyi_spade_info: "",
+        old_zhenyi_club: "真仪",
+        old_zhenyi_club_info: "",
+        old_zhenyi_heart: "真仪",
+        old_zhenyi_heart_info: "",
 
         old_tw_huojun: "旧TW霍峻",
         old_tw_huojun_ab: "旧霍峻",
