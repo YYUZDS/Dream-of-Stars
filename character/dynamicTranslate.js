@@ -4,11 +4,6 @@ let lmCharacter = {//动态翻译
         if (player.hasSkill("old_sblongdan_mark", null, null, false)) return "蓄力技（1/4）。①你可以消耗1点蓄力值，将【杀】当做【闪】或将【闪】当做【杀】使用或打出，然后摸一张牌。②一名角色的回合结束时，你获得1点蓄力值。";
         return "蓄力技（1/4）。①你可以消耗1点蓄力值，将【杀】当做【闪】或将【闪】当做【杀】使用或打出，然后若你以此法使用牌，你摸一张牌。②一名角色的回合结束时，你获得1点蓄力值。";
     },
-    old_mbzuoyou(player) {
-        const old_mbzuoyou = player.storage.old_mbzuoyou;
-        if (old_mbzuoyou) return "转换技。出牌阶段限一次，阳：你可以令一名角色摸三张牌，然后其弃置两张牌；<span class='bluetext'>阴：你可以令一名角色获得1点护甲。</span>";
-        return "转换技。出牌阶段限一次，<span class='bluetext'>阳：你可以令一名角色摸三张牌，然后其弃置两张牌；</span>阴：你可以令一名角色获得1点护甲。";
-    },
     old_sbwansha(player) {
         const storage = player.storage.old_sbwansha;
         var str = "①你的回合内，不处于濒死状态的其他角色不能使用【桃】。②一名角色进入濒死状态时，你可以观看其手牌并选择其";
