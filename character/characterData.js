@@ -67,7 +67,8 @@ let lmCharacter = {//武将信息
     old_pot_weiyan: ["male", "shu", 4, ["old_potzhongao", "old_potzhuangshi", "potyinzhan"], ["character:pot_weiyan", "die:pot_weiyan"]],
     old_mb_chenzhi: ["male", "shu", 4, ["mbquanchong", "mbrenxing"], ["character:mb_chenzhi"], "die:mb_chenzhi"],
     old_mb_luyusheng: ["female", "wu", 3, ["old_mbrunwei", "old_mbshuanghuai"], ["character:mb_luyusheng", "die:mb_luyusheng"]],
-
+    old_guoyuan: ["male", "wei", 3, ["mbqingdao", "old_mbxiugeng", "old_mbchenshe"], ["character:guoyuan", "die:guoyuan"]],
+    old_mb_caocao: ["male", "qun", 4, ["mblingfa", "twzhian"], ["character:mb_caocao", "die:mb_caocao"]],
     //OL
     oldx_clan_xuncai: ["female", "qun", 3, ["oldx_clanlieshi", "oldx_clandianzhan", "clanhuanyin", "clandaojie"], ["character:clan_xuncai", "die:clan_xuncai", "clan:颍川荀氏"]],
     old_clan_zhonghui: ["male", "wei", "3/4", ["old_clanyuzhi", "old_clanxieshu", "clanbaozu"], ["character:clan_zhonghui", "die:clan_zhonghui", "clan:颍川钟氏", "die:3"]],
@@ -150,7 +151,7 @@ let lmCharacter = {//武将信息
     old_tw_shen_lvmeng: ["male", "shen", 3, ["old_twgongxin", "old_twshelie"], ["character:tw_shen_lvmeng", "die:tw_shen_lvmeng", "wu"]],
     old_huan_caoang: ["male", "wei", "3/4", ["old_twchihui", "old_twfuxi"], ["character:huan_caoang", "die:huan_caoang"]],
     old_tw_gexuan: ["male", "qun", 3, ["old_twdanfa", "old_twlingbao", "old_twsidao"], ["character:tw_gexuan", "die:tw_gexuan"]],
-    old_jsrg_huangfusong: ["male", "qun", 4, ["twguanhuo", "twjuxia"], ["character:jsrg_huangfusong", "die:jsrg_huangfusong", "name:皇甫|嵩"]],
+    old_jsrg_huangfusong: ["male", "qun", 4, ["twguanhuo", "old_twjuxia"], ["character:jsrg_huangfusong", "die:jsrg_huangfusong", "name:皇甫|嵩"]],
     //其他
     diy_zhujun: ["male", "qun", 4, ["xinyangjie", "diy_juxiang", "houfeng"], ["character:sp_zhujun"]],
     diy_liaohua: ["male", "shu", 4, ["redangxian", "diy_fuli"], ["character:xin_liaohua"]],

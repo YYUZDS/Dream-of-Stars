@@ -12944,7 +12944,7 @@ let lmCharacter = {
             },
         },
         olsbpixian: {
-            audio: 2,
+            audio: "sbpixian",
             trigger: {
                 player: "phaseUseEnd",
             },
@@ -14460,7 +14460,7 @@ let lmCharacter = {
         },
         //新杀滕芳兰
         old_dcaichen: {
-            audio: 2,
+            audio: "dcaichen",
             init(player) {
                 game.addGlobalSkill("old_dcaichen_hit");
             },
@@ -19470,6 +19470,59 @@ let lmCharacter = {
                 }
             },
         },
+        old_twjuxia: {
+            audio: "jsrgjuxia",
+            trigger: {
+                player: "phaseZhunbeiBegin",
+                target: "useCardToTargeted",
+            },
+            filter(event, player) {
+                if (event.name === "phaseZhunbei") {
+                    return !player.hasSkill("twguanhuo", null, false, false);
+                } else if (player.hasSkill("old_twjuxia_used")) {
+                    return false;
+                }
+                return event.player !== player && lib.skill.jsrgjuxia.countSkill(event.player) > lib.skill.jsrgjuxia.countSkill(player);
+            },
+            logTarget: "player",
+            prompt2(event, player) {
+                if (event.name !== "phaseZhunbei") {
+                    return `令${get.translation(event.card)}对你无效，然后你摸两张牌`;
+                }
+                return `获得技能〖观火〗`;
+            },
+            frequent(event, player) {
+                return event.name === "phaseZhunbei";
+            },
+            check(event, player) {
+                return event.name === "phaseZhunbei" || get.effect(player, { name: "draw" }, player, player) * 2 - get.effect(player, event.card, event.player, player) > 0;
+            },
+            async content(event, trigger, player) {
+                if (trigger.name === "phaseZhunbei") {
+                    await player.addSkills("twguanhuo");
+                } else {
+                    player.addTempSkill("old_twjuxia_used");
+                    trigger.excluded.add(player);
+                    game.log(trigger.card, "对", player, "无效");
+                    await player.draw(2);
+                }
+            },
+            ai: {
+                effect: {
+                    target_use(card, player, target) {
+                        if (lib.skill.jsrgjuxia.countSkill(target) >= lib.skill.jsrgjuxia.countSkill(player)) {
+                            return;
+                        }
+                        if (card && (card.cards || card.isCard) && !target.hasSkill("old_twjuxia_used")) {
+                            return [0, 0.5, 0, 0.5];
+                        }
+                    },
+                },
+            },
+            subSkill: {
+                used: { charlotte: true },
+            },
+        },
         //幻诸葛亮
         old_twhunyou: {
             audio: "twhunyou",
@@ -21962,6 +22015,117 @@ let lmCharacter = {
                 markcount: () => 0,
             },
         },
+        //国渊
+        old_mbxiugeng: {
+            audio: "mbxiugeng",
+            logAudio: index => (typeof index === "number" ? "mbxiugeng" + index + ".mp3" : 2),
+            trigger: { player: "phaseBegin" },
+            async cost(event, trigger, player) {
+                event.result = await player
+                    .chooseTarget(get.prompt2(event.skill), [1, 3])
+                    .set("ai", target => get.attitude(get.player(), target))
+                    .forResult();
+            },
+            async content(event, trigger, player) {
+                player.line(event.targets);
+                for (const target of event.targets) {
+                    target.removeSkill("old_mbxiugeng_effect");
+                    target.storage["old_mbxiugeng_effect"] = target.countCards("h");
+                    target.addSkill("old_mbxiugeng_effect");
+                }
+            },
+            subSkill: {
+                effect: {
+                    charlotte: true,
+                    forced: true,
+                    popup: false,
+                    init(player, skill) {
+                        const storage = player.storage[skill];
+                        if (storage >= 0) {
+                            player.addTip(skill, `${get.translation(skill)} ${storage}`);
+                        }
+                    },
+                    onremove(player, skill) {
+                        delete player.storage[skill];
+                        player.removeTip(skill);
+                    },
+                    mark: true,
+                    intro: {
+                        content: "当前记录值为：#",
+                    },
+                    trigger: { player: "phaseDrawBegin" },
+                    content() {
+                        const record = player.storage[event.name];
+                        if (record) {
+                            player.logSkill("old_mbxiugeng", null, null, null, [player.countCards("h") >= record ? 4 : 3]);
+                            if (player.countCards("h") >= record) {
+                                player.addSkill("old_mbxiugeng_handcard");
+                                player.addMark("old_mbxiugeng_handcard", 1, false);
+                            } else {
+                                player.drawTo(record);
+                            }
+                        }
+                        player.removeSkill(event.name);
+                    },
+                },
+                handcard: {
+                    markimage: "image/card/handcard.png",
+                    charlotte: true,
+                    onremove: true,
+                    intro: {
+                        content: "手牌上限+#",
+                    },
+                    mark: true,
+                    mod: {
+                        maxHandcard(player, num) {
+                            return num + player.countMark("old_mbxiugeng_handcard");
+                        },
+                    },
+                },
+            },
+        },
+        old_mbchenshe: {
+            audio: "mbchenshe",
+            logAudio: index => (typeof index === "number" ? "mbchenshe" + index + ".mp3" : 2),
+            trigger: { global: "dying" },
+            filter(event, player) {
+                return event.player != player && lib.skill.old_mbchenshe.logTarget(event, player).length;
+            },
+            logTarget(event, player) {
+                return [player, event.player, event.source].filter(target => target?.isIn() && target?.countDiscardableCards(player, "he"));
+            },
+            check(event, player) {
+                const targets = lib.skill.old_mbchenshe.logTarget(event, player);
+                return (
+                    targets.reduce((sum, target) => {
+                        return sum + get.effect(target, { name: "guohe_copy2" }, player, player);
+                    }, 0) > 0
+                );
+            },
+            async content(event, trigger, player) {
+                const targets = lib.skill.old_mbchenshe.logTarget(trigger, player),
+                    cards = [];
+                for (const target of targets) {
+                    let result;
+                    if (!target.countDiscardableCards(player, "he")) {
+                        continue;
+                    }
+                    if (target == player) {
+                        result = await target.chooseToDiscard(`陈赦：请弃置一张牌`, "he", true).forResult();
+                    } else {
+                        result = await player.discardPlayerCard(`陈赦：请弃置${get.translation(target)}一张牌`, target, "he", true).forResult();
+                    }
+                    if (result?.cards) {
+                        cards.addArray(result.cards);
+                    }
+                }
+                if (cards.length == 3 && cards.map(card => get.color(card, false)).unique().length == 1) {
+                    player.logSkill("old_mbchenshe", trigger.player, null, null, [3]);
+                    await trigger.player.recoverTo(trigger.player.maxHp);
+                    await player.removeSkills(event.name);
+                }
+            },
+        },
         //朱儁
         diy_juxiang: {
             audio: "zjjuxiang",
@@ -22457,6 +22621,15 @@ let lmCharacter = {
         old_mbrunwei_info: "出牌阶段限一次，你可以展示牌堆顶至多三张牌，令一名角色获得其中一种颜色的所有牌。若如此做，本阶段你再失去X张牌后（X为其因此获得的牌数），该技能视为未发动过但不能以本回合获得过牌的角色为目标。若获得牌的角色为你，本阶段结束时，你弃置以此法获得的牌。",
         old_mbshuanghuai: "霜怀",
         old_mbshuanghuai_info: "每回合限一次，当与你距离1以内的角色受到伤害时，你可以选择一项：1.防止此伤害；2.令其从弃牌堆中获得一张【桃】。若该角色与你上一次发动时不同，你失去1点体力。",
+        old_guoyuan: "旧势国渊",
+        old_guoyuan_prefix: "旧|势",
+        old_mbxiugeng: "修耕",
+        old_mbxiugeng_info: "回合开始时，你可选择至多三名“修耕”角色并记录这些角色的手牌数。若如此做，“修耕”角色的下一个摸牌阶段开始时若：其手牌数小于记录值，则摸至记录值；其手牌数不小于记录值，则其手牌上限+1。",
+        old_mbchenshe: "陈赦",
+        old_mbchenshe_info: "当一名其他角色进入濒死状态时，你可以依次弃置你、该角色、伤害来源的各一张牌，若这些角色以此法弃置了共计三张牌，且这些牌的颜色皆相同，则其回复体力至上限，然后你失去此技能。",
+        old_mb_caocao: "旧手杀SP曹操",
+        old_mb_caocao_ab: "旧SP曹操",
+        old_mb_caocao_prefix: "旧|SP",
 
         oldx_clan_xuncai: "旧族荀采",
         oldx_clan_xuncai_prefix: "旧|族",
@@ -22912,6 +23085,8 @@ let lmCharacter = {
         old_jsrg_huangfusong: "旧TW起皇甫嵩",
         old_jsrg_huangfusong_ab: "旧起皇甫嵩",
         old_jsrg_huangfusong_prefix: "旧|起",
+        old_twjuxia: "居下",
+        old_twjuxia_info: "①每回合限一次，其他角色使用牌指定你为目标后，若其技能数多于你，则你可以令此牌对你无效，然后你摸两张牌。②准备阶段，若你没有〖观火〗，则你可以获得之。",
 
         old_gaowang: "旧高望",
         old_gaowang_prefix: "旧",
