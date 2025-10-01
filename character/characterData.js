@@ -133,6 +133,7 @@ let lmCharacter = {//武将信息
     old_renwan: ["female", "wei", 3, ["old_dcjuanji", "old_dcrenshuang"], ["character:renwan", "die:renwan"]],
     old_lukai: ["male", "wu", 4, ["old_bushi", "old_zhongzhuang"], ["character:lukai", "die:lukai"]],
     oldx_zhangqiying: ["female", "qun", 3, ["old_falu", "old_dianhua", "old_zhenyi"], ["character:zhangqiying", "die:zhangqiying"]],
+    old_v_machao: ["male", "qun", 4, ["old_dczhongtao", "dcjizhan"], ["character:v_machao", "die:v_machao"]],
 
     //海外
     old_tw_huojun: ["male", "shu", 4, ["twsidai", "old_twjieyu"], ["character:tw_huojun", "die:tw_huojun"]],

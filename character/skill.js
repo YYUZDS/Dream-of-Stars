@@ -17265,6 +17265,137 @@ let lmCharacter = {
                 },
             },
         },
+        //威马超
+        old_dczhongtao: {
+            audio: "dczhongtao",
+            enable: "phaseUse",
+            usable: 1,
+            chooseButton: {
+                dialog(event, player) {
+                    return ui.create.dialog(`###众讨###出牌阶段限一次，你可以选择至多${Math.min(4, player.getDamagedHp() + 2)}种花色，然后随机获得弃牌堆中你选择花色的各一张牌。`, [lib.suit.map(suit => "lukai_" + suit), "vcard"]);
+                },
+                check(button) {
+                    return Math.random();
+                },
+                select() {
+                    const player = get.player();
+                    return [1, 2 + player.getDamagedHp()];
+                },
+                backup(links) {
+                    return {
+                        audio: "dczhongtao",
+                        suits: links.map(list => list[2].slice(6)),
+                        async content(event, trigger, player) {
+                            const suits = get.info(event.name).suits;
+                            const cards = [];
+                            for (const suit of suits) {
+                                const card = lib.skill.old_dczhongtao.getCard(
+                                    card => get.suit(card) == suit,
+                                    cards.some(j => get.position(j) == "j"),
+                                    cards.some(e => get.position(e) == "e"),
+                                    player
+                                );
+                                if (card) {
+                                    cards.push(card);
+                                }
+                            }
+                            if (cards.length) {
+                                await player.gain(cards, "gain2");
+                            } else {
+                                player.chat("牌堆我对你的爱像叮咚鸡");
+                            }
+                        },
+                    };
+                },
+            },
+            /*珪珪：拿牌优先级应该是
+            优先拿判定区 然后装备区 弃牌堆 最后是牌堆
+            然后判定区和装备区最多各拿一张
+            装备区副类别可能细分还有优先级 就不重要了
+            然后弃牌堆优先
+            最后才是牌堆*/
+            getCard(filter, noj, noe, player) {
+                let curs = game.filterPlayer(() => true).sortBySeat();
+                //优先拿自己的
+                curs.sortBySeat(player);
+                //判定区
+                if (noj != true) {
+                    for (let i = 0; i < curs.length; i++) {
+                        const jx = curs[i].getCards("j");
+                        for (let j = 0; j < jx.length; j++) {
+                            if (filter(jx[j])) {
+                                return jx[j];
+                            }
+                        }
+                    }
+                }
+                //装备区
+                if (noe != true) {
+                    for (let i = 0; i < curs.length; i++) {
+                        const ex = curs[i].getCards("e");
+                        for (let j = 0; j < ex.length; j++) {
+                            if (filter(ex[j])) {
+                                return ex[j];
+                            }
+                        }
+                    }
+                }
+                //弃牌堆
+                const card1 = get.discardPile(filter, "random");
+                if (card1) {
+                    return card1;
+                }
+                //牌堆
+                const card2 = get.cardPile2(filter, "random");
+                if (card2) {
+                    return card2;
+                }
+                return null;
+            },
+            //珪珪：刷新的部分是众讨本身的效果而不是拿牌后的buff
+            group: "old_dczhongtao_reset",
+            subSkill: {
+                backup: {},
+                reset: {
+                    audio: "dczhongtao",
+                    forced: true,
+                    locked: false,
+                    popup: false,
+                    onremove: true,
+                    intro: {
+                        content: "已使用了 $",
+                    },
+                    trigger: { player: ["useCardAfter", "phaseAfter"] },
+                    filter(event, player) {
+                        if (event.name == "useCard") {
+                            return _status.currentPhase == player;
+                        }
+                        return true;
+                    },
+                    async content(event, trigger, player) {
+                        if (event.triggername == "phaseAfter") {
+                            player.setStorage(event.name, [], true);
+                            return;
+                        }
+                        player.markAuto(event.name, get.type2(trigger.card));
+                        if (player.getStorage(event.name).length >= 3) {
+                            player.setStorage(event.name, [], true);
+                            if (player.getStat().skill.old_dczhongtao > 0) {
+                                player.getStat().skill.old_dczhongtao--;
+                                player.popup("众讨");
+                                game.log(player, "重置了", "#g【众讨】");
+                            }
+                        }
+                    },
+                },
+            },
+            ai: {
+                order: 7,
+                result: {
+                    player: 1,
+                },
+            },
+        },
         //二刘
         old_dcllqixin: {
             audio: "dcllqixin",
@@ -21803,7 +21934,7 @@ let lmCharacter = {
                             const cards = get.cards(num, true);
                             player.logSkill("old_mbrunwei", null, null, null, [get.rand(1, 2)]);
                             await player.showCards(cards, `${get.translation(player)}发动了〖${get.translation(skill)}〗`);
-                            const used = player.getHistory("useSkill", evt => evt.skill == skill && evt.event.getParent("phaseUse") == event.getParent("phaseUse")).length > 1;
+                            const used = player.hasSkill(skill + "_twice");
                             if (
                                 used &&
                                 !game.hasPlayer(target => {
@@ -21814,69 +21945,47 @@ let lmCharacter = {
                             }
                             const red = cards.filter(card => get.color(card, false) == "red"),
                                 black = cards.filter(card => get.color(card, false) == "black");
-                            event.videoId = lib.status.videoId++;
-                            const func = (id, red, black) => {
-                                //创建新对话框
-                                const dialog = ui.create.dialog(`润微：选择一名角色令其获得其中一种颜色的牌`);
-                                //添加显示牌的部分，该部分不可点击
-                                dialog.addNewRow({ item: get.translation("black"), retio: 1 }, { item: black, ratio: 3 }, { item: get.translation("red"), retio: 1 }, { item: red, ratio: 3 });
-                                //对移动端和PC端对话框高度分别做适配，加了addNewRow的默认高度有点高
-                                dialog.css({
-                                    position: "absolute",
-                                    top: get.is.phoneLayout() ? "35%" : "45%",
-                                });
-                                //正常添加按钮
-                                dialog.add([
-                                    [
-                                        ["black", "黑色"],
-                                        ["red", "红色"],
-                                    ],
-                                    "tdnodes",
-                                ]);
-                                dialog.videoId = id;
-                                return dialog;
-                            };
-                            if (player.isOnline2()) {
-                                player.send(func, event.videoId, red, black);
-                            } else {
-                                func(event.videoId, red, black);
-                            }
+                            const list = get.addNewRowList(cards, "color");
                             const result = await player
                                 .chooseButtonTarget({
-                                    dialog: event.videoId,
+                                    createDialog: [[[[`润微：选择一名角色令其获得其中一种颜色的牌`], "addNewRow"], list.map(item => [Array.isArray(item) ? item : [item], "addNewRow"])]],
+                                    css: {
+                                        position: "absolute",
+                                        top: get.is.phoneLayout() ? "35%" : "45%",
+                                    },
                                     forced: true,
-                                    black: black,
-                                    red: red,
                                     used: used,
                                     targetsx: game.filterPlayer(target => !target.hasHistory("gain", evt => evt.cards?.length)),
                                     filterButton(button) {
-                                        return get.event()[button.link]?.length;
+                                        return button.links.length;
                                     },
                                     filterTarget(card, player, target) {
                                         if (get.event().used) {
-                                            return get.event().targetsx.includes(target);
+                                            return get.event().targetsx?.includes(target);
                                         }
                                         return true;
                                     },
                                     ai1(button) {
-                                        return get.event()[button.link]?.length;
+                                        return button.links.length;
                                     },
                                     ai2(target) {
-                                        if (!get.event().used && get.player() == target) {
+                                        const player = get.player();
+                                        if (!get.event().used && player == target) {
                                             return 114514;
                                         }
-                                        return get.attitude(get.player(), target);
+                                        return get.attitude(player, target);
                                     },
                                 })
                                 .forResult();
-                            game.broadcastAll("closeDialog", event.videoId);
                             if (result?.links && result?.targets) {
                                 const target = result.targets[0],
                                     gain = result.links[0] == "black" ? black : red;
                                 player.line(target);
-                                player.addTempSkill("old_mbrunwei_used", "phaseUseAfter");
-                                player.addMark("old_mbrunwei_used", gain.length, false);
-                                player.addTip("old_mbrunwei_used", `润微  ${gain.length}`);
+                                if (!player.hasSkill(skill + "_twice")) {
+                                    player.addTempSkill(skill + "_twice", "phaseChange");
+                                    player.addMark(skill + "_twice", gain.length, false);
+                                    player.addTip(skill + "_twice", `润微  ${gain.length}`);
+                                }
                                 let gaintag = [];
                                 if (player == target) {
                                     gaintag = ["old_mbrunwei"];
@@ -21891,7 +22000,9 @@ let lmCharacter = {
                                             }
                                         });
                                 }
-                                await target.gain(gain, "gain2").set("gaintag", gaintag);
+                                const next = target.gain(gain, "gain2");
+                                next.gaintag.addArray(gaintag);
+                                await next;
                             }
                         },
                     };
@@ -21901,7 +22012,7 @@ let lmCharacter = {
                 order: 10,
                 result: {
                     player(player) {
-                        const used = player.hasHistory("useSkill", evt => evt.skill == "old_mbrunwei" && evt.event.getParent("phaseUse") == get.event().getParent("phaseUse")); //
+                        const used = player.hasSkill("old_mbrunwei_twice");
                         if (!used) {
                             return 1;
                         } else if (
@@ -21916,7 +22027,7 @@ let lmCharacter = {
                 },
             },
             subSkill: {
-                used: {
+                twice: {
                     onremove(player, skill) {
                         delete player.storage[skill];
                         player.removeTip(skill);
@@ -21930,16 +22041,17 @@ let lmCharacter = {
                         global: ["loseAsyncAfter", "equipAfter", "gainAfter", "addToExpansionAfter", "addJudgeAfter"],
                     },
                     filter(event, player) {
-                        return event.getl(player)?.cards2?.length;
+                        return event.getl(player)?.cards2?.length && player.hasMark("old_mbrunwei_twice");
                     },
                     silent: true,
                     content() {
                         const num = trigger.getl(player)?.cards2?.length;
                         if (num >= player.countMark(event.name)) {
                             player.logSkill("old_mbrunwei", null, null, null, [3]);
-                            player.removeSkill(event.name);
+                            get.info(event.name).onremove(player, event.name);
+                            player.unmarkSkill(event.name);
                             delete player.getStat().skill.old_mbrunwei;
-                            game.log(player, "重置了", `#g〖${get.translation(event.name)}〗`);
+                            game.log(player, "重置了", `#g【${get.translation(event.name)}】`);
                         } else {
                             player.removeMark(event.name, num, false);
                             player.addTip(event.name, `润微  ${player.countMark(event.name)}`);
@@ -22061,9 +22173,9 @@ let lmCharacter = {
             },
             async content(event, trigger, player) {
                 player.line(event.targets);
-                for (const target of event.targets) {
+                for (const target of event.targets.sortBySeat()) {
                     target.removeSkill("old_mbxiugeng_effect");
-                    target.storage["old_mbxiugeng_effect"] = target.countCards("h");
+                    target.setStorage("old_mbxiugeng_effect", target.countCards("h"));
                     target.addSkill("old_mbxiugeng_effect");
                 }
             },
@@ -22091,11 +22203,12 @@ let lmCharacter = {
                         const record = player.storage[event.name];
                         if (record) {
                             player.logSkill("old_mbxiugeng", null, null, null, [player.countCards("h") >= record ? 4 : 3]);
+                            if (player.countCards("h") <= record) {
+                                player.draw(2);
+                            }
                             if (player.countCards("h") >= record) {
-                                player.addSkill("old_mbxiugeng_handcard");
-                                player.addMark("old_mbxiugeng_handcard", 1, false);
-                            } else {
-                                player.drawTo(record);
+                                player.addSkill("mbxiugeng_handcard");
+                                player.addMark("mbxiugeng_handcard", 1, false);
                             }
                         }
                         player.removeSkill(event.name);
@@ -22657,7 +22770,7 @@ let lmCharacter = {
         old_guoyuan: "旧势国渊",
         old_guoyuan_prefix: "旧|势",
         old_mbxiugeng: "修耕",
-        old_mbxiugeng_info: "回合开始时，你可选择至多三名“修耕”角色并记录这些角色的手牌数。若如此做，“修耕”角色的下一个摸牌阶段开始时若：其手牌数小于记录值，则摸至记录值；其手牌数不小于记录值，则其手牌上限+1。",
+        old_mbxiugeng_info: "回合开始时，你可以记录至多三名角色的手牌数。若如此做，这些角色的下一个摸牌阶段开始时若其手牌数：小于等于记录值，其摸两张牌；大于等于记录值，其手牌上限+1。",
         old_mbchenshe: "陈赦",
         old_mbchenshe_info: "当一名其他角色进入濒死状态时，你可以依次弃置你、该角色、伤害来源的各一张牌，若这些角色以此法弃置了共计三张牌，且这些牌的颜色皆相同，则其回复体力至上限，然后你失去此技能。",
         old_mb_caocao: "旧手杀SP曹操",
@@ -23017,6 +23130,10 @@ let lmCharacter = {
         old_zhenyi_club_info: "",
         old_zhenyi_heart: "真仪",
         old_zhenyi_heart_info: "",
+        old_v_machao: "旧威马超",
+        old_v_machao_prefix: "旧|威",
+        old_dczhongtao: "众讨",
+        old_dczhongtao_info: "①出牌阶段限一次，你可以选择至多X+2种花色（X为你已损失的体力值），然后随机获得场上、弃牌堆或牌堆中你选择花色的各一张牌。②当你于回合内使用三种类别的牌后，此技能视为未发动过。",
 
         old_tw_huojun: "旧TW霍峻",
         old_tw_huojun_ab: "旧霍峻",
