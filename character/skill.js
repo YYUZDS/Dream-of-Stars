@@ -4291,16 +4291,15 @@ let lmCharacter = {
         //吴珂
         old_mbzhuguo: {
             audio: "mbzhuguo",
-            logAudio: index => (typeof index === "number" ? "old_mbzhuguo" + index + ".mp3" : 2),
+            logAudio: index => (typeof index === "number" ? "mbzhuguo" + index + ".mp3" : 2),
             usable: 1,
             enable: "phaseUse",
             filterTarget: true,
             async content(event, trigger, player) {
                 const target = event.targets[0];
                 const num = target.maxHp - target.countCards("h");
-                const isMax = target.isMaxHandcard();
                 if (num > 0) {
-                    await target.drawTo(target.maxHp);
+                    await target.draw(num);
                 } else if (num < 0 && target.countDiscardableCards(target, "h") > 0) {
                     await target.chooseToDiscard("h", -num, true);
                 }
@@ -21207,7 +21206,7 @@ let lmCharacter = {
                 //if (get.mode() == "doudizhu") return 1;
                 return 4;
             },
-            logAudio: index => (typeof index === "number" ? "old_pothongyi" + index + ".mp3" : 2),
+            logAudio: index => (typeof index === "number" ? "pothongyi" + index + ".mp3" : 2),
             async cost(event, trigger, player) {
                 const num = player.countMark("old_pothongyi");
                 let list = [`摸${get.cnNumber(num)}张牌`, `移去所有“毅”标记，视为使用${get.cnNumber(num)}张【杀】`];
