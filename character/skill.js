@@ -23020,7 +23020,7 @@ let lmCharacter = {
         old_yingyou: "英猷",
         old_yingyou_info: "①出牌阶段开始时，你可明置一张“志”然后摸X张牌（X为明置的“志”的数量）。②当你失去与明置的“志”其中一张花色相同的牌时，你摸一张牌。",
         old_yingtian: "应天",
-        old_yingtian_info: "觉醒技。一名角色死亡后，若场上势力数不大于2，则你获得〖鬼才〗、〖完杀〗、〖连破〗并失去〖英猷〗且你本局游戏使用牌没有距离限制。",
+        old_yingtian_info: `觉醒技。一名角色死亡后，若场上势力数不大于2，则你获得${get.poptip("reguicai")}、${get.poptip("rewansha")}、${get.poptip("lianpo")}并失去〖英猷〗且你本局游戏使用牌没有距离限制。`,
         old_shen_lusu: "旧神鲁肃",
         old_shen_lusu_prefix: "旧|神",
         old_dingzhou: "定州",
@@ -23254,14 +23254,6 @@ let lmCharacter = {
         old_sbluanji_info: "①出牌阶段限一次。你可以将两张手牌当【万箭齐发】使用。②当其他角色因响应你使用的【万箭齐发】而打出【闪】时，你摸一张牌。",
         old_sbxueyi: "血裔",
         old_sbxueyi_info: "主公技，锁定技。①你的手牌上限+2X（X为场上其他群势力角色数）。②当你使用牌指定其他群势力角色为目标后，你摸一张牌。",
-        // old_sb_zhangjiao: "旧谋张角",
-        // old_sb_zhangjiao_prefix: "旧|谋",
-        // old_sbleiji: "雷击",
-        // old_sbleiji_info: "出牌阶段，你可以选择一名其他角色并弃4枚“道兵”，对其造成1点雷电伤害。",
-        // old_sbguidao: "鬼道",
-        // old_sbguidao_info: "①游戏开始时/一名角色受到属性伤害后，你获得4/2枚“道兵”。②当你受到伤害时，你可以弃2枚“道兵”并防止此伤害。然后若当前回合角色不为你，〖鬼道①〗于你下回合开始前无效。③“道兵”上限为8。",
-        // old_sbhuangtian: "黄天",
-        // old_sbhuangtian_info: "主公技，锁定技。①回合开始时，若本回合为你的第一个回合且游戏轮数为1，且游戏内没有【太平要术】，你装备【太平要术】。②其他群势力角色造成伤害后，若你拥有〖鬼道〗，你获得2枚“道兵”（每轮你至多以此法获得4枚“道兵”）。",
         old_sb_huaxiong: "旧谋华雄",
         old_sb_huaxiong_prefix: "旧|谋",
         old_sb_handang: "旧谋韩当",
@@ -23421,7 +23413,7 @@ let lmCharacter = {
         old_luochong: "落宠",
         old_luochong_info: "准备阶段或当你受到伤害后，你可以选择一项：1、令一名角色回复1点体力；2、令一名角色失去1点体力；3、弃置至多两名角色场上各一张牌；4、摸两张牌并可以将其交给其他角色（每轮每项各限一次）。",
         old_aichen: "哀尘",
-        old_aichen_info: "锁定技，当你进入濒死状态时，若【落宠】中剩余选项数大于1，你将体力回复至一点，执行并移去其中一项。",
+        old_aichen_info: "锁定技，当你进入濒死状态时，若〖落宠〗中剩余选项数大于1，你将体力回复至一点，执行并移去其中一项。",
         old_dengzhong: "旧邓忠",
         old_dengzhong_prefix: "旧",
         old_dzkanpo: "勘破",
@@ -24051,7 +24043,7 @@ let lmCharacter = {
         dc_zj_b: "养志",
         dc_zj_b_info: "结束阶段，你可以弃置所有牌并令一名其他角色获得〖乐身〗直到你的下个回合开始。",
 
-
+        friendyance_info: `每轮限一次，首轮开始时或准备阶段，你可以选择一项：①从牌堆中随机获得一张锦囊牌；②执行${get.poptip("friendyance_minigame")}。`,
     },
 };
 if (!_status.postReconnect.extErdai_skill) {
