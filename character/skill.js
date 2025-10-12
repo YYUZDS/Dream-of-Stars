@@ -22799,7 +22799,7 @@ let lmCharacter = {
                     trigger: { player: "phaseDrawBegin" },
                     content() {
                         const record = player.storage[event.name];
-                        if (record) {
+                        if (typeof record == "number") {
                             player.logSkill("old_mbxiugeng", null, null, null, [player.countCards("h") >= record ? 4 : 3]);
                             if (player.countCards("h") <= record) {
                                 player.draw(2);
@@ -23996,7 +23996,7 @@ let lmCharacter = {
         dc_zj_b_info: "结束阶段，你可以弃置所有牌并令一名其他角色获得〖乐身〗直到你的下个回合开始。",
 
         friendyance_info: `每轮限一次，首轮开始时或准备阶段，你可以选择一项：①从牌堆中随机获得一张锦囊牌；②执行${get.poptip("friendyance_minigame")}。`,
-        friendfangqiu_info: `限定技，当你执行${get.poptip("friendyance_minigame")}后，你可以展示你的${get.poptip("friendyance_minigame")}预测。若如此做，本次${get.poptip("friendyance_minigame")}的预测全部验证后，执行“[]”中效果的值均+1，然后若卧龙演策预测的牌数大于等于3且预测全部正确，该技能可以再次发动。`,
+        friendfangqiu_info: `限定技，当你执行${get.poptip("friendyance_minigame")}后，你可以展示你的${get.poptip("friendyance_minigame")}预测。若如此做，本次${get.poptip("friendyance_minigame")}的预测全部验证后，执行“[]”中效果的值均+1，然后若${get.poptip("friendyance_minigame")}预测的牌数大于等于3且预测全部正确，该技能可以再次发动。`,
         friendzhugelianggongli_info: `锁定技，若友庞统在场且确认与你阵营一致，你执行${get.poptip("friendyance_minigame")}初始可预测的牌数+1；若友徐庶在场且确认与你阵营一致，你执行${get.poptip("friendyance_minigame")}预测的第一张牌的结果始终视为正确。`,
     },
 };
