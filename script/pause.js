@@ -129,7 +129,7 @@ window.lm_import(function (lib, game, ui, get, ai, _status) {
 			this.parentNode
 		);
 	};
-	lib.ui.create.pause = function () {
+	ui.create.pause = function () {
 		if (_status.pausing) return;
 		ui.click.shortcut(false);
 		var node = ui.create.div(".pausedbg", ui.window);
@@ -179,7 +179,7 @@ window.lm_import(function (lib, game, ui, get, ai, _status) {
 		// });
 		return node;
 	};
-	lib.ui.click.pause = function () {
+	ui.click.pause = function () {
 		if (_status.paused2 || _status.pausing || _status.nopause || !ui.pause) return;
 		if (!_status.video) {
 			if (ui.pause.classList.contains("hidden")) return;
@@ -579,6 +579,8 @@ window.lm_import(function (lib, game, ui, get, ai, _status) {
 		if (!_status.event.skill) return;
 		//这里，清除使用卡牌在中间的显示
 		if (_status.event == 'useCard') return;
+		//这里，清除重铸的显示
+		if (_status.event.skill == '_recasting') return;
 		if (lib.config.show_log != 'off' && !game.chess) {
 			var nodeentry = node.cloneNode(true);
 			ui.arenalog.insertBefore(nodeentry, ui.arenalog.firstChild);
