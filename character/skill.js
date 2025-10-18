@@ -22551,43 +22551,50 @@ let lmCharacter = {
                             ) {
                                 return;
                             }
-                            const red = cards.filter(card => get.color(card, false) == "red"),
-                                black = cards.filter(card => get.color(card, false) == "black");
                             const list = get.addNewRowList(cards, "color");
-                            const result = await player
-                                .chooseButtonTarget({
-                                    createDialog: [[[[`润微：选择一名角色令其获得其中一种颜色的牌`], "addNewRow"], list.map(item => [Array.isArray(item) ? item : [item], "addNewRow"])]],
-                                    css: {
-                                        position: "absolute",
-                                        top: get.is.phoneLayout() ? "35%" : "45%",
-                                    },
-                                    forced: true,
-                                    used: used,
-                                    targetsx: game.filterPlayer(target => !target.hasHistory("gain", evt => evt.cards?.length)),
-                                    filterButton(button) {
-                                        return button.links.length;
-                                    },
-                                    filterTarget(card, player, target) {
-                                        if (get.event().used) {
-                                            return get.event().targetsx?.includes(target);
-                                        }
-                                        return true;
-                                    },
-                                    ai1(button) {
-                                        return button.links.length;
-                                    },
-                                    ai2(target) {
-                                        const player = get.player();
-                                        if (!get.event().used && player == target) {
-                                            return 114514;
-                                        }
-                                        return get.attitude(player, target);
-                                    },
-                                })
-                                .forResult();
-                            if (result?.links && result?.targets) {
+                            const { result } = await player.chooseButtonTarget({
+                                createDialog: [
+                                    [
+                                        [[`润微：选择一名角色令其获得其中一种颜色的牌`], "addNewRow"],
+                                        [
+                                            dialog => {
+                                                dialog.forcebutton = false;
+                                                dialog._scrollset = false;
+                                                dialog.css({
+                                                    top: "20%",
+                                                });
+                                            },
+                                            "handle",
+                                        ],
+                                        list.map(item => [Array.isArray(item) ? item : [item], "addNewRow"]),
+                                    ],
+                                ],
+                                forced: true,
+                                used: used,
+                                targetsx: game.filterPlayer(target => !target.hasHistory("gain", evt => evt.cards?.length)),
+                                filterButton(button) {
+                                    return button.links.length;
+                                },
+                                filterTarget(card, player, target) {
+                                    if (get.event().used) {
+                                        return get.event().targetsx?.includes(target);
+                                    }
+                                    return true;
+                                },
+                                ai1(button) {
+                                    return button.links.length;
+                                },
+                                ai2(target) {
+                                    const player = get.player();
+                                    if (!get.event().used && player == target) {
+                                        return 114514;
+                                    }
+                                    return get.attitude(player, target);
+                                },
+                            });
+                            if (result?.links?.length && result?.targets.length) {
                                 const target = result.targets[0],
-                                    gain = result.links[0] == "black" ? black : red;
+                                    gain = cards.filter(card => get.color(card, false) == result.links[0]);
                                 player.line(target);
                                 if (!player.hasSkill(skill + "_twice")) {
                                     player.addTempSkill(skill + "_twice", "phaseChange");
@@ -22600,11 +22607,11 @@ let lmCharacter = {
                                     player
                                         .when({ player: "phaseUseEnd" })
                                         .filter(evt => event.getParent("phaseUse") == evt)
-                                        .then(() => {
+                                        .step(async () => {
                                             const cards = player.getCards("h", card => card.hasGaintag("old_mbrunwei"));
                                             if (cards.length) {
                                                 player.logSkill("old_mbrunwei", null, null, null, [4]);
-                                                player.modedDiscard(cards).set("discarder", player);
+                                                await player.modedDiscard(cards).set("discarder", player);
                                             }
                                         });
                                 }
