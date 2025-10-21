@@ -2186,9 +2186,8 @@ export async function precontent(config, pack) {
     };
     lib.skill.new_rejianxiong = {
         audio: "rejianxiong",
-        audioname: ["shen_caopi", "mb_caocao", "old_mb_caocao"],
-        audioname2: { caoying: "lingren_jianxiong", old_shen_caopi: "rejianxiong_shen_caopi", sw_caopi: "rejianxiong_shen_caopi" },
-        trigger: { player: "damageEnd" },
+        audioname: ["shen_caopi", "mb_caocao"],
+        audioname2: { caoying: "lingren_jianxiong", old_shen_caopi: "rejianxiong_shen_caopi", sw_caopi: "rejianxiong_shen_caopi" },//, old_mb_caocao: "rejianxiong_mb_caocao"
         content() {
             "step 0";
             if (get.itemtype(trigger.cards) == "cards" && get.position(trigger.cards[0], true) == "o") {
