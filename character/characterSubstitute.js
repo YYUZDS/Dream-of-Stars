@@ -17,8 +17,8 @@ let lmCharacter = {//切换皮肤
     old_pot_yuji: [["pot_yuji_shadow", []]],
     old_dc_sb_xunyu: [["dc_sb_xunyu_shadow", ["tempname:dc_sb_xunyu_shadow"]]],
     old_pot_weiyan: [
-        ["pot_weiyan_achieve", []],
-        ["pot_weiyan_fail", []],
+        ["pot_weiyan_achieve", ["tempname:pot_weiyan_achieve"]],
+        ["pot_weiyan_fail", ["tempname:pot_weiyan_fail"]],
     ],
 };
 export const characterSubstitute = lmCharacter;

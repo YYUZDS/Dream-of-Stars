@@ -6924,7 +6924,7 @@ let lmCharacter = {
                     },
                 },
                 rob: {
-                    audio: "old_sbxuanhuo",
+                    audio: "sbxuanhuo",
                     trigger: {
                         global: ["gainAfter", "loseAsyncAfter"],
                     },
@@ -7555,7 +7555,7 @@ let lmCharacter = {
                 aiSkill: {},
                 backup: {},
                 gain: {
-                    audio: "old_sbxingshang",
+                    audio: "sbxingshang",
                     trigger: { global: ["die", "damageEnd"] },
                     filter(event, player) {
                         if (player.countMark("old_sbxingshang") >= get.info("old_sbxingshang").getLimit) return false;
@@ -7720,7 +7720,7 @@ let lmCharacter = {
                     const effect = links[0];
                     return {
                         effect: effect,
-                        audio: "old_sbfangzhu",
+                        audio: "sbfangzhu",
                         filterCard: () => false,
                         selectCard: -1,
                         filterTarget: effect.filterTarget,
@@ -7858,7 +7858,7 @@ let lmCharacter = {
             group: "old_sbsongwei_delete",
             subSkill: {
                 delete: {
-                    audio: "old_sbsongwei",
+                    audio: "sbsongwei",
                     enable: "phaseUse",
                     filter(event, player) {
                         if (player.storage.old_sbsongwei_delete) return false;
@@ -9132,7 +9132,7 @@ let lmCharacter = {
                 },
                 tao: {
                     charlotte: true,
-                    audio: "old_mblingfa",
+                    audio: "mblingfa",
                     trigger: { global: "useCardAfter" },
                     filter(event, player) {
                         return player != event.player && event.card.name == "tao" && event.player.countCards("he") > 0;
@@ -13359,7 +13359,7 @@ let lmCharacter = {
                     },
                 },
                 1: {
-                    audio: "old_olsbjiewan",
+                    audio: "olsbjiewan",
                     trigger: {
                         player: "damageBegin4",
                     },
@@ -13626,7 +13626,7 @@ let lmCharacter = {
                     },
                 },
                 lose: {
-                    audio: "old_olsiqi",
+                    audio: "olsiqi",
                     trigger: {
                         player: "loseAfter",
                         global: ["loseAsyncAfter", "cardsDiscardAfter", "equipAfter", "addJudgeAfter", "addToExpansionAfter"],
@@ -17404,7 +17404,7 @@ let lmCharacter = {
             },
             subSkill: {
                 buff: {
-                    audio: "old_stardangchen",
+                    audio: "stardangchen",
                     charlotte: true,
                     onremove: true,
                     filter(event, player) {
@@ -19872,7 +19872,7 @@ let lmCharacter = {
         },
         //赵娥
         old_twyanshi: {
-            audio: "old_twyanshi",
+            audio: "twyanshi",
             trigger: { global: "phaseBefore", player: "enterGame" },
             forced: true,
             locked: false,
@@ -19921,7 +19921,7 @@ let lmCharacter = {
                     },
                 },
                 damage: {
-                    audio: "old_twyanshi",
+                    audio: "twyanshi",
                     trigger: {
                         source: ["damageBegin1", "damageSource"],
                     },
@@ -21662,7 +21662,7 @@ let lmCharacter = {
                             if (card.cards?.some(cardx => cardx.hasGaintag("old_potwanglie"))) return true;
                         },
                     },
-                    audio: "old_potwanglie",
+                    audio: "potwanglie",
                     trigger: { player: ["useCard", "useCardAfter"] },
                     filter(event, player) {
                         return player.hasHistory("lose", evt => {
@@ -21757,7 +21757,7 @@ let lmCharacter = {
             group: "old_pothongyi_mark",
             subSkill: {
                 mark: {
-                    audio: ["old_pothongyi3.mp3", "old_pothongyi4.mp3"],
+                    audio: ["pothongyi3.mp3", "pothongyi4.mp3"],
                     trigger: {
                         global: "phaseBefore",
                         source: "damageSource",
