@@ -5121,56 +5121,65 @@ let lmCharacter = {
         },
         //谋大乔
         old_sbguose: {
-            audio: "sbguose",
-            enable: "phaseUse",
-            usable: 4,
-            discard: false,
-            lose: false,
-            delay: false,
-            filter(event, player) {
-                return player.hasCard(card => get.suit(card) == "diamond", "hes") || game.hasPlayer(current => current.hasJudge("lebu"));
-            },
-            position: "hes",
-            filterCard(card, player) {
-                if (get.suit(card) != "diamond") return false;
-                var mod = game.checkMod(ui.selected.cards[0], player, "unchanged", "cardEnabled2", player);
-                if (!mod) return false;
-                return true;
-            },
-            selectCard: [0, 1],
-            filterTarget(card, player, target) {
-                if (!ui.selected.cards.length) {
-                    if (target.hasJudge("lebu")) return true;
-                    return false;
-                }
-                if (player == target) return false;
-                return player.canUse(get.autoViewAs({ name: "lebu" }, ui.selected.cards), target);
-            },
-            complexSelect: true,
-            check(card) {
-                return 7 - get.value(card);
-            },
-            content() {
-                "step 0";
-                if (target.hasJudge("lebu")) {
-                    target.discard(target.getJudge("lebu"));
-                } else {
-                    player.useCard({ name: "lebu" }, target, cards).audio = false;
-                }
-                "step 1";
-                player.draw(2);
-                player.chooseToDiscard("h", true);
-            },
-            ai: {
-                result: {
-                    target(player, target) {
-                        if (target.hasJudge("lebu")) return -get.effect(target, { name: "lebu" }, player, target);
-                        return get.effect(target, { name: "lebu" }, player, target);
-                    },
+                audio: "sbguose",
+                enable: "phaseUse",
+                usable: 4,
+                discard: false,
+                lose: false,
+                delay: false,
+                filter(event, player) {
+                    return player.hasCard(card => get.suit(card) == "diamond", "hes") || game.hasPlayer(current => current.hasJudge("lebu"));
                 },
-                order: 9,
+                position: "hes",
+                filterCard(card, player) {
+                    if (get.suit(card) != "diamond") {
+                        return false;
+                    }
+                    if (game.checkMod(card, player, "unchanged", "cardEnabled2", player) === false) {
+                        return false;
+                    }
+                    return true;
+                },
+                selectCard: [0, 1],
+                filterTarget(card, player, target) {
+                    if (!ui.selected.cards.length) {
+                        if (target.hasJudge("lebu")) {
+                            return true;
+                        }
+                        return false;
+                    }
+                    if (player == target) {
+                        return false;
+                    }
+                    return player.canUse(get.autoViewAs({ name: "lebu" }, ui.selected.cards), target);
+                },
+                complexSelect: true,
+                check(card) {
+                    return 7 - get.value(card);
+                },
+                async content(event, trigger, player) {
+                    const [target] = event.targets;
+                    if (target.hasJudge("lebu")) {
+                        await target.discard(target.getJudge("lebu"));
+                    } else {
+                        const next = player.useCard({ name: "lebu" }, target, event.cards);
+                        next.audio = false;
+                        await next;
+                    }
+                    await player.draw(2);
+                },
+                ai: {
+                    result: {
+                        target(player, target) {
+                            if (target.hasJudge("lebu")) {
+                                return -get.effect(target, { name: "lebu" }, player, target);
+                            }
+                            return get.effect(target, { name: "lebu" }, player, target);
+                        },
+                    },
+                    order: 9,
+                },
             },
-        },
         //谋孙策
         old_sbjiang: {
             audio: "sbjiang",
@@ -18168,33 +18177,44 @@ let lmCharacter = {
                 global: "loseAsyncAfter",
             },
             filter(event, player) {
-                if (event.name === "useCard") return event.getParent(2).name !== "old_dcllqixin" && get.type(event.card) === "basic";
-                if (event.name === "gain" && (event.getParent().name !== "draw" || event.getParent(2).name === "old_dcllqixin")) return false;
-                if (event.name !== "gain" && event.type !== "draw") return false;
+                if (event.name === "useCard") {
+                    return event.getParent().name !== "old_dcllqixin" && get.type(event.card) === "basic";
+                }
+                if (event.name === "gain" && (event.getParent().name !== "draw" || event.getParent(2).name === "old_dcllqixin")) {
+                    return false;
+                }
+                if (event.name !== "gain" && event.type !== "draw") {
+                    return false;
+                }
                 return event.getg(player).length === 2;
             },
-            direct: true,
-            clearTime: true,
             frequent: true,
-            async content(event, trigger, player) {
-                let result;
-                if (trigger.name === "useCard") {
-                    result = await player.chooseBool(get.prompt(event.name), "摸两张牌").set("frequentSkill", event.name).forResult();
-                    if (result?.bool) {
-                        player.logSkill(event.name);
-                        await player.draw(2);
-                    }
+            async cost(event, trigger, player) {
+                if (trigger.name == "useCard") {
+                    event.result = await player
+                        .chooseBool(get.prompt(event.skill), "摸两张牌")
+                        .set("frequentSkill", event.skill)
+                        .forResult();
                 } else {
-                    result = await player
+                    event.result = await player
                         .chooseToUse(function (card, player, event) {
-                            if (get.type(card) !== "basic") return false;
+                            if (get.type(card) !== "basic") {
+                                return false;
+                            }
                             return lib.filter.cardEnabled.apply(this, arguments);
-                        }, get.translation(event.name) + "：是否使用一张基本牌？")
-                        .set("logSkill", event.name)
+                        }, `###${get.prompt(event.skill)}###使用一张基本牌`)
+                        .set("chooseonly", true)
                         .set("addCount", false)
                         .forResult();
                 }
-                if (!result?.bool && player.storage.counttrigger?.[event.name] > 0) player.storage.counttrigger[event.name]--;
+            },
+            async content(event, trigger, player) {
+                if (trigger.name === "useCard") {
+                    await player.draw(2);
+                } else {
+                    const { result } = event.cost_data;
+                    await player.useResult(result, event);
+                }
             },
         },
         //新杀谋荀彧
