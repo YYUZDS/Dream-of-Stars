@@ -598,6 +598,11 @@ export async function precontent(config, pack) {
         nature: "watermm",
         showName: "信",
     });
+    lib.namePrefix.set("废", {
+        color: "#a4a4a4",
+        nature: "black",
+        showName: "废",
+    });
     lib.namePrefix.set("ddd", {
         getSpan: () => {
             const span = document.createElement("span"),
@@ -685,6 +690,11 @@ export async function precontent(config, pack) {
             color: "#def7ca",
             nature: "watermm",
             showName: "信",
+        });
+        lib.namePrefix.set("废", {
+            color: "#a4a4a4",
+            nature: "black",
+            showName: "废",
         });
     }, []];
     lib.element.content.waitForPlayer = function () {
@@ -2027,7 +2037,7 @@ export async function precontent(config, pack) {
                     }
                 }
             },
-        },
+        };
     }
     //笮融增强
     if (lib.config.extension_星之梦_zrEnhance) {
