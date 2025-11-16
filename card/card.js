@@ -8,6 +8,7 @@ game.import("card", (lib, game, ui, get, ai, _status) => {
                 image: "ext:星之梦/image/card/sw_guilongzhanyuedao.png",
                 type: "equip",
                 subtype: "equip1",
+                bingzhu: ["关羽"],
                 fullskin: true,
                 distance: {
                     attackFrom: -2,
@@ -21,6 +22,7 @@ game.import("card", (lib, game, ui, get, ai, _status) => {
                 image: "ext:星之梦/image/card/sw_guofengyupao.png",
                 type: "equip",
                 subtype: "equip2",
+                bingzhu: ["吕蒙"],
                 fullskin: true,
                 skills: ["guofengyupao"],
                 ai: {
@@ -31,6 +33,7 @@ game.import("card", (lib, game, ui, get, ai, _status) => {
                 image: "ext:星之梦/image/card/sw_qimenbagua.png",
                 type: "equip",
                 subtype: "equip2",
+                bingzhu: ["诸葛亮"],
                 fullskin: true,
                 skills: ["qimenbagua"],
                 ai: {
@@ -41,6 +44,7 @@ game.import("card", (lib, game, ui, get, ai, _status) => {
                 image: "ext:星之梦/image/card/sw_chiyanzhenhunqin.png",
                 type: "equip",
                 subtype: "equip1",
+                bingzhu: ["周瑜"],
                 distance: {
                     attackFrom: -3,
                 },
@@ -50,11 +54,11 @@ game.import("card", (lib, game, ui, get, ai, _status) => {
                     equipValue: 5,
                 },
             },
-
             sw_juechenjinge: {
                 image: "ext:星之梦/image/card/sw_juechenjinge.png",
                 type: "equip",
                 subtype: "equip3",
+                bingzhu: ["曹操"],
                 fullskin: true,
                 distance: {
                     globalTo: 1,
@@ -75,6 +79,7 @@ game.import("card", (lib, game, ui, get, ai, _status) => {
                 image: "ext:星之梦/image/card/sw_xiuluolianyuji.png",
                 type: "equip",
                 subtype: "equip1",
+                bingzhu: ["吕布"],
                 fullskin: true,
                 distance: {
                     attackFrom: -3,
@@ -99,6 +104,7 @@ game.import("card", (lib, game, ui, get, ai, _status) => {
                 image: "ext:星之梦/image/card/sw_chixueqingfeng.png",
                 type: "equip",
                 subtype: "equip1",
+                bingzhu: ["赵云"],
                 fullskin: true,
                 distance: {
                     attackFrom: -1,
@@ -112,6 +118,7 @@ game.import("card", (lib, game, ui, get, ai, _status) => {
                 image: "ext:星之梦/image/card/sw_xuwangzhimian.png",
                 type: "equip",
                 subtype: "equip5",
+                bingzhu: ["司马懿"],
                 fullskin: true,
                 skills: ["xuwangzhimian"],
                 ai: {
@@ -128,6 +135,7 @@ game.import("card", (lib, game, ui, get, ai, _status) => {
                 image: "ext:星之梦/image/card/sw_qicaishenlu.png",
                 type: "equip",
                 subtype: "equip4",
+                bingzhu: ["陆逊"],
                 fullskin: true,
                 distance: {
                     globalFrom: -1,
@@ -143,6 +151,7 @@ game.import("card", (lib, game, ui, get, ai, _status) => {
                 image: "ext:星之梦/image/card/sw_luanfenghemingjian.png",
                 type: "equip",
                 subtype: "equip1",
+                bingzhu: ["刘备"],
                 fullskin: true,
                 skills: ["luanfenghemingjian"],
                 distance: {
@@ -170,6 +179,7 @@ game.import("card", (lib, game, ui, get, ai, _status) => {
                 image: "ext:星之梦/image/card/sw_xingtianpojunfu.png",
                 type: "equip",
                 subtype: "equip1",
+                bingzhu: ["张辽"],
                 fullskin: true,
                 distance: {
                     attackFrom: -2,
@@ -188,6 +198,7 @@ game.import("card", (lib, game, ui, get, ai, _status) => {
                 image: "ext:星之梦/image/card/sw_jinwuluorigong.png",
                 type: "equip",
                 subtype: "equip1",
+                bingzhu: ["甘宁"],
                 fullskin: true,
                 distance: {
                     attackFrom: -8,
@@ -207,6 +218,7 @@ game.import("card", (lib, game, ui, get, ai, _status) => {
                 image: "ext:星之梦/image/card/sw_lingsheji.png",
                 type: "equip",
                 subtype: "equip5",
+                bingzhu: ["甄宓"],
                 fullskin: true,
                 skills: ["lingsheji"],
                 ai: {
@@ -217,6 +229,7 @@ game.import("card", (lib, game, ui, get, ai, _status) => {
                 image: "ext:星之梦/image/card/sw_shanrangzhaoshu.png",
                 type: "equip",
                 subtype: "equip5",
+                bingzhu: ["曹丕"],
                 fullskin: true,
                 skills: ["shanrangzhaoshu"],
                 ai: {
@@ -227,6 +240,7 @@ game.import("card", (lib, game, ui, get, ai, _status) => {
                 image: "ext:星之梦/image/card/sw_sanshou.png",
                 type: "equip",
                 subtype: "equip2",
+                bingzhu: ["张角"],
                 fullskin: true,
                 skills: ["sanshou"],
                 ai: {
@@ -237,6 +251,7 @@ game.import("card", (lib, game, ui, get, ai, _status) => {
                 image: "ext:星之梦/image/card/sw_wushuangfangtianji.png",
                 type: "equip",
                 subtype: "equip1",
+                bingzhu: ["吕布"],
                 fullskin: true,
                 distance: {
                     attackFrom: -3,
@@ -250,6 +265,7 @@ game.import("card", (lib, game, ui, get, ai, _status) => {
                 image: "ext:星之梦/image/card/sw_shufazijinguan.png",
                 type: "equip",
                 subtype: "equip5",
+                bingzhu: ["吕布"],
                 fullskin: true,
                 skills: ["shufazijinguan_skill"],
                 ai: {
@@ -260,6 +276,7 @@ game.import("card", (lib, game, ui, get, ai, _status) => {
                 image: "ext:星之梦/image/card/sw_hongmianbaihuapao.png",
                 type: "equip",
                 subtype: "equip2",
+                bingzhu: ["吕布"],
                 fullskin: true,
                 skills: ["hongmianbaihuapao_skill"],
                 ai: {
@@ -270,6 +287,7 @@ game.import("card", (lib, game, ui, get, ai, _status) => {
                 image: "ext:星之梦/image/card/sw_linglongshimandai.png",
                 type: "equip",
                 subtype: "equip2",
+                bingzhu: ["吕布"],
                 fullskin: true,
                 skills: ["linglongshimandai_skill"],
                 ai: {
@@ -280,6 +298,7 @@ game.import("card", (lib, game, ui, get, ai, _status) => {
                 image: "ext:星之梦/image/card/mj_guilongzhanyuedao.png",
                 type: "equip",
                 subtype: "equip1",
+                bingzhu: ["关羽"],
                 fullskin: true,
                 distance: {
                     attackFrom: -2,
@@ -307,6 +326,7 @@ game.import("card", (lib, game, ui, get, ai, _status) => {
                 type: "equip",
                 subtype: "equip6",
                 subtypes: ["equip3", "equip4"],
+                bingzhu: ["关羽"],
                 nomod: true,
                 nopower: true,
                 distance: {
@@ -328,6 +348,7 @@ game.import("card", (lib, game, ui, get, ai, _status) => {
                 image: "ext:星之梦/image/card/mj_qixingpao.png",
                 type: "equip",
                 subtype: "equip2",
+                bingzhu: ["诸葛亮"],
                 fullskin: true,
                 skills: ["mj_qixingpao"],
                 ai: {
@@ -338,6 +359,7 @@ game.import("card", (lib, game, ui, get, ai, _status) => {
                 image: "ext:星之梦/image/card/mj_zhenhunqin.png",
                 type: "equip",
                 subtype: "equip1",
+                bingzhu: ["周瑜"],
                 fullskin: true,
                 distance: {
                     attackFrom: -3,
@@ -359,6 +381,7 @@ game.import("card", (lib, game, ui, get, ai, _status) => {
                 image: "ext:星之梦/image/card/mj_shengguangbaiyi.png",
                 type: "equip",
                 subtype: "equip2",
+                bingzhu: ["吕蒙"],
                 fullskin: true,
                 skills: ["mj_shengguangbaiyi"],
                 ai: {
@@ -369,6 +392,7 @@ game.import("card", (lib, game, ui, get, ai, _status) => {
                 image: "ext:星之梦/image/card/mj_xieshenmianju.png",
                 type: "equip",
                 subtype: "equip2",
+                bingzhu: ["吕布"],
                 fullskin: true,
                 skills: ["mj_xieshenmianju"],
                 ai: {
@@ -419,6 +443,7 @@ game.import("card", (lib, game, ui, get, ai, _status) => {
                 fullskin: true,
                 type: "equip",
                 subtype: "equip1",
+                bingzhu: ["赵云"],
                 distance: {
                     attackFrom: -2,
                 },
@@ -468,6 +493,7 @@ game.import("card", (lib, game, ui, get, ai, _status) => {
                 fullskin: true,
                 type: "equip",
                 subtype: "equip1",
+                bingzhu: ["赵云"],
                 distance: { attackFrom: -2 },
                 ai: { basic: { equipValue: 4 } },
                 skills: ["fh_yinyueqiang_skill"],
@@ -477,6 +503,7 @@ game.import("card", (lib, game, ui, get, ai, _status) => {
                 fullskin: true,
                 type: "equip",
                 subtype: "equip1",
+                bingzhu: ["徐荣"],
                 distance: {
                     attackFrom: -2,
                 },
