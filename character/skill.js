@@ -11965,7 +11965,7 @@ let lmCharacter = {
             },
             ai: { threaten: 3 },
         },
-        //韩融
+        //韩韶
         old_fangzhen: {
             audio: "clanfangzhen",
             enable: "phaseUse",
@@ -11994,8 +11994,11 @@ let lmCharacter = {
                 order: 1,
                 result: {
                     player(player, target) {
-                        if (player.isTurnedOver() && target.getSeatNum() == player.countMark("old_fangzhen") + 1) return 5;
-                        else return target.countCards("h") - player.countCards("h");
+                        if (player.isTurnedOver() && target.getSeatNum() == player.countMark("old_fangzhen") + 1) {
+                            return 5;
+                        } else {
+                            return target.countCards("h") - player.countCards("h");
+                        }
                     },
                 },
             },
@@ -12132,13 +12135,13 @@ let lmCharacter = {
                 result: {
                     target: 1,
                     player(player, target) {
-                        if (
-                            game.countPlayer(function (target) {
-                                return get.attitude(player, target) > 0 && player.countCards("h") > target.countCards("h") && player.canUse("wugu", target);
-                            }) >= 3
-                        )
+                        if (game.countPlayer(function (target) {
+                            return get.attitude(player, target) > 0 && player.countCards("h") > target.countCards("h") && player.canUse("wugu", target);
+                        }) >= 3) {
                             return 3;
-                        else return player.isTurnedOver() ? 1 : 0;
+                        } else {
+                            return player.isTurnedOver() ? 1 : 0;
+                        }
                     },
                 },
             },
@@ -12146,7 +12149,7 @@ let lmCharacter = {
         old_xumin_old_clan_hanshao: {
             audio: "ext:星之梦/audio/skill:2",
         },
-        //韩韶
+        //韩融
         old_huanjia: {
             audio: "clanhuanjia",
             usable: 1,
@@ -12265,7 +12268,9 @@ let lmCharacter = {
                         if (list[i][0] == 0) {
                             player.draw();
                         } else {
-                            await player.gainPlayerCard(i, "he", true);
+                            if (list[i][1].countGainableCards(player, "he")) {
+                                await player.gainPlayerCard(list[i][1], "he", true);
+                            }
                             player.turnOver();
                         }
                         list[i][1].addTempSkill("old_lianhe_eff", { player: "phaseUseAfter" });
@@ -12300,6 +12305,7 @@ let lmCharacter = {
                             .sortBySeat()
                             .filter(i => i.isIn());
                         for (let i of targetlist) {
+                            if (!i.isIn()) continue;
                             player.line(i);
                             let num1 = 0;
                             let history = player.getHistory("gain", function (evt) {
@@ -12330,7 +12336,9 @@ let lmCharacter = {
                                         .forResult();
                                 }
                                 if (result.index == 1) {
-                                    await i.gainPlayerCard(player, "he", true);
+                                    if (player.countGainableCards(i, "he")) {
+                                        await i.gainPlayerCard(player, "he", true);
+                                    }
                                     i.turnOver();
                                 } else i.draw();
                                 totalIndex += result.index + 1;
