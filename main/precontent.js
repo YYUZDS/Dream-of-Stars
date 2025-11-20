@@ -576,6 +576,11 @@ export async function precontent(config, pack) {
         nature: "LightSlateBlue",
         showName: "凌",
     });
+    lib.namePrefix.set("真", {
+        color: "#FFD700",
+        nature: "GoldEnrod",
+        showName: "真",
+    });
     lib.namePrefix.set("☆神", {
         color: "#FFD700",
         nature: "GoldEnrod",
@@ -668,6 +673,11 @@ export async function precontent(config, pack) {
             color: "#8470FF",
             nature: "LightSlateBlue",
             showName: "凌",
+        });
+        lib.namePrefix.set("真", {
+            color: "#FFD700",
+            nature: "GoldEnrod",
+            showName: "真",
         });
         lib.namePrefix.set("☆神", {
             color: "#FFD700",

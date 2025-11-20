@@ -3,7 +3,7 @@ let lmCharacter = {//武将信息
 
     //手杀
     old_new_simayi: ["male", "shen", 4, ["old_jilin", "old_yingyou", "old_yingtian"], ["character:new_simayi", "die:new_simayi", "wei", "name:司马|懿"]],
-    // old_shen_lusu: ["male", "shen", 3, ["old_tamo", "old_dingzhou", "old_zhimeng"], ["character:shen_lusu", "die:shen_lusu", "wu"]],
+    old_mb_shen_jiangwei: ["male", "shen", 4, ["old_guxuan", "old_juejin", "old_huitian", "old_xingzhen"], ["shu"]],
     old_mb_jushou: ["male", "qun", 3, ["old_xinjianying", "xinshibei"], ["character:xin_jushou", "die:xin_jushou"]],
     old_mb_zhuzhi: ["male", "wu", 4, ["old_sbanguo"], ["character:xin_zhuzhi", "die:xin_zhuzhi"]],
     old_mb_sp_zhenji: ["female", "qun", 3, ["old_mbbojian", "old_mbjiwei"], ["character:mb_sp_zhenji", "die:mb_sp_zhenji"]],
