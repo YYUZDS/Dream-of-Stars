@@ -4,7 +4,7 @@ let lmCharacter = {//武将信息
     //手杀
     old_new_simayi: ["male", "shen", 4, ["old_jilin", "old_yingyou", "old_yingtian"], ["character:new_simayi", "die:new_simayi", "wei", "name:司马|懿"]],
     old_mb_shen_jiangwei: ["male", "shen", 4, ["old_guxuan", "old_juejin", "old_huitian", "old_xingzhen"], ["shu"]],
-    oldx_mb_shen_jiangwei: ["male", "shen", 4, ["old_guxuan", "oldx_juejin", "old_huitian", "oldx_xingzhen"], ["img:extension/星之梦/image/character/old_mb_shen_jiangwei.jpg", "shu"]],
+    oldx_mb_shen_jiangwei: ["male", "shen", "1/4", ["old_guxuan", "oldx_juejin", "old_huitian", "oldx_xingzhen"], ["img:extension/星之梦/image/character/old_mb_shen_jiangwei.jpg", "shu"]],
     old_mb_jushou: ["male", "qun", 3, ["old_xinjianying", "xinshibei"], ["character:xin_jushou", "die:xin_jushou"]],
     old_mb_zhuzhi: ["male", "wu", 4, ["old_sbanguo"], ["character:xin_zhuzhi", "die:xin_zhuzhi"]],
     old_mb_sp_zhenji: ["female", "qun", 3, ["old_mbbojian", "old_mbjiwei"], ["character:mb_sp_zhenji", "die:mb_sp_zhenji"]],
