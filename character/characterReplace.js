@@ -55,7 +55,7 @@ let lmCharacter = {//武将切换
     hujinding: ["old_ol_hujinding"],
     feiyi: ["old_ol_feiyi"],
     ol_pengyang: ["old_ol_pengyang"],
-    sunce: ["old_sp_sunce", "old_sb_sunce"],
+    sunce: ["old_sp_sunce", "old_sb_sunce", "old_v_sunce"],
     yufan: ["old_ol_yufan"],
     zhugejin: ["old_zhugejin", "old_sb_zhugejin"],
     xurong: ["old_xurong", "lm_xurong"],

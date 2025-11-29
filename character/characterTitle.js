@@ -146,6 +146,7 @@ let lmCharacter = {//武将称号
     old_dc_sb_hulie: "暗舆平叛",
     old_chengui: "弄虎如婴",
     old_dc_sb_luxun: "渊谋谦略",
+    old_v_sunce: "勇冠三江势",
     //海外
     old_tw_huojun: "葭萌铁狮",
     old_tw_guohuai: "屡破羌胡",

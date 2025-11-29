@@ -6,7 +6,7 @@ let lmCharacter = {//翻译
     tw_old: "海外怀旧",
     other_old: "线下怀旧",
 
-    old_mb_shen_jiangwei: "牢手杀神姜维",
+    old_mb_shen_jiangwei: "牢手杀神姜维",//初版
     old_mb_shen_jiangwei_ab: "牢神姜维",
     old_mb_shen_jiangwei_prefix: "牢|神",
     old_guxuan: "孤悬",
@@ -17,7 +17,7 @@ let lmCharacter = {//翻译
     old_huitian_info: "每轮限一次，结束阶段，若你本回合使用【杀】造成过伤害且当前体力值小于等于2，你可以获得一个额外回合且你于该额外回合内：①摸牌阶段的摸牌数+2；②使用【杀】无次数限制且【杀】造成的伤害+1.每轮开始时，若你发动“回天”的次数大于2，你死亡。",
     old_xingzhen: "星阵",
     old_xingzhen_info: "出牌阶段限一次，你可以观看牌堆顶的Y张牌（Y为你的体力上限且至多为7），你可以用手牌中的任意张牌与其中的任意张牌交换；然后选择一名其他角色角色，令其选择一项：①展示牌堆顶Y张牌；②展示你的手牌。展示后，你可以将展示牌中的【杀】依次对其使用。",
-    oldx_mb_shen_jiangwei: "旧手杀神姜维",
+    oldx_mb_shen_jiangwei: "旧手杀神姜维",//二版
     oldx_mb_shen_jiangwei_ab: "旧神姜维",
     oldx_mb_shen_jiangwei_prefix: "旧|神",
     oldx_juejin: "绝烬",
@@ -190,7 +190,7 @@ let lmCharacter = {//翻译
     old_sbhunzi_info: `觉醒技。当你脱离濒死状态后，你减1点体力上限，获得2点护甲，摸三张牌。然后你获得${get.poptip("sbyingzi")}和${get.poptip("gzyinghun")}。`,
     old_sbzhiba: "制霸",
     old_sbzhiba_info: "主公技，限定技。当你进入濒死状态时，你可以回复X点体力并修改〖激昂③〗为“出牌阶段限X次”（X为场上吴势力角色数）。然后其他吴势力角色依次受到1点无来源伤害，且当有角色因此死亡后，你摸三张牌。",
-    old_sb_sp_zhugeliang: "牢谋卧龙诸葛亮",
+    old_sb_sp_zhugeliang: "牢谋卧龙诸葛亮",//初版
     old_sb_sp_zhugeliang_ab: "牢谋卧龙",
     old_sb_sp_zhugeliang_prefix: "牢|谋",
     old_sbhuoji: "火计",
@@ -204,7 +204,7 @@ let lmCharacter = {//翻译
     old_sbguanxing_info: "①准备阶段，你将所有“星”置入弃牌堆，将牌堆顶的X张牌置于你的武将牌上，称为“星”。然后你可以将任意张“星”置于牌堆顶（X为你此次移去的“星”数+1且至多为7，若你此前未发动过〖观星①〗则X为7）。②结束阶段，若你未于本回合的准备阶段将“星”置于过牌堆顶，你可以将任意张“星”置于牌堆顶。③你可以如手牌般使用或打出“星”。",
     old_sbkongcheng: "空城",
     old_sbkongcheng_info: "锁定技。当你受到伤害时，若你有〖观星〗，且若你：有“星”，你判定，若结果点数不大于你的“星”数，此伤害-1；没有“星”，此伤害+1。",
-    oldx_sb_sp_zhugeliang: "旧谋卧龙诸葛亮",
+    oldx_sb_sp_zhugeliang: "旧谋卧龙诸葛亮",//二版
     oldx_sb_sp_zhugeliang_ab: "旧谋卧龙",
     oldx_sb_sp_zhugeliang_prefix: "旧|谋",
     oldx_sbhuoji: "火计",
@@ -807,6 +807,12 @@ let lmCharacter = {//翻译
     old_dcsbjunmou_info: "转换技。①游戏开始时，你可以转换此技能状态；②一张牌结算结束后，若此牌的目标包括你，你可以摸一张牌并选择一张手牌，阳：此牌视为无次数限制的火【杀】；阴：重铸此牌并横置一名角色。",
     old_dcsbzhanyan: "绽炎",
     old_dcsbzhanyan_info: "限定技，出牌阶段，你可选择任意名横置的其他角色并摸等量张牌，然后这些角色同时展示一张手牌，你可弃置相同花色牌并对展示对应花色的角色各造成1点火焰伤害，若这些角色均受到伤害则重复此流程， 且此技能结算期间你每失去一张牌则摸一张牌。",
+    old_v_sunce: "旧威孙策",
+    old_v_sunce_prefix: "旧|威",
+    old_dczhifeng: "猘锋",
+    old_dczhifeng_info: "每回合限X次（X为场上人数）。当你的手牌数：大于体力值时，你可将至少两张黑色牌当作不计入次数的【酒】使用；小于体力值时，你可将一张红色牌当作【杀】或【闪】使用或打出，然后将手牌摸至体力上限；等于体力值时，你可将任意张牌当作【决斗】使用。",
+    old_dcweijing: "威靖",
+    old_dcweijing_info: "吴势力角色的回合开始时，你可令其执行一项：1.受到你造成的1点伤害；2.交给你一张牌，然后其可发动一次对应条件的〖猘锋〗。",
 
     old_tw_huojun: "旧TW霍峻",
     old_tw_huojun_ab: "旧霍峻",

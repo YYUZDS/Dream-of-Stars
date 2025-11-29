@@ -147,6 +147,7 @@ let lmCharacter = {//武将信息
     old_dc_sb_hulie: ["male", "wei", 4, ["old_dcsbchuanyu", "old_dcsbyitou"], ["character:dc_sb_hulie", "die:dc_sb_hulie"]],
     old_chengui: ["male", "qun", 3, ["old_yingtu", "old_congshi"], ["character:chengui", "die:chengui"]],
     old_dc_sb_luxun: ["male", "wu", 3, ["old_dcsbjunmou", "old_dcsbzhanyan"], ["character:dc_sb_luxun", "die:dc_sb_luxun"]],
+    old_v_sunce: ["male", "wu", 4, ["old_dczhifeng", "old_dcweijing"], ["character:v_sunce", "die:v_sunce"]],
     //海外
     old_tw_huojun: ["male", "shu", 4, ["twsidai", "old_twjieyu"], ["character:tw_huojun", "die:tw_huojun"]],
     old_tw_guohuai: ["male", "wei", 4, ["old_twjingce", "old_yuzhang"], ["character:tw_guohuai", "die:tw_guohuai"]],
