@@ -836,7 +836,7 @@ let lmCharacter = {//翻译
     old_twmutao: "募讨",
     old_twmutao_info: "出牌阶段限一次。你可以选择一名角色，令其将手牌中所有的【杀】依次交给其下家开始除你外的每一名角色。然后其对最后一名以此法获得【杀】的角色A造成X点伤害（X为A手牌中【杀】的数量且至多为3）。",
     old_twyimou: "毅谋",
-    old_twyimou_info: `当与你距离1以内的一名角色受到伤害后，你可以选择一项：1.令其从牌堆中获得一张【杀】；2.令其将一张手牌交给另一名角色并摸两张牌；3${get.poptip("rule_beishui")}：将所有手牌交给其，然后依次执行上述所有选项。`,
+    old_twyimou_info: `当与你距离1以内的一名角色受到伤害后，你可以选择一项：1.令其从牌堆中获得一张【杀】；2.令其将一张手牌交给另一名角色并摸两张牌；3.${get.poptip("rule_beishui")}：将所有手牌交给其，然后依次执行上述所有选项。`,
     old_tw_zhangmancheng: "旧TW张曼成",
     old_tw_zhangmancheng_ab: "旧张曼成",
     old_tw_zhangmancheng_prefix: "旧",
