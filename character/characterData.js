@@ -73,6 +73,7 @@ let lmCharacter = {//武将信息
     old_pot_xinxianying: ["female", "wei", 3, ["old_potjiejie", "old_potqingshi"], ["character:pot_xinxianying", "die:pot_xinxianying"]],
     old_sb_jiangwei: ["male", "shu", "4/4/1", ["old_sbtiaoxin", "old_sbzhiji"], ["character:sb_jiangwei", "die:sb_jiangwei"]],
     old_mb_zhangyan: ["male", "qun", 4, ["old_mbfeijing", "old_mbxiaoge"], ["character:mb_zhangyan", "die:mb_zhangyan"]],
+    old_tw_jiangji: ["male", "wei", 3, ["twjichou", "old_twjilun"], ["character:tw_jiangji", "die:tw_jiangji"]],
     //OL
     old_shen_caopi: ["male", "shen", 6, ["old_chuyuan", "old_dengji"], ["tempname:shen_caopi", "character:shen_caopi", "die:shen_caopi", "wei"]],
     oldx_clan_xuncai: ["female", "qun", 3, ["oldx_clanlieshi", "oldx_clandianzhan", "clanhuanyin", "clandaojie"], ["character:clan_xuncai", "die:clan_xuncai", "clan:颍川荀氏"]],

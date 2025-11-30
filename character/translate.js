@@ -918,6 +918,11 @@ let lmCharacter = {//翻译
     old_dcyingyu_info: "准备阶段开始时，你可以展示两名角色的各一张手牌。若这两张牌的花色不同，则你可以令一名角色获得另一名角色的展示牌。",
     old_dcyongbi: "拥嬖",
     old_dcyongbi_info: "限定技。出牌阶段，你可以将所有手牌交给一名其他男性角色。你将〖媵予〗的发动时机改为“准备阶段和结束阶段开始时”。然后若这些牌中包含的花色数：大于1，则你与其本局游戏的手牌上限+2；大于2，则当你或其于本局游戏内受到大于1的伤害时，此伤害-2。",
+    old_tw_jiangji: "旧蒋济",
+    old_tw_jiangji_ab: "旧TW蒋济",
+    old_tw_jiangji_prefix: "旧",
+    old_twjilun: "机论",
+    old_twjilun_info: "当你受到伤害后，你可以摸X张牌，或视为使用一张〖急筹①〗记录过且未被〖机论〗记录过的普通锦囊牌并记录此牌。",
 
     old_gaowang: "旧高望",
     old_gaowang_prefix: "旧",

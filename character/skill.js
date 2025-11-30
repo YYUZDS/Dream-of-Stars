@@ -25723,6 +25723,72 @@ let lmCharacter = {
                 },
             },
         },
+        //蒋济
+        old_twjilun: {
+            audio: "twjilun",
+            trigger: { player: "damageEnd" },
+            async cost(event, trigger, player) {
+                const num = Math.max(1, player.getStorage("twjichou").length);
+                const list = player
+                    .getStorage("twjichou")
+                    .filter(name => !player.getStorage(event.skill).includes(name))
+                    .map(name => ["锦囊", "", name]);
+                if (list.length) {
+                    const { result } = await player
+                        .chooseButton([`###${get.prompt(event.skill)}###摸${get.cnNumber(num)}张牌或者视为使用一张牌`, [[[num, `摸${get.cnNumber(num)}张牌`]], "tdnodes"], [list, "vcard"]])
+                        .set("filterButton", button => {
+                            const { player, numx } = get.event();
+                            const { link } = button;
+                            if (!Array.isArray(link)) {
+                                return true;
+                            }
+                            return player.hasUseTarget({ name: link[2] });
+                        })
+                        .set("ai", button => {
+                            const { player, numx } = get.event();
+                            const { link } = button;
+                            const val = numx > 3 ? Math.min(1.5, 1 + (numx - 3) * 0.1) : 1;
+                            if (Array.isArray(link)) {
+                                if (player.getUseValue({ name: link[2] }) > 4 * val) {
+                                    return 1;
+                                }
+                            }
+                            if (typeof link == "number") {
+                                return 1;
+                            }
+                            return 0;
+                        })
+                        .set("numx", num);
+                    event.result = {
+                        bool: result?.bool,
+                        cost_data: result?.links,
+                    };
+                } else {
+                    event.result = await player.chooseBool(get.prompt(event.skill), `摸${get.cnNumber(num)}张牌`).forResult();
+                    if (event.result?.bool) {
+                        event.result.cost_data = [num];
+                    }
+                }
+            },
+            async content(event, trigger, player) {
+                const { cost_data: links } = event;
+                if (typeof links[0] == "number") {
+                    await player.draw(links[0]);
+                } else {
+                    const card = get.autoViewAs({ name: links[0][2], isCard: true });
+                    player.markAuto(event.name, [card.name]);
+                    await player.chooseUseTarget(card, true);
+                }
+            },
+            marktext: "论",
+            intro: { content: "已记录牌名：$" },
+            onremove: true,
+            ai: {
+                maixie: true,
+                maixie_defend: true,
+                threaten: 0.7,
+            },
+        },
         //朱儁
         diy_juxiang: {
             audio: "zjjuxiang",
