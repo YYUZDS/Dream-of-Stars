@@ -103,7 +103,7 @@ let lmCharacter = {//武将称号
     old_ol_liubiao: "儁才秀拔",
     old_kongshu: "寄在璺",
     old_ol_madai: "临危受命",
-    old_ol_liuzhang: "求仁失益",
+    // old_ol_liuzhang: "求仁失益",
     old_clan_xunshuang: "大直若屈",
     old_clan_yangxiu: "皓首邀终始",
     old_clan_wangmingshan: "擅书多艺",

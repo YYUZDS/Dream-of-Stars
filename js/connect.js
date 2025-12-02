@@ -622,7 +622,7 @@ if (lib.config.extension_星之梦_lianji) {
 				viewInfo.listen(function () {
 					let player = this.link;
 					let audioName = player.skin.name || player.name1 || player.name;
-					ui.click.charactercard(player.name1 || player.name, null, null, true, player.node, audioName);
+					ui.click.charactercard(player.name1 || player.name, null, null, true, player.node.avatar, audioName);
 				});
 				uiintro.add(viewInfo);
 			}
@@ -1231,7 +1231,7 @@ if (lib.config.extension_星之梦_lianji) {
 					viewInfo.innerHTML = "查看资料";
 					viewInfo.style.marginBottom = "15px";
 					viewInfo.listen(function () {
-						return ui.click.charactercard(this.link, this);
+						return ui.click.charactercard(this.link, node);
 					});
 					uiintro.add(viewInfo);
 				}

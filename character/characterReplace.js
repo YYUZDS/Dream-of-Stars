@@ -102,7 +102,7 @@ let lmCharacter = {//武将切换
     gaoshun: ["old_sb_gaoshun"],
     jikang: ["lm_jikang"],
     ol_dongzhao: ["unlock_dongzhao"],
-    liuzhang: ["mx_fh_liuzhang", "old_ol_liuzhang"],
+    liuzhang: ["mx_fh_liuzhang"],
     dc_zhangren: ["old_zhangren"],
     xuelingyun: ["old_ol_xuelingyun"],
     dingfeng: ["old_star_dingfengn"],

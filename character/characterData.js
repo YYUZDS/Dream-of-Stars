@@ -105,7 +105,7 @@ let lmCharacter = {//武将信息
     old_ol_liubiao: ["male", "qun", 3, ["old_olzishou", "old_olzongshi"], ["character:ol_liubiao", "die:ol_liubiao"]],
     old_kongshu: ["female", "qun", 3, ["olleiluan", "olfuchao"], ["character:kongshu", "die:kongshu"]],
     old_ol_madai: ["male", "shu", 4, ["mashu", "old_olqianxi"], ["character:ol_madai", "die:kol_madai"]],
-    old_ol_liuzhang: ["male", "qun", 3, ["old_olfengwei", "olzonghu"], ["character:ol_liuzhang", "die:ol_liuzhang"]],
+    // old_ol_liuzhang: ["male", "qun", 3, ["old_olfengwei", "olzonghu"], ["character:ol_liuzhang", "die:ol_liuzhang"]],
     old_clan_xunshuang: ["male", "qun", 3, ["old_clanyangji", "old_clandandao", "old_clanqingli", "clandaojie"], ["character:clan_xunshuang", "die:clan_xunshuang", "clan:颍川荀氏"]],
     old_clan_yangxiu: ["male", "wei", 3, ["old_clanjiewu", "old_clangaoshi", "clanquhuo"], ["character:clan_yangxiu", "die:clan_yangxiu", "clan:弘农杨氏"]],
     old_clan_wangmingshan: ["male", "wei", 3, ["old_clantanque", "old_clanshengmo", "clanzhongliu"], ["character:clan_wangmingshan", "die:clan_wangmingshan", "clan:太原王氏"]],
