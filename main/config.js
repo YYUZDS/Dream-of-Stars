@@ -5,11 +5,18 @@ export let config = {
 		name: "<font size='4'>---------实用功能---------</font>",
 		clear: true,
 	},
+	ewhh: {
+		name: "<span style='text-decoration: underline;'>点击获得一个额外的回合</span>",
+		clear: true,
+		onclick: function () {
+			game.me.insertPhase();
+		},
+	},
 	cancelwindow: {
 		//搬运自群英会
 		name: "取消弹窗警告",
-		intro: "开启此项后取消弹窗警告（自欺欺人），推荐用于忽略报错勉强能玩的场景等，重启游戏后生效。",
 		init: true,
+		intro: "开启此项后取消弹窗警告（自欺欺人），推荐用于忽略报错勉强能玩的场景等，重启游戏后生效。",
 	},
 	guanfangshili: {
 		name: "仅保留官方势力",
@@ -24,15 +31,14 @@ export let config = {
 	filterexpand: {
 		//搬运自搬运自用
 		name: "自由选将-筛选按钮扩充",
-		intro: "扩充自由选将筛选按钮：男性、女性、双性，可根据性别筛选（统计）武将；主公（可筛选主公武将）；护甲（可筛选带护甲的武将）、不同体力上限筛选，实现更加自由灵活地禁选将。",
 		init: false,
+		intro: "扩充自由选将筛选按钮：男性、女性、双性，可根据性别筛选（统计）武将；主公（可筛选主公武将）；护甲（可筛选带护甲的武将）、不同体力上限筛选，实现更加自由灵活地禁选将。",
 	},
-	ewhh: {
-		name: "<span style='text-decoration: underline;'>点击获得一个额外的回合</span>",
-		clear: true,
-		onclick: function () {
-			game.me.insertPhase();
-		},
+	randomexpand: {
+		//搬运自搬运自用
+		name: "自由选将-随机按钮",
+		init: false,
+		intro: "开启后，将在自由选将界面添加“随机”筛选按钮，点击该按钮可切换显示全部武将和随机武将。",
 	},
 	zdyjdrcq: {
 		//搬运自搬运自用
