@@ -120,8 +120,7 @@ if (lib.config.extension_星之梦_lianji) {
 	};
 	//连续交互
 	get.nodeintro = function (node, simple, evt) {
-		var uiintro = ui.create.dialog("hidden", "notouchscroll");
-		// uiintro ??= ui.create.dialog("hidden", "notouchscroll");
+		var uiintro = uiintro ?? ui.create.dialog("hidden", "notouchscroll");
 		uiintro.setAttribute("id", "nodeintro");
 		if (node.classList.contains("player") && !node.name) {
 			return uiintro;
