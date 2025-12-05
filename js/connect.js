@@ -120,7 +120,7 @@ if (lib.config.extension_星之梦_lianji) {
 	};
 	//连续交互
 	get.nodeintro = function (node, simple, evt) {
-		var uiintro = ui.create.dialog("hidden", "notouchscroll");
+		uiintro ??= ui.create.dialog("hidden", "notouchscroll");
 		uiintro.setAttribute("id", "nodeintro");
 		if (node.classList.contains("player") && !node.name) {
 			return uiintro;
@@ -1235,7 +1235,8 @@ if (lib.config.extension_星之梦_lianji) {
 					});
 					uiintro.add(viewInfo);
 				}
-				var addskin = false;
+				//先废弃这里的换肤
+				/*var addskin = false;
 				if (node.parentNode.classList.contains("menu-buttons")) {
 					addskin = !lib.config.show_charactercard;
 				} else {
@@ -1311,7 +1312,7 @@ if (lib.config.extension_星之梦_lianji) {
 							createButtons(lib.skin[nameskin]);
 						});
 					}
-				}
+				}*/
 			}
 		} else if (node.classList.contains("equips") && ui.arena.classList.contains("selecting")) {
 			(function () {
