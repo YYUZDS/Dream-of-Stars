@@ -9,10 +9,10 @@ export async function precontent(config, pack) {
     {
         //本体版本检测
         let noname = lib.version.split(".").slice(2),
-            min = [4],
+            min = [0],
             len = Math.min(noname.length, min.length),
             status = false;
-        if (lib.version.slice(0, 8) === "1.10.17.")
+        if (lib.version.slice(0, 5) === "1.11.")
             for (let i = 0; i < len; i++) {
                 if (Number(noname[i]) < min[i]) {
                     status = "您的无名杀版本太低";
