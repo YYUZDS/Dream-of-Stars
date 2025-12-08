@@ -12057,135 +12057,135 @@ let lmCharacter = {
             },
         },
         //势鲁肃
-        // old_pothaoshi: {
-        //     audio: "pothaoshi",
-        //     logAudio: () => 2,
-        //     trigger: { player: "phaseJieshuBegin" },
-        //     filter(event, player) {
-        //         return game.hasPlayer(target => target.hp <= player.hp && target != player); //
-        //     },
-        //     async cost(event, trigger, player) {
-        //         event.result = await player
-        //             .chooseTarget(get.prompt2(event.skill), (card, player, target) => {
-        //                 return target.hp <= player.hp && target != player; //
-        //             })
-        //             .set("ai", target => {
-        //                 return get.attitude(get.player(), target);
-        //             })
-        //             .forResult();
-        //     },
-        //     async content(event, trigger, player) {
-        //         const target = event.targets[0];
-        //         target.markAuto(event.name + "_use", player);
-        //         target.addAdditionalSkill(`${event.name}_use_${player.playerid}`, event.name + "_use");
-        //         player.markAuto(event.name + "_clear", target);
-        //         player.addTempSkill(event.name + "_clear", { player: "phaseBeforeStart" });
-        //         player.addTempSkill(event.name + "_change", { player: "phaseBeforeStart" });
-        //     },
-        //     group: ["old_pothaoshi_draw"],
-        //     subSkill: {
-        //         tag: {},
-        //         draw: {
-        //             audio: "pothaoshi",
-        //             logAudio: () => "pothaoshi3.mp3",
-        //             trigger: { player: "loseAfter" },
-        //             forced: true,
-        //             locked: false,
-        //             filter(event, player) {
-        //                 return event.getl(player)?.hs?.length && !player.countCards("h") && event.getParent().old_pothaoshi;
-        //             },
-        //             async content(event, trigger, player) {
-        //                 await player.drawTo(player.maxHp);
-        //             },
-        //         },
-        //         clear: {
-        //             charlotte: true,
-        //             onremove(player, skill) {
-        //                 player.storage[skill].forEach(target => {
-        //                     target.unmarkAuto("old_pothaoshi_use", [player]);
-        //                     lib.skill.old_pothaoshi_use.init(target, "old_pothaoshi_use");
-        //                     target.removeAdditionalSkill(`old_pothaoshi_use_${player.playerid}`);
-        //                 });
-        //                 delete player.storage[skill];
-        //             },
-        //         },
-        //         change: {
-        //             trigger: {
-        //                 global: ["loseEnd", "loseAsyncEnd", "gainEnd", "addToExpansionEnd", "equipEnd", "addJudgeEnd"],
-        //             },
-        //             silent: true,
-        //             charlrotte: true,
-        //             filter(event, player) {
-        //                 return event.getg?.(player)?.length || event.getl?.(player)?.hs?.length;
-        //             },
-        //             forceDie: true,
-        //             async content(event, trigger, player) {
-        //                 const toAdd = trigger.getg?.(player) || [],
-        //                     toRemove = trigger.getl?.(player)?.hs || [];
-        //                 event.set("toAdd", toAdd);
-        //                 event.set("toRemove", toRemove);
-        //                 await event.trigger("old_pothaoshiChange");
-        //             },
-        //         },
-        //         use: {
-        //             init(player, skill) {
-        //                 const toRemove = player.getCards("s", card => card.hasGaintag("old_pothaoshi_tag"));
-        //                 game.deleteFakeCards(toRemove);
-        //                 const cards = player.getStorage(skill).reduce((cards, target) => {
-        //                     const fake = target.isAlive() && target.countCards("h") ? game.createFakeCards(target.getCards("h")) : [];
-        //                     return cards.addArray(fake);
-        //                 }, []);
-        //                 player.directgains(cards, null, "old_pothaoshi_tag");
-        //             },
-        //             onremove(player, skill) {
-        //                 const toRemove = player.getCards("s", card => card.hasGaintag("old_pothaoshi_tag"));
-        //                 game.deleteFakeCards(toRemove);
-        //             },
-        //             mark: true,
-        //             intro: {
-        //                 content: "你可以如手牌般使用或打出<span class=thundertext>$</span>的手牌",
-        //             },
-        //             forced: true,
-        //             popup: false,
-        //             delay: false,
-        //             charlotte: true,
-        //             trigger: {
-        //                 player: ["useCardBefore", "respondBefore"],
-        //                 global: ["old_pothaoshiChange"],
-        //             },
-        //             filter(event, player) {
-        //                 if (["useCard", "respond"].includes(event.name)) {
-        //                     const cards = player.getCards("s", card => card.hasGaintag("old_pothaoshi_tag"));
-        //                     return event.cards && event.cards.some(card => cards.includes(card));
-        //                 }
-        //                 return player.getStorage("old_pothaoshi_use").includes(event.player);
-        //             },
-        //             async content(event, trigger, player) {
-        //                 const tag = "old_pothaoshi_tag";
-        //                 if (["useCard", "respond"].includes(trigger.name)) {
-        //                     trigger.set("old_pothaoshi", true);
-        //                     const real = player.getStorage(event.name).reduce((cards, target) => {
-        //                         const hs = target.isAlive() && target.countCards("h") ? target.getCards("h") : [];
-        //                         return cards.addArray(hs);
-        //                     }, []);
-        //                     for (let i = 0; i < trigger.cards.length; i++) {
-        //                         const card = trigger.cards[i];
-        //                         const cardx = real.find(cardx => cardx.cardid == card._cardid);
-        //                         if (cardx) {
-        //                             trigger.cards[i] = cardx;
-        //                             trigger.card.cards[i] = cardx;
-        //                             trigger.throw = false;
-        //                             get.owner(cardx)?.$throw(cardx);
-        //                         }
-        //                     }
-        //                 } else {
-        //                     game.deleteFakeCards(player.getCards("s", card => trigger.toRemove.find(cardx => cardx.cardid == card._cardid)));
-        //                     player.directgains(game.createFakeCards(trigger.toAdd), null, tag);
-        //                 }
-        //             },
-        //         },
-        //     },
-        // },
+        old_pothaoshi: {
+            audio: "pothaoshi",
+            logAudio: () => 2,
+            trigger: { player: "phaseJieshuBegin" },
+            filter(event, player) {
+                return game.hasPlayer(target => target != player); //target.hp <= player.hp &&
+            },
+            async cost(event, trigger, player) {
+                event.result = await player
+                    .chooseTarget(get.prompt2(event.skill), (card, player, target) => {
+                        return target != player; //target.hp <= player.hp &&
+                    })
+                    .set("ai", target => {
+                        return get.attitude(get.player(), target);
+                    })
+                    .forResult();
+            },
+            async content(event, trigger, player) {
+                const target = event.targets[0];
+                target.markAuto(event.name + "_use", player);
+                target.addAdditionalSkill(`${event.name}_use_${player.playerid}`, event.name + "_use");
+                player.markAuto(event.name + "_clear", target);
+                player.addTempSkill(event.name + "_clear", { player: "phaseBeforeStart" });
+                player.addTempSkill(event.name + "_change", { player: "phaseBeforeStart" });
+            },
+            group: ["old_pothaoshi_draw"],
+            subSkill: {
+                tag: {},
+                draw: {
+                    audio: "pothaoshi",
+                    logAudio: () => "pothaoshi3.mp3",
+                    trigger: { player: "loseAfter" },
+                    forced: true,
+                    locked: false,
+                    filter(event, player) {
+                        return event.getl(player)?.hs?.length && !player.countCards("h") && event.getParent().old_pothaoshi;
+                    },
+                    async content(event, trigger, player) {
+                        await player.drawTo(player.maxHp);
+                    },
+                },
+                clear: {
+                    charlotte: true,
+                    onremove(player, skill) {
+                        player.storage[skill].forEach(target => {
+                            target.unmarkAuto("old_pothaoshi_use", [player]);
+                            lib.skill.old_pothaoshi_use.init(target, "old_pothaoshi_use");
+                            target.removeAdditionalSkill(`old_pothaoshi_use_${player.playerid}`);
+                        });
+                        delete player.storage[skill];
+                    },
+                },
+                change: {
+                    trigger: {
+                        global: ["loseEnd", "loseAsyncEnd", "gainEnd", "addToExpansionEnd", "equipEnd", "addJudgeEnd"],
+                    },
+                    silent: true,
+                    charlrotte: true,
+                    filter(event, player) {
+                        return event.getg?.(player)?.length || event.getl?.(player)?.hs?.length;
+                    },
+                    forceDie: true,
+                    async content(event, trigger, player) {
+                        const toAdd = trigger.getg?.(player) || [],
+                            toRemove = trigger.getl?.(player)?.hs || [];
+                        event.set("toAdd", toAdd);
+                        event.set("toRemove", toRemove);
+                        await event.trigger("old_pothaoshiChange");
+                    },
+                },
+                use: {
+                    init(player, skill) {
+                        const toRemove = player.getCards("s", card => card.hasGaintag("old_pothaoshi_tag"));
+                        game.deleteFakeCards(toRemove);
+                        const cards = player.getStorage(skill).reduce((cards, target) => {
+                            const fake = target.isAlive() && target.countCards("h") ? game.createFakeCards(target.getCards("h")) : [];
+                            return cards.addArray(fake);
+                        }, []);
+                        player.directgains(cards, null, "old_pothaoshi_tag");
+                    },
+                    onremove(player, skill) {
+                        const toRemove = player.getCards("s", card => card.hasGaintag("old_pothaoshi_tag"));
+                        game.deleteFakeCards(toRemove);
+                    },
+                    mark: true,
+                    intro: {
+                        content: "你可以如手牌般使用或打出<span class=thundertext>$</span>的手牌",
+                    },
+                    forced: true,
+                    popup: false,
+                    delay: false,
+                    charlotte: true,
+                    trigger: {
+                        player: ["useCardBefore", "respondBefore"],
+                        global: ["old_pothaoshiChange"],
+                    },
+                    filter(event, player) {
+                        if (["useCard", "respond"].includes(event.name)) {
+                            const cards = player.getCards("s", card => card.hasGaintag("old_pothaoshi_tag"));
+                            return event.cards && event.cards.some(card => cards.includes(card));
+                        }
+                        return player.getStorage("old_pothaoshi_use").includes(event.player);
+                    },
+                    async content(event, trigger, player) {
+                        const tag = "old_pothaoshi_tag";
+                        if (["useCard", "respond"].includes(trigger.name)) {
+                            trigger.set("old_pothaoshi", true);
+                            const real = player.getStorage(event.name).reduce((cards, target) => {
+                                const hs = target.isAlive() && target.countCards("h") ? target.getCards("h") : [];
+                                return cards.addArray(hs);
+                            }, []);
+                            for (let i = 0; i < trigger.cards.length; i++) {
+                                const card = trigger.cards[i];
+                                const cardx = real.find(cardx => cardx.cardid == card._cardid);
+                                if (cardx) {
+                                    trigger.cards[i] = cardx;
+                                    trigger.card.cards[i] = cardx;
+                                    trigger.throw = false;
+                                    get.owner(cardx)?.$throw(cardx);
+                                }
+                            }
+                        } else {
+                            game.deleteFakeCards(player.getCards("s", card => trigger.toRemove.find(cardx => cardx.cardid == card._cardid)));
+                            player.directgains(game.createFakeCards(trigger.toAdd), null, tag);
+                        }
+                    },
+                },
+            },
+        },
         //势辛宪英
         old_potjiejie: {
             global: "old_potjiejie_global",

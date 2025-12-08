@@ -67,7 +67,7 @@ let lmCharacter = {//武将称号
     old_mb_luyusheng: "义姑",
     old_guoyuan: "清介有守",
     old_mb_caocao: "峥嵘而立",
-    // old_pot_lusu: "廓开大计",
+    old_pot_lusu: "廓开大计",
     old_mb_mengda: "怠军反复",
     old_pot_xinxianying: "明鉴致节",
     old_sb_jiangwei: "见危授命",

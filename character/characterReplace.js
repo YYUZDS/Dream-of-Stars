@@ -149,7 +149,7 @@ let lmCharacter = {//武将切换
     caochong: ["old_strong_caochong"],
     wufu: ["old_wufu"],
     dc_sb_hulie: ["old_dc_sb_hulie"],
-    // re_lusu: ["old_pot_lusu"],
+    re_lusu: ["old_pot_lusu"],
     chengpu: ["old_ol_chengpu"],
     luxun: ["old_dc_sb_luxun"],
     xinxianying: ["old_pot_xinxianying"],
