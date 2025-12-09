@@ -10678,6 +10678,137 @@ let lmCharacter = {
                 },
             },
         },
+        //庞羲
+        old_mbxuye: {
+            audio: "mbxuye",
+            trigger: { global: "damageEnd" },
+            filter(event, player) {
+                return event.player.isMinHandcard() && event.player.isAlive();
+            },
+            logTarget: "player",
+            check(event, player) {
+                return get.attitude(player, event.player) > 0;
+            },
+            logAudio: index => "mbxuye" + (typeof index === "number" ? index : [1, 3].randomGet()) + ".mp3",
+            async content(event, trigger, player) {
+                const target = event.targets[0]; //兼容匡襄后续效果才这么写的
+                const isMax = target.isMaxHandcard();
+                await target.draw(2);
+                //player.logSkill("mbxuye", [target], null, null, !isMax && target.isMaxHandcard() && target.countCards("ej") > 0 ? [1] : [get.rand(2, 3)]);
+                if (!isMax && target.isMaxHandcard() && target.countCards("hej") > 0) {
+                    player.logSkill("old_mbxuye", target, null, null, [2]);
+                    const result = await player.choosePlayerCard(`蓄业：将${get.translation(target)}场上一张牌置于牌堆顶`, target, "hej", true).forResult();
+                    const card = result.cards[0];
+                    target.$throw(card, 1000);
+                    game.log(player, "将", card, "置于牌堆顶");
+                    await target.lose(card, ui.cardPile, "insert");
+                    game.updateRoundNumber();
+                }
+            },
+            ai: { expose: 0.2 },
+        },
+        old_mbkuangxiang: {
+            audio: "mbkuangxiang",
+            enable: "phaseUse",
+            filter(event, player) {
+                return game.hasPlayer(target => {
+                    return target != player && target.countCards("h") <= player.countCards("h");
+                });
+            },
+            filterTarget(card, player, target) {
+                return target != player && target.countCards("h") <= player.countCards("h");
+            },
+            usable: 1,
+            logAudio: index => "mbkuangxiang" + [1, 3].randomGet() + ".mp3",
+            async content(event, trigger, player) {
+                const target = event.targets[0];
+                player.addTempSkill("old_mbkuangxiang_effect", { player: "phaseUseBegin" });
+                player.markAuto("old_mbkuangxiang_effect", [player, target]);
+                await player.swapHandcards(target);
+            },
+            derivation: "old_mbxuye",
+            //ai待补充
+            ai: {
+                order: 6,
+                result: {
+                    target(player, target) {
+                        const hs1 = player.getCards("h"),
+                            hs2 = target.getCards("h");
+                        return get.value(hs1, player) - get.value(hs2, target);
+                    },
+                },
+            },
+            group: ["old_mbkuangxiang_mark"],
+            subSkill: {
+                //给交换的牌上标记
+                mark: {
+                    charlotte: true,
+                    trigger: { global: "loseAsyncBegin" },
+                    filter(event, player) {
+                        return event.getParent(2).name == "old_mbkuangxiang" && event.getParent(2).player == player;
+                    },
+                    silent: true,
+                    firstDo: true,
+                    content() {
+                        //考虑场上出现复数个技能的情况
+                        game.broadcastAll(player => {
+                            lib.translate["old_mbkuangxiang_" + player.playerid] = "匡襄";
+                        }, player);
+                        trigger.set("gaintag", ["old_mbkuangxiang_" + player.playerid]);
+                    },
+                },
+                effect: {
+                    charlotte: true,
+                    onremove(player, skill) {
+                        game.filterPlayer(target => {
+                            return player.storage[skill].includes(target);
+                        }).forEach(target => target.removeGaintag("old_mbkuangxiang_" + player.playerid));
+                        delete player.storage[skill];
+                    },
+                    intro: { content: "players" },
+                    audio: "mbkuangxiang2.mp3",
+                    trigger: { global: ["loseAfter", "equipAfter", "addJudgeAfter", "gainAfter", "loseAsyncAfter", "addToExpansionAfter"] },
+                    getIndex(event, player) {
+                        return game
+                            .filterPlayer2(target => {
+                                if (!player.getStorage("old_mbkuangxiang_effect").includes(target)) {
+                                    return false;
+                                }
+                                let evt = event.getl(target);
+                                if (!evt?.hs?.length) {
+                                    return false;
+                                }
+                                if (event.name == "lose") {
+                                    return Object.values(event.gaintag_map)
+                                        .flat()
+                                        .includes("old_mbkuangxiang_" + player.playerid);
+                                }
+                                return target.hasHistory("lose", evtx => {
+                                    return (
+                                        evtx.getParent() == event &&
+                                        evtx.hs.length &&
+                                        Object.values(evtx.gaintag_map)
+                                            .flat()
+                                            .includes("old_mbkuangxiang_" + player.playerid)
+                                    );
+                                });
+                            })
+                            .sortBySeat();
+                    },
+                    check: () => true,
+                    prompt2: "你执行一次〖蓄业〗的效果：摸两张牌，然后若手牌数因此成为全场最多，你将场上的一张牌置于牌堆顶。",
+                    filter(event, player, triggername, target) {
+                        return !target.hasCard(card => card.hasGaintag("old_mbkuangxiang_" + player.playerid), "h");
+                    },
+                    async content(event, trigger, player) {
+                        var next = game.createEvent("old_mbkuangxiang_xuye");
+                        next.set("player", player);
+                        next.set("targets", [player]);
+                        next.setContent(lib.skill.old_mbxuye.content);
+                    },
+                },
+            },
+        },
         //势娄圭
         old_potjiyu: {
             audio: "potjiyu",
@@ -12580,7 +12711,7 @@ let lmCharacter = {
                     audio: "mbweizhuang_xiuge",
                 },
                 guidian: {
-                    audio: "mbweizhuang",
+                    audio: "mbweizhuang_guidian",
                     logAudio(event, player) {
                         if (event.name == "faceUpCard") {
                             return ["mbweizhuang_guidian3.mp3", "mbweizhuang_guidian4.mp3"];
@@ -12758,7 +12889,7 @@ let lmCharacter = {
                     onremove: true,
                 },
                 dongjiao: {
-                    audio: 6,
+                    audio: "mbweizhuang_dongjiao",
                     trigger: {
                         player: ["useCard", "useCardToPlayered", "useCardAfter"],
                     },
@@ -12892,7 +13023,7 @@ let lmCharacter = {
                     onremove: true,
                 },
                 xiuge: {
-                    audio: "mbweizhuang",
+                    audio: "mbweizhuang_xiuge",
                     logAudio(event, player) {
                         if (typeof event == "string") {
                             const index = ["sha", "jiu", "tao", "shan"].indexOf(event) + 3;
