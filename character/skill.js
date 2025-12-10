@@ -12399,29 +12399,29 @@ let lmCharacter = {
                             .set("target", player)
                             .forResult();
                         const choice = result.control;
-                        if (choice == "cancel2") {
-                            return;
-                        }
-                        game.log(target, "选择了" + get.translation(choice));
-                        target.popup(choice);
-                        if (player.hasCard(card => get.suit(card, player) == choice, "h")) {
-                            const skill = "old_potjiejie_effect";
-                            player.markAuto(skill, [choice]);
-                            player.addTip(
-                                skill,
-                                `诫节${player
-                                    .getStorage(skill)
-                                    .map(suit => get.translation(suit))
-                                    .join("")}`
-                            );
-                            player.addTempSkill(skill);
-                            await player.modedDiscard(player.getCards("h", card => get.suit(card, player) != choice));
-                        } else {
-                            const card = get.cardPile2(card => {
-                                return get.suit(card) == choice;
-                            });
-                            if (card) {
-                                await player.gain(card, "gain2");
+                        if (choice !== "cancel2") {
+                            game.log(target, "选择了" + get.translation(choice));
+                            target.popup(choice);
+                            if (player.hasCard(card => get.suit(card, player) == choice, "h")) {
+                                const skill = "old_potjiejie_effect";
+                                player.markAuto(skill, [choice]);
+                                player.addTip(
+                                    skill,
+                                    `诫节${player
+                                        .getStorage(skill)
+                                        .sort((a, b) => lib.suit.indexOf(b) - lib.suit.indexOf(a))
+                                        .map(suit => get.translation(suit))
+                                        .join("")}`
+                                );
+                                player.addTempSkill(skill);
+                                await player.modedDiscard(player.getCards("h", card => get.suit(card, player) != choice));
+                            } else {
+                                const card = get.cardPile2(card => {
+                                    return get.suit(card) == choice;
+                                });
+                                if (card) {
+                                    await player.gain(card, "gain2");
+                                }
                             }
                         }
                         let getSuits = current =>
