@@ -12714,9 +12714,9 @@ let lmCharacter = {
                     audio: "mbweizhuang_guidian",
                     logAudio(event, player) {
                         if (event.name == "faceUpCard") {
-                            return ["mbweizhuang_guidian3.mp3", "mbweizhuang_guidian4.mp3"];
+                            return ["mbweizhuang_guidian1.mp3", "mbweizhuang_guidian4.mp3"];
                         }
-                        return 2;
+                        return ["mbweizhuang_guidian2.mp3", "mbweizhuang_guidian3.mp3"];
                     },
                     trigger: {
                         global: ["faceUpCardAfter", "phaseJieshuBegin"],
@@ -12895,10 +12895,10 @@ let lmCharacter = {
                     },
                     logAudio(event, player, name) {
                         if (name == "useCardAfter") {
-                            return ["mbweizhuang_dongjiao3.mp3", "mbweizhuang_dongjiao4.mp3"];
+                            return ["mbweizhuang_dongjiao3.mp3", "mbweizhuang_dongjiao6.mp3"];
                         }
                         if (name == "useCardToPlayered") {
-                            return ["mbweizhuang_dongjiao5.mp3", "mbweizhuang_dongjiao6.mp3"];
+                            return ["mbweizhuang_dongjiao4.mp3", "mbweizhuang_dongjiao5.mp3"];
                         }
                         return 2;
                     },
@@ -13024,12 +13024,11 @@ let lmCharacter = {
                 },
                 xiuge: {
                     audio: "mbweizhuang_xiuge",
-                    logAudio(event, player) {
-                        if (typeof event == "string") {
-                            const index = ["sha", "jiu", "tao", "shan"].indexOf(event) + 3;
-                            return `mbweizhuang_xiuge${index}.mp3`;
+                    logAudio(event) {
+                        if (typeof event == "number") {
+                            return `mbweizhuang_xiuge${event}.mp3`;
                         }
-                        return 2;
+                        return 6;
                     },
                     enable: "chooseToUse",
                     hiddenCard(player, name) {
@@ -13094,7 +13093,7 @@ let lmCharacter = {
                     },
                     viewAs(cards, player) {
                         if (cards.length) {
-                            let name = false;
+                            let name;
                             const subtype = get.subtype(cards[0], player);
                             if (typeof subtype == "string") {
                                 name = ["sha", "shan", "tao", "jiu"][subtype.slice(5) - 1];
@@ -13168,15 +13167,17 @@ let lmCharacter = {
                         player.markAuto("old_mbweizhuang_blocker", name);
                         //delete event.result.skill;
                         event.getParent().addCount = false;
-                        player.logSkill("old_mbweizhuang_xiuge", null, null, null, [name]);
                         const count = get
                             .info("old_mbweizhuang")
                             .getFaceupCards(player)
                             ?.map(card => get.suit(card))
                             ?.toUniqued()?.length;
                         if (count >= 4) {
+                            player.logSkill("old_mbweizhuang_xiuge", null, null, null, [get.rand(1, 2)]);
                             await player.showCards(cards, `${get.translation(player)}发动了【褽装】`);
                         } else {
+                            const index = ["sha", "jiu", "tao", "shan"].indexOf(name) + 3;
+                            player.logSkill("old_mbweizhuang_xiuge", null, null, null, [index]);
                             await player.modedDiscard(cards);
                         }
                         event.result.card = new lib.element.VCard({ name: name, isCard: true, storage: { wzxiuge: true } });
@@ -13185,7 +13186,6 @@ let lmCharacter = {
                             .when("useCardAfter")
                             .filter(evt => evt.getParent() == event.getParent())
                             .step(async (event, trigger, player) => {
-                                player.logSkill("old_mbweizhuang_xiuge");
                                 const card = get.cardPile(card => get.suit(card) == get.suit(cards[0]));
                                 if (card) {
                                     await player.gain(card, "gain2");
