@@ -413,6 +413,12 @@ let lmCharacter = {//翻译
     old_mbxuye_info: "当全场手牌数最少的角色受到伤害后，你可以令其摸两张牌，然后若其手牌数因此成为全场最多，你将其区域里的一张牌置于牌堆顶。",
     old_mbkuangxiang: "匡襄",
     old_mbkuangxiang_info: "出牌阶段限一次，你可以与一名手牌数不大于你的其他角色交换手牌，且直到你的下个出牌阶段开始前，你或其失去所有因此获得的手牌后，你可以执行一次〖蓄业〗的效果（不受发动次数影响）。",
+    old_mb_liuhui: "旧数刘徽",
+    old_mb_liuhui_prefix: "旧|数",
+    old_mbgeyuan: "割圆",
+    old_mbgeyuan_info: "当你使用点数为X的牌时（X为圆周率中小数点后第一位的值），你可以摸Y张牌并令X改为后移一位的值（Y为你本技能发动的次数+1)。",
+    old_mbchongcha: "重差",
+    old_mbchongcha_info: "①你的点数大于等于10的牌不计入手牌上限，且使用时视为满足〖割圆〗中的点数0。②出牌阶段限一次，你可以弃置一张牌，令〖割圆〗中的X改为后移一位的值。",
 
     old_shen_caopi: "旧神曹丕",
     old_shen_caopi_prefix: "旧|神",

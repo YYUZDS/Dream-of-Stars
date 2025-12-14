@@ -74,6 +74,7 @@ let lmCharacter = {//武将称号
     old_mb_zhangyan: "轻勇骇势",
     old_mb_cuilingyi: "戴冠金尾",
     old_pangxi: "壁玉佐君",
+    //old_mb_liuhui: "",
     //OL
     old_shen_caopi: "诰天仰颂",
     oldx_clan_xuncai: "怀刃自誓",

@@ -13218,6 +13218,186 @@ let lmCharacter = {
                 },
             },
         },
+        //数刘徽 by流年
+        old_mbgeyuan: {
+            audio: "mbgeyuan",
+            init(player, skill) {
+                let index = 0;
+                player.setStorage(skill, index, true);
+                player.addTip(skill, `${get.translation(skill)} ${get.info(skill).getNumList(index, true)}`);
+            },
+            onremove: true,
+            mark: true,
+            marktext: "◯", //⚪
+            intro: {
+                markcount(storage) {
+                    storage = storage || 0;
+                    return Number(get.info("old_mbgeyuan").PI[storage]);
+                },
+                mark(dialog, storage, player, evt, skill) {
+                    let str = get.info(skill).getNumList(storage);
+                    dialog.addText(str);
+                },
+            },
+            mod: {
+                aiOrder(player, card, order) {
+                    let number = get.number(card, player),
+                        index = player.getStorage("old_mbgeyuan", 0);
+                    let num = Number(get.info("old_mbgeyuan").PI[index]);
+                    if (typeof number !== "number") {
+                        return;
+                    }
+                    if (num == number || (player.hasSkill("old_mbchongcha") && num == 0 && number > 9)) {
+                        return order + 10;
+                    }
+                },
+                aiUseful(player, card, useful) {
+                    let number = get.number(card, player),
+                        index = player.getStorage("old_mbgeyuan", 0);
+                    let num = Number(get.info("old_mbgeyuan").PI[index]);
+                    if (typeof number !== "number") {
+                        return;
+                    }
+                    if (num == number || (player.hasSkill("old_mbchongcha") && num == 0 && number > 9)) {
+                        return useful + 10;
+                    }
+                },
+            },
+            trigger: { player: "useCard" },
+            filter(event, player) {
+                let index = player.getStorage("old_mbgeyuan", 0);
+                let num = Number(get.info("old_mbgeyuan").PI[index]),
+                    number = get.number(event.card);
+                if (num == number) {
+                    return true;
+                }
+                if (typeof number == "number" && number > 9) {
+                    return player.hasSkill("old_mbchongcha") && num == 0;
+                }
+                return false;
+            },
+            prompt2(event, player) {
+                let draw = player.getAllHistory("useSkill", evt => evt.skill === "old_mbgeyuan").length + 1;
+                return `摸${get.cnNumber(draw)}张牌并调整“割圆”中X的值`;
+            },
+            frequent: "check",
+            check(event, player) {
+                return get.effect(player, { name: "draw" }, player, player) > 0;
+            },
+            async content(event, trigger, player) {
+                await player.draw(player.getAllHistory("useSkill", evt => evt.skill === event.name).length);
+                let index = player.getStorage(event.name, 0);
+                index++;
+                const { PI, getNumList } = get.info(event.name);
+                if (index >= PI.length) {
+                    index -= PI.length;
+                }
+                player.setStorage(event.name, index, true);
+                player.addTip(event.name, `${get.translation(event.name)} ${getNumList(index, true)}`);
+            },
+            getNumList(index, isTip) {
+                const { PI } = get.info("old_mbgeyuan");
+                index = index || 0;
+                function getNexts(index) {
+                    let result = "",
+                        cnt = 0;
+                    while (cnt++ < 3) {
+                        let index2 = index + cnt - 1;
+                        if (index2 >= PI.length) {
+                            index2 - PI.length;
+                        }
+                        result += PI[index2];
+                    }
+                    return result;
+                }
+                let first = isTip ? PI[index] : `<span data-nature="fire">${PI[index]}</span>`,
+                    nextNums = getNexts(index + 1);
+                return first + nextNums;
+            },
+            PI: "1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679",
+        },
+        old_mbchongcha: {
+            audio: "mbchongcha",
+            mod: {
+                ignoredHandcard(card, player) {
+                    let number = get.number(card, player);
+                    if (typeof number == "number" && number > 9) {
+                        return true;
+                    }
+                },
+                cardDiscardable(card, player, name) {
+                    if (name == "phaseDiscard") {
+                        let number = get.number(card, player);
+                        if (typeof number == "number" && number > 9) {
+                            return true;
+                        }
+                    }
+                },
+            },
+            enable: "phaseUse",
+            usable: 1,
+            filter(event, player) {
+                if (!player.hasSkill("old_mbgeyuan", null, false, false)) {
+                    return false;
+                }
+                return player.countDiscardableCards(player, "he") > 0;
+            },
+            position: "he",
+            filterCard: lib.filter.cardDiscardable,
+            check(card) {
+                const player = get.player();
+                let index = player.getStorage("old_mbgeyuan", 0);
+                const { getNumList } = get.info("old_mbgeyuan");
+                let next = Number(getNumList(index, true).slice(1, 2));
+                if (get.number(card, player) == next) {
+                    return 0;
+                }
+                return 10 - get.value(card);
+            },
+            selectTarget: 0,
+            prompt(event) {
+                const player = get.player();
+                let index = player.getStorage("old_mbgeyuan", 0);
+                const { PI, getNumList } = get.info("old_mbgeyuan");
+                let num = PI[index],
+                    next = getNumList(index, true).slice(1, 2);
+                return `弃一张牌并调整“割圆”中X的值（当前为${num}，调整后为${next}）`;
+            },
+            async content(event, trigger, player) {
+                let index = player.getStorage("old_mbgeyuan", 0);
+                index++;
+                const { PI, getNumList } = get.info("old_mbgeyuan");
+                if (index >= PI.length) {
+                    index -= PI.length;
+                }
+                player.setStorage("old_mbgeyuan", index, true);
+                player.addTip("old_mbgeyuan", `${get.translation("old_mbgeyuan")} ${getNumList(index, true)}`);
+            },
+            ai: {
+                order(item, player) {
+                    player = player || get.player();
+                    let index = player.getStorage("old_mbgeyuan", 0),
+                        hs = player.getCards("hs", card => player.getUseValue(card));
+                    if (!hs.length) {
+                        return 0;
+                    }
+                    const { getNumList } = get.info("old_mbgeyuan");
+                    const numList = getNumList(index, true);
+                    let first = Number(numList.slice(0, 1)),
+                        next = Number(numList.slice(1, 2));
+                    if (hs.some(card => get.number(card, player) == first)) {
+                        return 0;
+                    } else if (!hs.some(card => get.number(card, player) == next)) {
+                        return 0;
+                    }
+                    return 10;
+                },
+                result: {
+                    player: 1,
+                },
+            },
+        },
+
         //神曹丕
         old_chuyuan: {
             audio: "chuyuan",
