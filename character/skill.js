@@ -13226,7 +13226,10 @@ let lmCharacter = {
                 player.setStorage(skill, index, true);
                 player.addTip(skill, `${get.translation(skill)} ${get.info(skill).getNumList(index, true)}`);
             },
-            onremove: true,
+            onremove(player, skill) {
+                player.setStorage(skill, undefined, true);
+                player.removeTip(skill);
+            },
             mark: true,
             marktext: "◯", //⚪
             intro: {
