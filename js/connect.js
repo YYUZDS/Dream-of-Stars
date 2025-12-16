@@ -152,8 +152,7 @@ if (lib.config.extension_星之梦_lianji) {
 				node = node.link;
 			}
 			let capt = get.translation(node.name);
-			const characterInfo = get.character(node.name),
-				sex = node.sex || characterInfo[0];
+			const characterInfo = get.character(node.name), sex = node.sex || characterInfo[0];
 			if (sex && sex != "unknown" && lib.config.show_sex) {
 				capt += `&nbsp;&nbsp;${sex == "none" ? "无" : get.translation(sex)}`;
 			}
@@ -162,20 +161,16 @@ if (lib.config.extension_星之梦_lianji) {
 				capt += `&nbsp;&nbsp;${get.translation(group)}`;
 			}
 			uiintro.add(capt);
-
 			if (lib.characterTitle[node.name]) {
 				uiintro.addText(get.colorspan(lib.characterTitle[node.name]));
 			}
-
 			if (lib.characterAppend[node.name]) {
 				uiintro.addText(get.colorspan(lib.characterAppend[node.name]));
 			}
-
 			if (lib.config.show_sortPack) {
 				for (let packname in lib.characterPack) {
 					if (node.name in lib.characterPack[packname]) {
-						let pack = lib.translate[packname + '_character_config'],
-							sort;
+						let pack = lib.translate[packname + "_character_config"], sort;
 						if (lib.characterSort[packname]) {
 							let sorted = lib.characterSort[packname];
 							for (let sortname in sorted) {
@@ -194,22 +189,20 @@ if (lib.config.extension_星之梦_lianji) {
 					}
 				}
 			}
-
 			if (get.characterInitFilter(node.name)) {
-				const initFilters = get.characterInitFilter(node.name).filter(tag => {
+				const initFilters = get.characterInitFilter(node.name).filter((tag) => {
 					if (!lib.characterInitFilter[node.name]) {
 						return true;
 					}
 					return lib.characterInitFilter[node.name](tag) !== false;
 				});
 				if (initFilters.length) {
-					const str = initFilters.reduce((strx, stry) => strx + lib.InitFilter[stry] + "<br>", "").slice(0, -4);
-					uiintro.addText(str);
+					const str2 = initFilters.reduce((strx, stry) => strx + lib.InitFilter[stry] + "<br>", "").slice(0, -4);
+					uiintro.addText(str2);
 				}
 			}
-
 			if (!node.noclick) {
-				const allShown = node.isUnderControl() || (!game.observe && game.me && game.me.hasSkillTag("viewHandcard", null, node, true));
+				const allShown = node.isUnderControl() || !game.observe && game.me && game.me.hasSkillTag("viewHandcard", null, node, true);
 				const shownHs = node.getShownCards();
 				if (shownHs.length) {
 					uiintro.add('<div class="text center">明置的手牌</div>');
@@ -230,7 +223,6 @@ if (lib.config.extension_星之梦_lianji) {
 					}
 				}
 			}
-
 			var skills = node.getSkills(null, false, false).slice(0);
 			var skills2 = game.filterSkills(skills, node);
 			if (node == game.me && node.hiddenSkills.length) {
@@ -254,7 +246,6 @@ if (lib.config.extension_星之梦_lianji) {
 							translation = `【${translation.slice(0, 2)}】`;
 						}
 					}
-
 					if (node.forbiddenSkills[skills[i]]) {
 						var forbidstr = '<div style="opacity:0.5"><div class="skill">' + translation + "</div><div>";
 						if (node.forbiddenSkills[skills[i]].length) {
@@ -322,7 +313,7 @@ if (lib.config.extension_星之梦_lianji) {
 						underlinenode.listen(ui.click.autoskill2);
 					} else if (lib.skill[skills[i]].clickable && node.isIn() && node.isUnderControl(true)) {
 						var intronode = uiintro.add('<div><div class="skill">' + translation + "</div><div>" + get.skillInfoTranslation(skills[i], node, false) + '<br><div class="menubutton skillbutton" style="position:relative;margin-top:5px">点击发动</div></div></div>').querySelector(".skillbutton");
-						if (!_status.gameStarted || (lib.skill[skills[i]].clickableFilter && !lib.skill[skills[i]].clickableFilter(node))) {
+						if (!_status.gameStarted || lib.skill[skills[i]].clickableFilter && !lib.skill[skills[i]].clickableFilter(node)) {
 							intronode.classList.add("disabled");
 							intronode.style.opacity = 0.5;
 						} else {
@@ -340,26 +331,6 @@ if (lib.config.extension_星之梦_lianji) {
 					}
 				}
 			}
-			// if(get.is.phoneLayout()){
-			// 	var storage=node.storage;
-			// 	for(i in storage){
-			// 		if(get.info(i)&&get.info(i).intro){
-			// 			intro=get.info(i).intro;
-			// 			if(node.getSkills().concat(lib.skill.global).includes(i)==false&&!intro.show) continue;
-			// 			var name=intro.name?intro.name:get.translation(i);
-			// 			if(typeof name=='function'){
-			// 				name=name(storage[i],node);
-			// 			}
-			// 			translation='<div><div class="skill">『'+name.slice(0,2)+'』</div><div>';
-			// 			var stint=get.storageintro(intro.content,storage[i],node,null,i);
-			// 			if(stint){
-			// 				translation+=stint+'</div></div>';
-			// 				uiintro.add(translation);
-			// 			}
-			// 		}
-			// 	}
-			// }
-
 			if (lib.config.right_range && _status.gameStarted) {
 				uiintro.add(ui.create.div(".placeholder"));
 				var table, tr, td;
@@ -378,7 +349,6 @@ if (lib.config.extension_星之梦_lianji) {
 				td = document.createElement("td");
 				td.innerHTML = "伤害";
 				tr.appendChild(td);
-
 				tr = document.createElement("tr");
 				table.appendChild(tr);
 				td = document.createElement("td");
@@ -402,12 +372,11 @@ if (lib.config.extension_星之梦_lianji) {
 				td.innerHTML = node.phaseNumber;
 				tr.appendChild(td);
 				td = document.createElement("td");
-
 				(function () {
-					num = 0;
-					for (var j = 0; j < node.stat.length; j++) {
-						if (typeof node.stat[j].damage == "number") {
-							num += node.stat[j].damage;
+					let num = 0;
+					for (var j2 = 0; j2 < node.stat.length; j2++) {
+						if (typeof node.stat[j2].damage == "number") {
+							num += node.stat[j2].damage;
 						}
 					}
 					td.innerHTML = num;
@@ -415,7 +384,6 @@ if (lib.config.extension_星之梦_lianji) {
 				tr.appendChild(td);
 				table.style.width = "calc(100% - 20px)";
 				table.style.marginLeft = "10px";
-
 				uiintro.content.appendChild(table);
 				if (!lib.config.show_favourite) {
 					table.style.paddingBottom = "5px";
@@ -424,29 +392,27 @@ if (lib.config.extension_星之梦_lianji) {
 			if (!simple || get.is.phoneLayout()) {
 				var es = node.getCards("e");
 				for (var i = 0; i < es.length; i++) {
-					const special = [es[i]].concat(es[i].cards || []).find(j => j.name == es[i].name && lib.card[j.name]?.cardPrompt);
+					const special = [es[i]].concat(es[i].cards || []).find((j2) => j2.name == es[i].name && lib.card[j2.name]?.cardPrompt);
 					var str = special ? lib.card[special.name].cardPrompt(special, node) : lib.translate[es[i].name + "_info"];
 					uiintro.add('<div><div class="skill">' + es[i].outerHTML + "</div><div>" + str + "</div></div>");
 					uiintro.content.lastChild.querySelector(".skill>.card").style.transform = "";
-
 					if (lib.translate[es[i].name + "_append"]) {
 						uiintro.add('<div class="text">' + lib.translate[es[i].name + "_append"] + "</div>");
 					}
 				}
 				var js = node.getCards("j");
 				for (var i = 0; i < js.length; i++) {
-					const Vcard = js[i][js[i].cardSymbol];
-					if (js[i].viewAs && Vcard.cards.length == 1 && js[i].viewAs != Vcard.cards[0].name) {
-						let html = Vcard.cards[0].outerHTML;
-						let cardInfo = lib.card[js[i].viewAs],
-							showCardIntro = true;
-						if (cardInfo.blankCard) {
+					const Vcard2 = js[i][js[i].cardSymbol];
+					if (js[i].viewAs && Vcard2.cards.length == 1 && js[i].viewAs != Vcard2.cards[0].name) {
+						let html = Vcard2.cards[0].outerHTML;
+						let cardInfo2 = lib.card[js[i].viewAs], showCardIntro2 = true;
+						if (cardInfo2.blankCard) {
 							var cardOwner = get.owner(js[i]);
 							if (cardOwner && !cardOwner.isUnderControl(true)) {
-								showCardIntro = false;
+								showCardIntro2 = false;
 							}
 						}
-						if (!showCardIntro) {
+						if (!showCardIntro2) {
 							html = ui.create.button(js[i], "blank").outerHTML;
 						}
 						uiintro.add(`<div><div class="skill">${html}</div><div>${lib.translate[js[i].viewAs]}：${lib.card[js[i].viewAs]?.cardPrompt?.(js[i], node) || lib.translate[`${js[i].viewAs}_info`]}</div></div>`);
@@ -468,7 +434,7 @@ if (lib.config.extension_星之梦_lianji) {
 							var rect = this.link.getBoundingClientRect();
 							ui.click.intro.call(this.link, {
 								clientX: rect.left + rect.width,
-								clientY: rect.top + rect.height / 2,
+								clientY: rect.top + rect.height / 2
 							});
 							if (lib.config.touchscreen) {
 								uiintro._close();
@@ -506,12 +472,12 @@ if (lib.config.extension_星之梦_lianji) {
 						function () {
 							_status.throwEmotionWait = false;
 							if (ui.throwEmotion) {
-								for (var i of ui.throwEmotion) {
-									i.classList.remove("exclude");
+								for (var i2 of ui.throwEmotion) {
+									i2.classList.remove("exclude");
 								}
 							}
 						},
-						emotion == "flower" || emotion == "egg" ? 500 : 5000
+						emotion == "flower" || emotion == "egg" ? 500 : 5e3
 					);
 				};
 				//连续交互
@@ -620,129 +586,12 @@ if (lib.config.extension_星之梦_lianji) {
 				viewInfo.link = node;
 				viewInfo.innerHTML = "查看资料";
 				viewInfo.listen(function () {
-					let player = this.link;
-					let audioName = player.skin.name || player.name1 || player.name;
-					ui.click.charactercard(player.name1 || player.name, null, null, true, player.node.avatar, audioName);
+					let player2 = this.link;
+					let audioName = player2.skin.name || player2.name1 || player2.name;
+					ui.click.charactercard(player2.name1 || player2.name, null, null, true, player2.node.avatar, audioName);
 				});
 				uiintro.add(viewInfo);
 			}
-			if (!simple || get.is.phoneLayout()) {
-				if ((lib.config.change_skin || lib.skin) && !node.isUnseen()) {
-					var num = 1;
-					var introadded = false;
-					var createButtons = function (num, avatar2) {
-						if (!introadded) {
-							introadded = true;
-							uiintro.add('<div class="text center">更改皮肤</div>');
-						}
-						var buttons = ui.create.div(".buttons.smallzoom.scrollbuttons");
-						lib.setMousewheel(buttons);
-						var nameskin = avatar2 ? node.name2 : node.name1;
-						var nameskin2 = nameskin;
-						var gzbool = false;
-						if (nameskin.startsWith("gz_shibing")) {
-							nameskin = nameskin.slice(3, 11);
-						} else if (nameskin.startsWith("gz_")) {
-							nameskin = nameskin.slice(3);
-							gzbool = true;
-						}
-						for (var i = 0; i <= num; i++) {
-							var button = ui.create.div(".button.character.pointerdiv", buttons, function () {
-								if (this._link) {
-									if (avatar2) {
-										lib.config.skin[nameskin] = this._link;
-										node.node.avatar2.style.backgroundImage = this.style.backgroundImage;
-									} else {
-										lib.config.skin[nameskin] = this._link;
-										node.node.avatar.style.backgroundImage = this.style.backgroundImage;
-									}
-								} else {
-									delete lib.config.skin[nameskin];
-									if (avatar2) {
-										if (gzbool && lib.character[nameskin2].hasSkinInGuozhan && lib.config.mode_config.guozhan.guozhanSkin) {
-											node.node.avatar2.setBackground(nameskin2, "character");
-										} else {
-											node.node.avatar2.setBackground(nameskin, "character");
-										}
-									} else {
-										if (gzbool && lib.character[nameskin2].hasSkinInGuozhan && lib.config.mode_config.guozhan.guozhanSkin) {
-											node.node.avatar.setBackground(nameskin2, "character");
-										} else {
-											node.node.avatar.setBackground(nameskin, "character");
-										}
-									}
-								}
-								game.saveConfig("skin", lib.config.skin);
-							});
-							button._link = i;
-							if (i) {
-								button.setBackgroundImage("image/skin/" + nameskin + "/" + i + ".jpg");
-							} else {
-								if (gzbool && lib.character[nameskin2].hasSkinInGuozhan && lib.config.mode_config.guozhan.guozhanSkin) {
-									button.setBackground(nameskin2, "character", "noskin");
-								} else {
-									button.setBackground(nameskin, "character", "noskin");
-								}
-							}
-						}
-						uiintro.add(buttons);
-					};
-					var loadImage = function (avatar2) {
-						var img = new Image();
-						img.onload = function () {
-							num++;
-							loadImage(avatar2);
-						};
-						img.onerror = function () {
-							num--;
-							if (num) {
-								createButtons(num, avatar2);
-							}
-							if (!avatar2) {
-								if (!node.classList.contains("unseen2") && node.name2) {
-									num = 1;
-									loadImage(true);
-								}
-							}
-						};
-						var nameskin = avatar2 ? node.name2 : node.name1;
-						var nameskin2 = nameskin;
-						var gzbool = false;
-						if (nameskin.startsWith("gz_shibing")) {
-							nameskin = nameskin.slice(3, 11);
-						} else if (nameskin.startsWith("gz_")) {
-							nameskin = nameskin.slice(3);
-							gzbool = true;
-						}
-						img.src = lib.assetURL + "image/skin/" + nameskin + "/" + num + ".jpg";
-					};
-					if (lib.config.change_skin) {
-						if (!node.isUnseen(0)) {
-							loadImage();
-						} else if (node.name2) {
-							loadImage(true);
-						}
-					} else {
-						setTimeout(function () {
-							var nameskin1 = node.name1;
-							var nameskin2 = node.name2;
-							if (nameskin1 && nameskin1.startsWith("gz_")) {
-								nameskin1 = nameskin1.slice(3);
-							}
-							if (nameskin2 && nameskin2.startsWith("gz_")) {
-								nameskin2 = nameskin2.slice(3);
-							}
-							if (!node.isUnseen(0) && lib.skin[nameskin1]) {
-								createButtons(lib.skin[nameskin1]);
-							}
-							if (!node.isUnseen(1) && lib.skin[nameskin2]) {
-								createButtons(lib.skin[nameskin2], true);
-							}
-						});
-					}
-				}
-			}
-
 			uiintro.add(ui.create.div(".placeholder.slim"));
 		} else if (node.classList.contains("mark") && node.info && node.parentNode && node.parentNode.parentNode && node.parentNode.parentNode.classList.contains("player")) {
 			var info = node.info;
@@ -786,16 +635,7 @@ if (lib.config.extension_星之梦_lianji) {
 					if (!stint.startsWith('<div class="skill"')) {
 						uiintro._place_text = placetext;
 					}
-					// if(stint.length<=100){
-					// 	uiintro.add('<div class="text center">'+stint+'</div>');
-					// }
-					// else{
-					// 	uiintro.add('<div class="text">'+stint+'</div>');
-					// }
 				}
-				/*if (evt) {
-					lib.placePoppedDialog(uiintro, evt);
-				}*/
 			} else {
 				var stint = get.storageintro(info.content, player.storage[node.skill], player, uiintro, node.skill);
 				if (stint) {
@@ -807,23 +647,14 @@ if (lib.config.extension_星之梦_lianji) {
 							uiintro._place_text = placetext;
 						}
 					}
-					// else if(stint.length<=100){
-					// 	uiintro.add('<div class="text center">'+stint+'</div>');
-					// }
-					// else{
-					// 	uiintro.add('<div class="text">'+stint+'</div>');
-					// }
 				}
 			}
 			uiintro.add(ui.create.div(".placeholder.slim"));
 		} else if (node.classList.contains("card")) {
-			//卡牌长按介绍
 			if (ui.arena.classList.contains("observe") && node.parentNode.classList.contains("handcards")) {
 				return;
 			}
-			var name = node.name,
-				Vcard = node[node.cardSymbol] || false,
-				trueCard = node;
+			var name = node.name, Vcard = node[node.cardSymbol] || false, trueCard = node;
 			if (node.parentNode.cardMod) {
 				var moded = false;
 				for (var i in node.parentNode.cardMod) {
@@ -844,10 +675,9 @@ if (lib.config.extension_星之梦_lianji) {
 				trueCard = node.link;
 			}
 			var cardPosition = get.position(trueCard);
-			if (((cardPosition === "e" || cardPosition === "j") && trueCard.viewAs && trueCard.viewAs != name) || (Vcard && (Vcard.cards.length != 1 || Vcard.cards[0].name != name))) {
+			if ((cardPosition === "e" || cardPosition === "j") && trueCard.viewAs && trueCard.viewAs != name || Vcard && (Vcard.cards.length != 1 || Vcard.cards[0].name != name)) {
 				uiintro.add(get.translation(trueCard.viewAs));
-				var cardInfo = lib.card[trueCard.viewAs],
-					showCardIntro = true;
+				var cardInfo = lib.card[trueCard.viewAs], showCardIntro = true;
 				var cardOwner = get.owner(trueCard);
 				if (cardInfo.blankCard) {
 					if (cardOwner && !cardOwner.isUnderControl(true)) {
@@ -857,21 +687,24 @@ if (lib.config.extension_星之梦_lianji) {
 				if (cardOwner && showCardIntro) {
 					uiintro.isNotCard = true;
 				}
-				// uiintro.add(get.translation(node.viewAs)+'<br><div class="text center" style="padding-top:5px;">（'+get.translation(node)+'）</div>');
-				//uiintro.nosub = true;
 				name = trueCard.viewAs;
 			} else {
-				uiintro.add(get.translation(node));
+				if (node.extraEquip) {
+					name = node.extraEquip[1];
+					uiintro.add(`${get.translation(node.extraEquip[0])} ${get.translation(node.extraEquip[1])}`);
+				} else {
+					uiintro.add(get.translation(node));
+				}
 			}
 			if (node._banning) {
 				var clickBanned = function () {
-					var banned = lib.config[this.bannedname] || [];
-					if (banned.includes(name)) {
-						banned.remove(name);
+					var banned2 = lib.config[this.bannedname] || [];
+					if (banned2.includes(name)) {
+						banned2.remove(name);
 					} else {
-						banned.push(name);
+						banned2.push(name);
 					}
-					game.saveConfig(this.bannedname, banned);
+					game.saveConfig(this.bannedname, banned2);
 					this.classList.toggle("on");
 					if (node.updateBanned) {
 						node.updateBanned();
@@ -923,16 +756,16 @@ if (lib.config.extension_星之梦_lianji) {
 				}
 				ui.create.div(".menubutton.pointerdiv", banall ? "全部禁用" : "全部启用", uiintro.content, function () {
 					if (this.innerHTML == "全部禁用") {
-						for (var i = 0; i < page.childElementCount; i++) {
-							if (page.childNodes[i].bannedname.indexOf("zhinang_tricks") == -1 && page.childNodes[i].bannedname && page.childNodes[i].classList.contains("on")) {
-								clickBanned.call(page.childNodes[i]);
+						for (var i2 = 0; i2 < page.childElementCount; i2++) {
+							if (page.childNodes[i2].bannedname.indexOf("zhinang_tricks") == -1 && page.childNodes[i2].bannedname && page.childNodes[i2].classList.contains("on")) {
+								clickBanned.call(page.childNodes[i2]);
 							}
 						}
 						this.innerHTML = "全部启用";
 					} else {
-						for (var i = 0; i < page.childElementCount; i++) {
-							if (page.childNodes[i].bannedname.indexOf("zhinang_tricks") == -1 && page.childNodes[i].bannedname && !page.childNodes[i].classList.contains("on")) {
-								clickBanned.call(page.childNodes[i]);
+						for (var i2 = 0; i2 < page.childElementCount; i2++) {
+							if (page.childNodes[i2].bannedname.indexOf("zhinang_tricks") == -1 && page.childNodes[i2].bannedname && !page.childNodes[i2].classList.contains("on")) {
+								clickBanned.call(page.childNodes[i2]);
 							}
 						}
 						this.innerHTML = "全部禁用";
@@ -955,17 +788,9 @@ if (lib.config.extension_星之梦_lianji) {
 						} else if (lib.card[name] && lib.card[name].type && lib.translate[lib.card[name].type]) {
 							typeinfo += get.translation(lib.card[name].type) + "牌";
 						}
-						let vcard = get
-							.owner(node)
-							?.getVCards(get.position(node))
-							?.find(card => card.cards?.includes(node));
+						let vcard = get.owner(node)?.getVCards(get.position(node))?.find((card) => card.cards?.includes(node));
 						if (get.subtypes(vcard || node, get.owner(node))?.length) {
-							typeinfo +=
-								"-" +
-								get
-									.subtypes(vcard || node, get.owner(node))
-									.map(type => get.translation(type))
-									.join("/");
+							typeinfo += "-" + get.subtypes(vcard || node, get.owner(node)).map((type) => get.translation(type)).join("/");
 						}
 						if (typeinfo) {
 							uiintro.add('<div class="text center">' + typeinfo + "</div>");
@@ -982,8 +807,8 @@ if (lib.config.extension_星之梦_lianji) {
 						}
 						if (get.subtype(name, false) == "equip1") {
 							var added = false;
-							if (lib.card[node.name] && lib.card[node.name].distance) {
-								var dist = lib.card[node.name].distance;
+							if (lib.card[name] && lib.card[name].distance) {
+								var dist = lib.card[name].distance;
 								if (dist.attackFrom) {
 									added = true;
 									uiintro.add('<div class="text center">攻击范围：' + (-dist.attackFrom + 1) + "</div>");
@@ -995,8 +820,7 @@ if (lib.config.extension_星之梦_lianji) {
 						}
 					}
 					if (lib.card[name].cardPrompt) {
-						var str = lib.card[name].cardPrompt(node.link || node, player),
-							placetext = uiintro.add('<div class="text" style="display:inline">' + str + "</div>");
+						var str = lib.card[name].cardPrompt(node.link || node, player), placetext = uiintro.add('<div class="text" style="display:inline">' + str + "</div>");
 						if (!str.startsWith('<div class="skill"')) {
 							uiintro._place_text = placetext;
 						}
@@ -1015,7 +839,7 @@ if (lib.config.extension_星之梦_lianji) {
 							}
 						}
 						if (yingbianEffects.length && showCardIntro) {
-							uiintro.add(`<div class="text" style="font-family: yuanli">应变：${yingbianEffects.map(value => lib.yingbian.prompt.get(value)).join("；")}</div>`);
+							uiintro.add(`<div class="text" style="font-family: yuanli">应变：${yingbianEffects.map((value) => lib.yingbian.prompt.get(value)).join("；")}</div>`);
 						}
 					}
 					if (lib.translate[name + "_append"]) {
@@ -1033,8 +857,7 @@ if (lib.config.extension_星之梦_lianji) {
 				uiintro.add(ui.create.div(".placeholder.slim"));
 			}
 		} else if (node.classList.contains("character")) {
-			const character = node.link,
-				characterInfo = get.character(node.link);
+			const character = node.link, characterInfo = get.character(node.link);
 			let capt = get.translation(character);
 			if (characterInfo) {
 				const infoSex = characterInfo[0];
@@ -1045,27 +868,23 @@ if (lib.config.extension_星之梦_lianji) {
 				if (infoGroup && lib.config.show_group) {
 					const group = get.is.double(character, true);
 					if (group) {
-						capt += `&nbsp;&nbsp;${group.map(value => get.translation(value)).join("/")}`;
+						capt += `&nbsp;&nbsp;${group.map((value) => get.translation(value)).join("/")}`;
 					} else {
 						capt += `&nbsp;&nbsp;${lib.translate[infoGroup]}`;
 					}
 				}
 			}
 			uiintro.add(capt);
-
 			if (lib.characterTitle[node.link]) {
 				uiintro.addText(get.colorspan(lib.characterTitle[node.link]));
 			}
-
 			if (lib.characterAppend[node.link]) {
 				uiintro.addText(get.colorspan(lib.characterAppend[node.link]));
 			}
-
 			if (lib.config.show_sortPack) {
 				for (let packname in lib.characterPack) {
 					if (node.link in lib.characterPack[packname]) {
-						let pack = lib.translate[packname + '_character_config'],
-							sort;
+						let pack = lib.translate[packname + "_character_config"], sort;
 						if (lib.characterSort[packname]) {
 							let sorted = lib.characterSort[packname];
 							for (let sortname in sorted) {
@@ -1084,29 +903,27 @@ if (lib.config.extension_星之梦_lianji) {
 					}
 				}
 			}
-
 			if (get.characterInitFilter(node.link)) {
-				const initFilters = get.characterInitFilter(node.link).filter(tag => {
+				const initFilters = get.characterInitFilter(node.link).filter((tag) => {
 					if (!lib.characterInitFilter[node.link]) {
 						return true;
 					}
 					return lib.characterInitFilter[node.link](tag) !== false;
 				});
 				if (initFilters.length) {
-					const str = initFilters.reduce((strx, stry) => strx + lib.InitFilter[stry] + "<br>", "").slice(0, -4);
-					uiintro.addText(str);
+					const str2 = initFilters.reduce((strx, stry) => strx + lib.InitFilter[stry] + "<br>", "").slice(0, -4);
+					uiintro.addText(str2);
 				}
 			}
-
 			if (node._banning) {
 				var clickBanned = function () {
-					var banned = lib.config[this.bannedname] || [];
-					if (banned.includes(character)) {
-						banned.remove(character);
+					var banned2 = lib.config[this.bannedname] || [];
+					if (banned2.includes(character)) {
+						banned2.remove(character);
 					} else {
-						banned.push(character);
+						banned2.push(character);
 					}
-					game.saveConfig(this.bannedname, banned);
+					game.saveConfig(this.bannedname, banned2);
 					this.classList.toggle("on");
 					if (node.updateBanned) {
 						node.updateBanned();
@@ -1173,16 +990,16 @@ if (lib.config.extension_星之梦_lianji) {
 				}
 				ui.create.div(".menubutton.pointerdiv", banall ? "全部禁用" : "全部启用", uiintro.content, function () {
 					if (this.innerHTML == "全部禁用") {
-						for (var i = 0; i < page.childElementCount; i++) {
-							if (page.childNodes[i].bannedname && page.childNodes[i].classList.contains("on")) {
-								clickBanned.call(page.childNodes[i]);
+						for (var i2 = 0; i2 < page.childElementCount; i2++) {
+							if (page.childNodes[i2].bannedname && page.childNodes[i2].classList.contains("on")) {
+								clickBanned.call(page.childNodes[i2]);
 							}
 						}
 						this.innerHTML = "全部启用";
 					} else {
-						for (var i = 0; i < page.childElementCount; i++) {
-							if (page.childNodes[i].bannedname && !page.childNodes[i].classList.contains("on")) {
-								clickBanned.call(page.childNodes[i]);
+						for (var i2 = 0; i2 < page.childElementCount; i2++) {
+							if (page.childNodes[i2].bannedname && !page.childNodes[i2].classList.contains("on")) {
+								clickBanned.call(page.childNodes[i2]);
 							}
 						}
 						this.innerHTML = "全部禁用";
@@ -1201,9 +1018,7 @@ if (lib.config.extension_星之梦_lianji) {
 								translation = `【${translation.slice(0, 2)}】`;
 							}
 						}
-
 						uiintro.add('<div><div class="skill">' + translation + "</div><div>" + get.skillInfoTranslation(skills[i], null, false) + "</div></div>");
-
 						if (lib.translate[skills[i] + "_append"]) {
 							uiintro._place_text = uiintro.add('<div class="text">' + lib.translate[skills[i] + "_append"] + "</div>");
 						}
@@ -1235,90 +1050,12 @@ if (lib.config.extension_星之梦_lianji) {
 					});
 					uiintro.add(viewInfo);
 				}
-				//先废弃这里的换肤
-				/*var addskin = false;
-				if (node.parentNode.classList.contains("menu-buttons")) {
-					addskin = !lib.config.show_charactercard;
-				} else {
-					addskin = lib.config.change_skin || lib.skin;
-				}
-				if (addskin && (!simple || get.is.phoneLayout())) {
-					var num = 1;
-					var introadded = false;
-					var nameskin = node.link;
-					var nameskin2 = nameskin;
-					var gzbool = false;
-					if (nameskin.startsWith("gz_shibing")) {
-						nameskin = nameskin.slice(3, 11);
-					} else if (nameskin.startsWith("gz_")) {
-						nameskin = nameskin.slice(3);
-						gzbool = true;
-					}
-					var createButtons = function (num) {
-						if (!num) {
-							return;
-						}
-						if (!introadded) {
-							introadded = true;
-							uiintro.add('<div class="text center">更改皮肤</div>');
-						}
-						var buttons = ui.create.div(".buttons.smallzoom.scrollbuttons");
-						lib.setMousewheel(buttons);
-						for (var i = 0; i <= num; i++) {
-							var button = ui.create.div(".button.character.pointerdiv", buttons, function () {
-								if (this._link) {
-									lib.config.skin[nameskin] = this._link;
-									node.style.backgroundImage = this.style.backgroundImage;
-									game.saveConfig("skin", lib.config.skin);
-								} else {
-									delete lib.config.skin[nameskin];
-									if (gzbool && lib.character[nameskin2].hasSkinInGuozhan && lib.config.mode_config.guozhan.guozhanSkin) {
-										node.setBackground(nameskin2, "character");
-									} else {
-										node.setBackground(nameskin, "character");
-									}
-									game.saveConfig("skin", lib.config.skin);
-								}
-							});
-							button._link = i;
-							if (i) {
-								button.setBackgroundImage("image/skin/" + nameskin + "/" + i + ".jpg");
-							} else {
-								if (gzbool && lib.character[nameskin2].hasSkinInGuozhan && lib.config.mode_config.guozhan.guozhanSkin) {
-									button.setBackground(nameskin2, "character", "noskin");
-								} else {
-									button.setBackground(nameskin, "character", "noskin");
-								}
-							}
-						}
-						uiintro.add(buttons);
-					};
-					var loadImage = function () {
-						var img = new Image();
-						img.onload = function () {
-							num++;
-							loadImage();
-						};
-						img.onerror = function () {
-							num--;
-							createButtons(num);
-						};
-						img.src = lib.assetURL + "image/skin/" + nameskin + "/" + num + ".jpg";
-					};
-					if (lib.config.change_skin) {
-						loadImage();
-					} else {
-						setTimeout(function () {
-							createButtons(lib.skin[nameskin]);
-						});
-					}
-				}*/
 			}
 		} else if (node.classList.contains("equips") && ui.arena.classList.contains("selecting")) {
 			(function () {
 				uiintro.add("选择装备");
 				uiintro.addSmall(
-					Array.from(node.childNodes).filter(node => !node.classList.contains("emptyequip") && !node.classList.contains("feichu")),
+					Array.from(node.childNodes).filter((node2) => !node2.classList.contains("emptyequip") && !node2.classList.contains("feichu")),
 					true
 				);
 				uiintro.clickintro = true;
@@ -1327,8 +1064,8 @@ if (lib.config.extension_星之梦_lianji) {
 					ui.control.show();
 				};
 				var confirmbutton;
-				for (var i = 0; i < uiintro.buttons.length; i++) {
-					var button = uiintro.buttons[i];
+				for (var i2 = 0; i2 < uiintro.buttons.length; i2++) {
+					var button = uiintro.buttons[i2];
 					button.classList.add("pointerdiv");
 					if (button.link.classList.contains("selected")) {
 						button.classList.add("selected");
