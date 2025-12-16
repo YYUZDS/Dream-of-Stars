@@ -26233,6 +26233,11 @@ let lmCharacter = {
                             .map(name => lib.card[name[2]]?.skills || [])
                             .flat()
                     );
+                    player.addExtraEquip(
+                        equip,
+                        player.getStorage(equip).map(name => name[2]),
+                        true
+                    );
                 }
             },
             subSkill: {
@@ -26276,6 +26281,7 @@ let lmCharacter = {
                     forced: true,
                     popup: false,
                     content() {
+                        player.removeExtraEquip(event.name);
                         player.unmarkAuto(
                             event.name,
                             player.getStorage(event.name).filter(name => trigger.slots.some(t => get.subtypes(name[2]).includes(t)))
