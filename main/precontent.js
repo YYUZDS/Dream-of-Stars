@@ -1136,7 +1136,7 @@ export async function precontent(config, pack) {
             firstDo: true,
             direct: true,
             filter(event, player) {
-                if (get.mode() != "doudizhu" && get.mode() != "versus" && get.mode() != "single") return false;
+                if (get.mode() != "doudizhu" && get.mode() != "versus" && get.mode() != "single" || get.config("versus_mode") === "four") return false;
                 if (lib.character[player.name1][1] == "shen" || lib.character[player.name1][1] == "devil") return true;
                 // for (var i of lib.character[player.name1][4]) {
                 //     return i.includes("doublegroup");
