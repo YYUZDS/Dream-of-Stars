@@ -4,8 +4,8 @@ let lmCharacter = {//切换皮肤
     oldx_sb_sp_zhugeliang: [["sb_zhugeliang", ["tempname:sb_zhugeliang"]]],
     old_pot_yuji: [["pot_yuji_shadow", ["tempname:pot_yuji_shadow"]]],
     old_mb_caomao: [
-        ["old_mb_caomao_shadow", ["ext:星之梦/image/character/old_mb_caomao_shadow.jpg"], ["die:ext:星之梦/audio/die:true"]],
-        ["mb_caomao_dead", ["die:ext:星之梦/audio/die:true"]],
+        ["old_mb_caomao_shadow", ["ext:星之梦/image/character/old_mb_caomao_shadow.jpg", "die:old_mb_caomao"]],
+        ["mb_caomao_dead", ["die:old_mb_caomao"]],
     ],
     old_pot_taishici: [
         ["pot_taishici_shadow1", ["die:pot_taishici"]],
