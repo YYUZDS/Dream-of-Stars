@@ -43,7 +43,7 @@ let lmCharacter = {//翻译
         info: "当有牌进入弃牌堆后，系统将这些牌中的【闪】、【桃】和【酒】移出游戏。",
     })}”。`,
     old_mbweitong: "卫统",
-    old_mbweitong_info: `${get.poptip("rule_chihengji")}，主公技。游戏开始时，若你有〖潜龙〗且场上有其他魏势力角色，你因“潜龙”于游戏开始时获得的“道心”标记数修改为60枚。`,
+    old_mbweitong_info: `${get.poptip("rule_chihengji")}，主公技。游戏开始时，若你有〖潜龙〗且场上有其他魏势力角色，则你获得x枚“道心”标记（x为其他魏势力角色数*20）。`,
     old_new_simayi: "旧应天神司马懿",
     old_new_simayi_ab: "旧神司马懿",
     old_new_simayi_prefix: "旧|神",

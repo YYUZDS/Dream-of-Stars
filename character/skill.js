@@ -1691,12 +1691,11 @@ let lmCharacter = {
                     forced: true,
                     locked: false,
                     async content(event, trigger, player) {
-                        const num = game.hasPlayer(current => {
+                        const num = game.countPlayer(current => {
                             return current !== player && current.group === "wei" && player.hasZhuSkill("old_mbweitong", current);
-                        })
-                            ? 60
-                            : lib.skill.old_mbqianlong.beginMarkCount;
-                        lib.skill.old_mbqianlong.addMark(player, num);
+                        });
+                        const daoxin = lib.skill.old_mbqianlong.beginMarkCount + (num * 20);
+                        lib.skill.old_mbqianlong.addMark(player, daoxin);
                     },
                 },
                 add: {
