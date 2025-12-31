@@ -1457,7 +1457,7 @@ if (lib.config.extension_星之梦_zxEnhance) {
                 next = promise;
             }
             else next = switchToAuto();
-            const result = await next;
+            const result = await next.forResult();
             game.broadcastAll((id, time) => {
                 if (_status.connectMode) lib.configOL.choose_timeout = time;
                 const dialog = get.idDialog(id);
@@ -1678,9 +1678,7 @@ if (lib.config.extension_星之梦_vtbEnhance) {
         },
         direct: true,
         async content(event, trigger, player) {
-            const {
-                result: { bool },
-            } = await player
+            const { bool } = await player
                 .chooseToRespond(get.prompt("vtbshanwu"), (card, player) => {
                     return get.name(card) == "shan";
                 })
@@ -1689,7 +1687,8 @@ if (lib.config.extension_星之梦_vtbEnhance) {
                     const trigger = get.event().getTrigger();
                     return -get.effect(player, trigger.card, trigger.target, player);
                 })
-                .set("logSkill", "vtbshanwu");
+                .set("logSkill", "vtbshanwu")
+                .forResult();
             if (bool) {
                 trigger.getParent().excluded.add(player);
                 await player.draw();
