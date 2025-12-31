@@ -67,7 +67,7 @@ export async function content(config, pack) {
 			alert("检测到扩展文件夹名不正确！\r将会引起很多跟路径相关的bug，而且这样导入的扩展无法在游戏内删除。\n\r为防出现bug，请依照如下路径修正扩展文件夹名:\n游戏目录/extension/" + i);
 		}
 	}
-	if (lib.config.extensions && game.getFileList && game.readFile && game.writeFile) { //添加交互素材
+	if (lib.config.extensions && game.getFileList && game.readFile && game.writeFile && lib.config.extension_星之梦_fileimport ) { //添加交互素材
 		game.getFileList("extension/星之梦/copy/throw_emotion/", (folders, files) => {
 			game.getFileList("image/emotion/throw_emotion/", (targetFolders, targetFiles) => {
 				for (let img of files) {

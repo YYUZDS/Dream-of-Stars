@@ -174,6 +174,11 @@ export let config = {
 		init: true,
 		intro: "包括单人开房，连续交互，特殊字体等。",
 	},
+	fileimport: {
+		name: "导入交互素材",
+		init: false,
+		intro: "导入额外的交互素材到本体路径下。",
+	},
 	emotionsize: {
 		name: "聊天图片尺寸",
 		intro: "设置聊天图片尺寸（50-150）。",
