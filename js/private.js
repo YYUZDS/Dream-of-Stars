@@ -558,7 +558,6 @@ if (lib.config.extension_星之梦_scsEnhance) {
             }
             else if (event.triggername == "dieAfter") {
                 if (player.getStorage("mbdanggu").length) {
-                    player.logSkill("mbmowang");
                     game.broadcastAll(function () {
                         if (lib.config.background_speak) {
                             game.playAudio("die", "shichangshiRest");
@@ -572,6 +571,7 @@ if (lib.config.extension_星之梦_scsEnhance) {
                     trigger.cancel();
                 } else {
                     if (player.getStorage("mbdanggu").length) {
+                        player.logSkill("mbmowang");
                         //煞笔十常侍
                         trigger.excludeMark.add("mbdanggu");
                         trigger.noDieAudio = true;
