@@ -17387,7 +17387,7 @@ let lmCharacter = {
                 const froms = (await player
                     .chooseButton(["青书：请选择“天书”时机", [FromItems.randomGets(3).map(item => [item, item.name]), "textbutton"]], true)
                     .set("ai", () => 1 + Math.random())
-                    .forResult()).index;
+                    .forResult()).links;
                 if (!froms?.length) return;
                 const [from] = froms;
                 const ToItems = lib.skill.old_olhedao.tianshuContent.filter(item => {
@@ -17396,7 +17396,7 @@ let lmCharacter = {
                 const tos = (await player
                     .chooseButton(['###青书：请选择“天书”效果###<div class="text center">' + from.name + "</div>", [ToItems.randomGets(3).map(item => [item, item.name]), "textbutton"]], true)
                     .set("ai", () => 1 + Math.random())
-                    .forResult()).index;
+                    .forResult()).links;
                 if (!tos?.length) return;
                 const [to] = tos;
                 let skill;
