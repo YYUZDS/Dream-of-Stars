@@ -3673,19 +3673,19 @@ let lmCharacter = {
             },
             direct: true,
             locked: true,
-            *content(event, map) {
-                var player = map.player,
-                    trigger = map.trigger;
+            async content(event, trigger, player) {
+                trigger = map.trigger;
                 if (trigger.name != "phaseZhunbei") {
                     player.logSkill("old_guimou");
                     var result,
                         choiceList = ["惩罚期间使用牌最少的角色", "惩罚期间弃置牌最少的角色", "惩罚期间得到牌最少的角色"];
                     if (trigger.name != "phase" || game.phaseNumber == 0) result = { index: get.rand(0, 2) };
                     else
-                        result = yield player
+                        result = await player
                             .chooseControl()
                             .set("choiceList", choiceList)
-                            .set("ai", () => get.rand(0, 2));
+                            .set("ai", () => get.rand(0, 2))
+                            .forResult();
                     var str = choiceList[result.index];
                     game.log(player, "选择", "#g" + str);
                     player.addSkill("old_guimou_" + result.index);
@@ -3705,7 +3705,7 @@ let lmCharacter = {
                 }
                 targets = targets.filter(target => target != player && target.countCards("h"));
                 if (targets.length) {
-                    var result = yield player
+                    var result = await player
                         .chooseTarget(
                             "请选择【诡谋】的目标",
                             "观看一名可选择的角色的手牌并选择其中至多三张牌，然后你可以将其中至多两张牌交给另一名其他角色，然后弃置剩余的牌",
@@ -3717,32 +3717,37 @@ let lmCharacter = {
                         .set("ai", target => {
                             return Math.sqrt(Math.min(3, target.countCards("h"))) * get.effect(target, { name: "guohe_copy2" }, player, player);
                         })
-                        .set("targets", targets);
+                        .set("targets", targets).forResult();
                     if (result.bool) {
                         var target = result.targets[0];
                         player.logSkill("old_guimou", target);
                         player.addExpose(0.3);
-                        var result2 = yield player.choosePlayerCard(target, "h", "visible", "<div class='text center'>选择其中至多三张牌，然后你可以将其中至多两张牌交给另一名其他角色，然后弃置剩余的牌</div>", [1, 3], true).set("ai", button => get.value(button.link));
+                        var result2 = await player
+                            .choosePlayerCard(target, "h", "visible", "<div class='text center'>选择其中至多三张牌，然后你可以将其中至多两张牌交给另一名其他角色，然后弃置剩余的牌</div>", [1, 3], true)
+                            .set("ai", button => get.value(button.link))
+                            .forResult();
                         if (result2.bool) {
                             var cards = result2.links.slice();
                             var result3;
                             if (!game.hasPlayer(targetx => targetx != player && targetx != target)) result3 = { bool: false };
                             else
-                                result3 = yield player
+                                result3 = await player
                                     .chooseCardButton("是否将其中至多两张牌交给另一名其他角色", cards, [1, Math.min(2, cards.length)])
                                     .set("ai", button => {
                                         var player = _status.event.player;
                                         if (!game.hasPlayer(target => target != player && target != _status.event.target && get.attitude(player, target) > 0)) return 0;
                                         return get.value(button.link, _status.event.player);
                                     })
-                                    .set("target", target);
+                                    .set("target", target)
+                                    .forResult();
                             if (result3.bool) {
-                                var result4 = yield player
+                                var result4 = await player
                                     .chooseTarget("请选择获得" + get.translation(result3.links) + "的目标", (card, player, target) => {
                                         return target != player && target != _status.event.target;
                                     })
                                     .set("ai", target => get.attitude(_status.event.player, target))
-                                    .set("target", target);
+                                    .set("target", target)
+                                    .forResult();
                                 if (result4.bool) {
                                     var targetx = result4.targets[0];
                                     player.line(targetx);
@@ -6126,8 +6131,7 @@ let lmCharacter = {
             get getNumber() {
                 return 3;
             },
-            *content(event, map) {
-                var player = map.player;
+            async content(event, trigger, player) {
                 var storage = player.getStorage("old_sbkanpo").slice();
                 if (storage.length) {
                     player.unmarkAuto("old_sbkanpo", storage);
@@ -6163,7 +6167,7 @@ let lmCharacter = {
                 };
                 if (event.isMine()) func();
                 else if (event.isOnline()) event.player.send(func);
-                var result = yield player
+                var result = await player
                     .chooseButton(["看破：是否记录三个牌名？", [list, "vcard"]], [1, 3], true)
                     .set("ai", function (button) {
                         switch (button.link[2]) {
@@ -6245,7 +6249,7 @@ let lmCharacter = {
                                 game.check();
                             },
                         },
-                    });
+                    }).forResult();
                 if (result.bool) {
                     var names = result.links.map(link => link[2]);
                     player.setStorage("old_sbkanpo", names);
@@ -6551,9 +6555,8 @@ let lmCharacter = {
             },
             forced: true,
             locked: false,
-            *content(event, map) {
-                var player = map.player,
-                    storage = player.storage.oldx_sbkanpo;
+            async content(event, trigger, player) {
+                var storage = player.storage.oldx_sbkanpo;
                 var sum = storage[0];
                 storage[1] = [];
                 player.markSkill("oldx_sbkanpo");
@@ -6587,7 +6590,7 @@ let lmCharacter = {
                 };
                 if (event.isMine()) func();
                 else if (event.isOnline()) event.player.send(func);
-                var result = yield player
+                var result = await player
                     .chooseButton(["看破：是否记录至多" + get.cnNumber(sum) + "个牌名？", [list, "vcard"]], [1, sum], false)
                     .set("ai", function (button) {
                         if (ui.selected.buttons.length >= Math.max(3, game.countPlayer() / 2)) return 0;
@@ -6672,7 +6675,8 @@ let lmCharacter = {
                             },
                         },
                     })
-                    .set("sum", sum);
+                    .set("sum", sum)
+                    .forResult();
                 if (result.bool) {
                     var names = result.links.map(link => link[2]);
                     storage[0] -= names.length;
@@ -7098,16 +7102,15 @@ let lmCharacter = {
                 return game.hasPlayer(target => target != player && !target.isZhu2());
             },
             direct: true,
-            *content(event, map) {
-                var player = map.player;
-                var result = yield player
+            async content(event, trigger, player) {
+                var result = await player
                     .chooseTarget(get.prompt("old_sbwusheng"), "选择一名非主公的其他角色，本阶段对其使用【杀】无距离和次数限制，使用【杀】指定其为目标后摸一张牌，对其使用五张【杀】后不能对其使用【杀】", (card, player, target) => {
                         return target != player && !target.isZhu2();
                     })
                     .set("ai", target => {
                         var player = _status.event.player;
                         return get.effect(target, { name: "sha" }, player, player);
-                    });
+                    }).forResult();
                 if (result.bool) {
                     var target = result.targets[0];
                     player.logSkill("old_sbwusheng", target);
