@@ -3676,7 +3676,6 @@ let lmCharacter = {
             direct: true,
             locked: true,
             async content(event, trigger, player) {
-                trigger = map.trigger;
                 if (trigger.name != "phaseZhunbei") {
                     player.logSkill("old_guimou");
                     var result,
