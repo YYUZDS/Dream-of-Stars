@@ -131,7 +131,7 @@ let lmCharacter = {//武将切换
   lukai: ["old_lukai", "ol_lukai", "lukai"],
   zhangqiying: ["zhangqiying", "x_dc_zhangqiying", "y_dc_zhangqiying", "oldx_zhangqiying"],
   clan_wangmingshan: ["clan_wangmingshan", "old_clan_wangmingshan"],
-  guoyuan: ["guoyuan", "old_guoyuan"],
+  old_guoyuan: ["guoyuan", "old_guoyuan"],
   caocao: ["old_mb_caocao", "caocao", "re_caocao", "sp_ol_caocao", "ol_jsrg_caocao", "dc_caocao", "sb_caocao", "mb_caocao", "tw_jsrg_caocao", "jsrg_caocao", "jd_sb_caocao", "yj_caocao", "ns_caocao", "ns_caocaosp", "jy_caocao", "ps_caocao", "sxrm_caocao", "wn_caocao", "pe_jun_caocao", "xy_caocao", "v_caocao", "wxdl_caocao", "dm_caocao"],
   machao: ["old_v_machao", "machao", "re_machao", "sp_machao", "dc_sp_machao", "one_dc_sp_machao", "two_dc_sp_machao", "v_machao", "sb_machao", "jsrg_machao", "ps_machao", "old_machao"],
   caochong: ["old_strong_caochong", "caochong", "ol_caochong", "re_caochong", "huan_caochong", "old_caochong", "strong_caochong"],
