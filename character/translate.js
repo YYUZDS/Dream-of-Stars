@@ -809,7 +809,7 @@ let lmCharacter = {//翻译
     old_dczhongtao_info: "①出牌阶段限一次，你可以选择至多X+2种花色（X为你已损失的体力值），然后随机获得场上、弃牌堆或牌堆中你选择花色的各一张牌。②当你于回合内使用三种类别的牌后，此技能视为未发动过。",
     old_wufu: "旧伍孚",
     old_wufu_prefix: "旧",
-    old_dc_sb_hulie: "新杀谋胡烈",
+    old_dc_sb_hulie: "旧新杀谋胡烈",
     old_dc_sb_hulie_prefix: "旧|新杀谋",
     old_dcsbchuanyu: "传舆",
     old_dcsbchuanyu_tag: "舆",
