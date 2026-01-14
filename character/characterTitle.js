@@ -65,7 +65,6 @@ const characterTitles = {//武将称号
     old_wuke: "智略权谲",
     old_pot_weiyan: "矜忠跨万山",
     old_mb_chenzhi: "承担接贤",
-    old_mb_luyusheng: "义姑",
     old_guoyuan: "清介有守",
     old_mb_caocao: "峥嵘而立",
     old_pot_lusu: "廓开大计",

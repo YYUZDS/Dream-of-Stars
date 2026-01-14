@@ -50,7 +50,7 @@ const characterReplaces = {//武将切换
   tengfanglan: ["old_tengfanglan", "old_dc_tengfanglan", "tengfanglan", "dc_tengfanglan"],
   old_dengzhong: ["dengzhong", "old_dengzhong"],
   old_wangyan: ["wangyan", "old_wangyan"],
-  luyusheng: ["old_ol_luyusheng", "old_mb_luyusheng", "ol_luyusheng", "luyusheng", "mb_luyusheng", "ns_luyusheng"],
+  luyusheng: ["old_ol_luyusheng", "ol_luyusheng", "luyusheng", "mb_luyusheng", "ns_luyusheng"],
   hujinding: ["old_ol_hujinding", "ol_hujinding", "hujinding", "dc_hujinding"],
   feiyi: ["old_ol_feiyi", "ol_feiyi", "feiyi", "tw_feiyi", "std_feiyi"],
   ol_pengyang: ["old_ol_pengyang", "ol_pengyang", "sp_pengyang"],
