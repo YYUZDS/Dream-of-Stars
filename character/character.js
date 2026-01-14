@@ -1478,6 +1478,7 @@ const characters = {//武将信息
         group: "shu",
         hp: 3,
         skills: ["huguan", "yaopei", "mingluan"],
+        dieAudios: ["ext:星之梦/audio/die/wangtaowangyue1.mp3", "ext:星之梦/audio/die/wangtaowangyue2.mp3"],
     },
     lm_old_caocao: {
         sex: "male",
