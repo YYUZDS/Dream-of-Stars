@@ -530,14 +530,6 @@ const characters = {//武将信息
         img: "image/character/mb_chenzhi.jpg",
         dieAudios: ["mb_chenzhi"],
     },
-    old_mb_luyusheng: {
-        sex: "female",
-        group: "wu",
-        hp: 3,
-        skills: ["old_mbrunwei", "old_mbshuanghuai"],
-        img: "image/character/mb_luyusheng.jpg",
-        dieAudios: ["mb_luyusheng"],
-    },
     old_guoyuan: {
         sex: "male",
         group: "wei",
