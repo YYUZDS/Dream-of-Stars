@@ -719,6 +719,8 @@ const characters = {//武将信息
         group: "wei",
         hp: 3,
         skills: ["old_clanqingjue", "old_clanxsyingxiang", "clandaojie"],
+        img: "image/character/clan_xunshi.jpg",
+        dieAudios: ["clan_xunshi"],
         clans: ["颍川荀氏"],
         tempname: ["clan_xunshi"],
     },
