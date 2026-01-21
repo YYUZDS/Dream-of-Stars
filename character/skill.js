@@ -28585,7 +28585,7 @@ const lmCharacter = {
         old_mb_chulie_info: "游戏开始时，你为【雕弓】从黑桃、梅花、红桃、方块中选择一个花色。",
         old_mb_shehu: "射虎",
         old_mb_shehu_info: "准备阶段，你可以令一名角色装备或升级【雕弓】。出牌阶段限一次，你可以视为对一名其他角色使用X张【杀】。（X为【雕引】的升级次数）",
-        pot_dengai: "旧势邓艾",
+        old_pot_dengai: "旧势邓艾",
         old_pot_dengai_prefix: "旧|势",
         old_pottuntian: "屯田",
         old_pottuntian_info: "蓄力技（1/3），出牌阶段限一次，你可以减少1点蓄力点，令一名角色将一张牌置于你的武将牌上，称为“田”。回合结束时，你摸X张牌（X为你本回合失去过的蓄力点数量）。你于回合外失去牌或“田”后，获得1点蓄力点。",
