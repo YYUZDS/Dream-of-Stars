@@ -1933,9 +1933,13 @@ lib.skill.rezhiheng = {
     audioname2: { shen_caopi: "rezhiheng_shen_caopi", new_simayi: "rezhiheng_new_simayi", jsrg_sunce: "rezhiheng_jsrg_sunce" },
     mod: {
         aiOrder(player, card, num) {
-            if (num <= 0 || get.itemtype(card) !== "card" || get.type(card) !== "equip") return num;
+            if (num <= 0 || get.itemtype(card) !== "card" || get.type(card) !== "equip") {
+                return num;
+            }
             let eq = player.getEquip(get.subtype(card));
-            if (eq && get.equipValue(card) - get.equipValue(eq) < Math.max(1.2, 6 - player.hp)) return 0;
+            if (eq && get.equipValue(card) - get.equipValue(eq) < Math.max(1.2, 6 - player.hp)) {
+                return 0;
+            }
         },
     },
     locked: false,
@@ -1947,6 +1951,7 @@ lib.skill.rezhiheng = {
     lose: false,
     delay: false,
     selectCard: [1, Infinity],
+    allowChooseAll: true,
     check(card) {
         let player = _status.event.player;
         if (
@@ -1956,11 +1961,14 @@ lib.skill.rezhiheng = {
                 !player.countCards("h", i => {
                     return get.value(i) >= 8;
                 }))
-        )
+        ) {
             return 1;
+        }
         if (get.position(card) == "e") {
             let subs = get.subtypes(card);
-            if (subs.includes("equip2") || subs.includes("equip3")) return player.getHp() - get.value(card);
+            if (subs.includes("equip2") || subs.includes("equip3")) {
+                return player.getHp() - get.value(card);
+            }
         }
         return 6 - get.value(card);
     },
@@ -1969,7 +1977,9 @@ lib.skill.rezhiheng = {
         player.discard(cards);
         event.num = 1;
         var hs = player.getCards("h");
-        if (!hs.length) event.num = 0;
+        if (!hs.length) {
+            event.num = 0;
+        }
         for (var i = 0; i < hs.length; i++) {
             if (!cards.includes(hs[i])) {
                 event.num = 0;
@@ -1985,10 +1995,16 @@ lib.skill.rezhiheng = {
             trigger: { player: "loseEnd" },
             silent: true,
             filter(event, player) {
-                if (event.getParent(2).skill != "rezhiheng" && event.getParent(2).skill != "jilue_zhiheng") return false;
-                if (player.countCards("h")) return false;
+                if (event.getParent(2).skill != "rezhiheng" && event.getParent(2).skill != "jilue_zhiheng") {
+                    return false;
+                }
+                if (player.countCards("h")) {
+                    return false;
+                }
                 for (var i = 0; i < event.cards.length; i++) {
-                    if (event.cards[i].original == "h") return true;
+                    if (event.cards[i].original == "h") {
+                        return true;
+                    }
                 }
                 return false;
             },
@@ -2000,7 +2016,9 @@ lib.skill.rezhiheng = {
     },
     ai: {
         order(item, player) {
-            if (player.hasCard(i => get.value(i) > Math.max(6, 9 - player.hp), "he")) return 1;
+            if (player.hasCard(i => get.value(i) > Math.max(6, 9 - player.hp), "he")) {
+                return 1;
+            }
             return 10;
         },
         result: {
@@ -2008,7 +2026,9 @@ lib.skill.rezhiheng = {
         },
         nokeep: true,
         skillTagFilter(player, tag, arg) {
-            if (tag === "nokeep") return (!arg || (arg && arg.card && get.name(arg.card) === "tao")) && player.isPhaseUsing() && !player.getStat().skill.rezhiheng && player.hasCard(card => get.name(card) !== "tao", "h");
+            if (tag === "nokeep") {
+                return (!arg || (arg && arg.card && get.name(arg.card) === "tao")) && player.isPhaseUsing() && !player.getStat().skill.rezhiheng && player.hasCard(card => get.name(card) !== "tao", "h");
+            }
         },
         threaten: 1.55,
     },
