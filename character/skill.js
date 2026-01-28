@@ -9510,7 +9510,7 @@ const lmCharacter = {
             async content(event, trigger, player) {
                 const cards = event.cards;
                 const target = trigger.player;
-                const draw = await target.draw(cards.length).forResult();
+                const draw = (await target.draw(cards.length).forResult()).cards;
                 if (Array.isArray(cards) && Array.isArray(draw)) {
                     let types = [cards, draw]
                         .map(list => list.map(card => get.type2(card)))
@@ -15305,7 +15305,7 @@ const lmCharacter = {
                 if (bool) {
                     const target = targets[0];
                     player.logSkill("old_olzhiyan", target);
-                    const result = await target.draw("visible").forResult();
+                    const result = (await target.draw("visible").forResult()).cards;
                     if (result) {
                         const card = result[0];
                         if (get.type(card, null, target) == "equip") {
@@ -21782,7 +21782,7 @@ const lmCharacter = {
                 if (player.countCards("h") >= player.maxHp || player.getStorage("old_dclianjie_used").includes(num)) return;
                 player.addTempSkill("old_dclianjie_used");
                 player.markAuto("old_dclianjie_used", num);
-                const result = await player.drawTo(player.maxHp).forResult();
+                const result = (await player.drawTo(player.maxHp).forResult()).cards;
                 if (result) player.addGaintag(result, "old_dclianjie");
             },
             mod: {
