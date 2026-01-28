@@ -1,6 +1,15 @@
 import { lib, game, ui, get, ai, _status } from "noname";
 const characters = {//武将信息
     //手杀
+    old_jm_yuanshu: {
+        sex: "male",
+        group: "qun",
+        hp: 4,
+        skills: ["mbjimi", "old_mbmaodie"],
+        img: "image/character/jm_yuanshu.jpg",
+        dieAudios: ["jm_yuanshu"],
+        names: "袁|术",
+    },
     old_mb_caomao: {
         sex: "male",
         group: "wei",

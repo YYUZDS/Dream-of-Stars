@@ -11933,7 +11933,6 @@ const lmCharacter = {
                 },
             },
         },
-
         //势辛宪英
         old_potjiejie: {
             global: "old_potjiejie_global",
@@ -13017,7 +13016,64 @@ const lmCharacter = {
                 },
             },
         },
-
+        //哈基术
+        old_mbmaodie: {
+            audio: "mbmaodie",
+            forced: true,
+            trigger: { player: "useCardAfter" },
+            filter(event, player) {
+                if (player.hasHistory("sourceDamage", evt => evt.card == event.card)) {
+                    return true;
+                }
+                return get.info("old_mbmaodie").getCards(player, event.targets || []).length > 0;
+            },
+            getCards(player, targets) {
+                return targets.flatMap(target => target._start_cards.filter(card => "cdhej".includes(get.position(card)) && get.owner(card) !== player));
+            },
+            async content(event, trigger, player) {
+                if (player.hasHistory("sourceDamage", evt => evt.card == trigger.card)) {
+                    player.addTempSkill(`${event.name}_limit`);
+                    player.setStorage(`${event.name}_limit`, get.cardNameLength(trigger.card), true);
+                } else {
+                    const card = get.info(event.name).getCards(player, trigger.targets).randomGet();
+                    if (card) {
+                        let animate = ["gain2"];
+                        if (get.owner(card)) {
+                            animate = [get.owner(card), "giveAuto"];
+                        }
+                        await player.gain(card, ...animate);
+                        return;
+                    }
+                }
+            },
+            subSkill: {
+                limit: {
+                    charlotte: true,
+                    onremove: true,
+                    silent: true,
+                    trigger: { player: "useCard1" },
+                    filter(event, player) {
+                        return get.tag(event.card, "damage");
+                    },
+                    async content(event, trigger, player) {
+                        player.removeSkill(event.name);
+                    },
+                    mod: {
+                        cardEnabled(card, player) {
+                            const storage = player.storage.old_mbmaodie_limit;
+                            if (!storage || typeof storage != "number" || !get.tag(card, "damage")) {
+                                return;
+                            }
+                            return get.cardNameLength(card) > storage;
+                        },
+                    },
+                    intro: {
+                        markcount: storage => storage,
+                        content: "下一次使用的伤害牌字数需大于#",
+                    },
+                },
+            },
+        },
         //神曹丕
         old_chuyuan: {
             audio: "chuyuan",
@@ -27884,6 +27940,10 @@ const lmCharacter = {
         tw_old: "海外怀旧",
         other_old: "线下怀旧",
 
+        old_jm_yuanshu: "旧集蜜袁术",
+        old_jm_yuanshu_ab: "哈基术",
+        old_mbmaodie: "冒迭",
+        old_mbmaodie_info: "锁定技，你使用牌后，若造成伤害，你本回合下一次使用的伤害牌需大于此牌字数；若未造成伤害，你获得一张目标角色的初始手牌。",
         old_mb_shen_jiangwei: "牢手杀神姜维",//初版
         old_mb_shen_jiangwei_prefix: "牢|手杀神",
         old_guxuan: "孤悬",

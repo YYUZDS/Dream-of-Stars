@@ -156,6 +156,7 @@ const characterReplaces = {//武将切换
   yangfeng: ["ol_yangfeng", "yangfeng", "old_ol_yangfeng"],
   old_hansong: ["hansong", "old_hansong"],
   old_clan_xunshiang: ["old_clan_xunshang", "clan_xunshang"],
+  yuanshu: ["yuanshu", "re_yuanshu", "ol_sb_yuanshu", "star_yuanshu", "yl_yuanshu", "old_yuanshu", "ol_yuanshu", "yao_yuanshu", "x_yao_yuanshu", "jm_yuanshu", "old_jm_yuanshu"],
 
   shen_sunquan: ["shen_sunquan", "junk_sunquan", "dc_shen_sunquan", "old_dc_shen_sunquan"],
   shen_huatuo: ["dc_shen_huatuo", "shen_huatuo", "old_dc_shen_huatuo"],
