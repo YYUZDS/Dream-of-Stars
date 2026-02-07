@@ -1,10 +1,10 @@
 import { lib, game, ui, get, ai, _status } from "noname";
 import { character } from "../character/index.js";
 import { skill } from "../character/skill.js";
-import {} from "../js/pause.js";
-import {} from "../js/connect.js";
-import {} from "../js/broadcast.js";
-import {} from "../js/private.js";
+import { } from "../js/pause.js";
+import { } from "../js/connect.js";
+import { } from "../js/broadcast.js";
+import { } from "../js/private.js";
 export async function precontent(config, pack) {
 	{
 		//本体版本检测
@@ -32,7 +32,7 @@ export async function precontent(config, pack) {
 
 	//屏蔽弹窗
 	if (lib.config.extension_星之梦_cancelwindow) {
-		window.onerror = function (msg, src, line, column, err) {};
+		window.onerror = function (msg, src, line, column, err) { };
 	}
 	if (lib.config.extension_星之梦_randomexpand) {
 		setTimeout(function () {
@@ -1134,7 +1134,7 @@ export async function precontent(config, pack) {
 	if (lib.config.extension_星之梦_guanfangshili) {
 		Object.defineProperty(lib, "group", {
 			get: () => ["wei", "shu", "wu", "qun", "jin"],
-			set: () => {},
+			set: () => { },
 		});
 		lib.skill._slyh = {
 			trigger: { global: "gameStart", player: "enterGame" },

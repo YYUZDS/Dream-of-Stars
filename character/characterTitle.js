@@ -3,8 +3,8 @@ const characterTitles = {
 	//武将称号
 	//手杀
 	old_mb_caomao: "向死存魏",
-	old_mb_shen_jiangwei: "燃魂孤忠",
-	oldx_mb_shen_jiangwei: "燃魂孤忠",
+	old_mb_shen_jiangwei: "烟雨济世",
+	oldx_mb_shen_jiangwei: "烟雨济世",
 	old_new_simayi: "权控三势",
 	old_mb_jushou: "监军谋国",
 	old_mb_zhuzhi: "功崇信重",
@@ -21,7 +21,6 @@ const characterTitles = {
 	old_sp_lvfan: "持筹廉悍",
 	old_xin_zhangzhongjing: "医理圣哲",
 	old_sp_zhujun: "功成师克",
-	// old_yj_weiyan: "骜勇孤战",
 	old_yj_zhoubuyi: "稚雀清声",
 	old_shenpei: "正南义北",
 	old_mb_sp_guanqiujian: "才识拔干",
