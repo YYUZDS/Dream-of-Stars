@@ -8269,13 +8269,9 @@ const lmCharacter = {
 					return;
 				}
 				const controls = ["选项一", "选项二", "背水！"];
-				const control = await target
+				const { control } = await target
 					.chooseControl(controls)
-					.set("choiceList", [
-						`令所有攻击范围内含有你的角色依次弃置两张牌（${get.translation(targets)}）`,
-						`你摸等同于攻击范围内含有你的角色数+2的牌（${get.cnNumber(count)}张牌）`,
-						`背水！令${get.translation(player)}的〖解烦〗失效直到其杀死一名角色，然后你依次执行上述所有选项`,
-					])
+					.set("choiceList", [`令所有攻击范围内含有你的角色依次弃置两张牌（${get.translation(targets)}）`, `你摸等同于攻击范围内含有你的角色数+2的牌（${get.cnNumber(count)}张牌）`, `背水！令${get.translation(player)}的〖解烦〗失效直到其杀死一名角色，然后你依次执行上述所有选项`])
 					.set("ai", () => {
 						return get.event().choice;
 					})
@@ -8285,7 +8281,9 @@ const lmCharacter = {
 							const eff1 = targets
 								.map(current => {
 									let position = "h";
-									if (!current.countCards("h")) position += "e";
+									if (!current.countCards("h")) {
+										position += "e";
+									}
 									return get.effect(current, { name: "guohe_copy", position }, target, target);
 								})
 								.reduce((p, c) => p + c, 0);
@@ -8301,25 +8299,28 @@ const lmCharacter = {
 								}) &&
 								eff1 > 15 &&
 								eff2 > 0
-							)
+							) {
 								return "背水！";
-							if (eff1 > 3 * eff2) return "选项一";
+							}
+							if (eff1 > 3 * eff2) {
+								return "选项一";
+							}
 							return "选项二";
 						})()
 					)
 					.forResult();
 				game.log(target, "选择了", "#g" + control);
-				if (control === "背水！") {
-					player.tempBanSkill("old_sbjiefan", { source: "die" });
-				}
 				if (control !== "选项二") {
 					for (const current of targets) {
 						target.line(current, "thunder");
-						await current.chooseToDiscard("解烦：请弃置一张牌", "he", true);
+						await current.chooseToDiscard("解烦：请弃置两张牌", 2, "he", true);
 					}
 				}
 				if (control !== "选项一") {
 					await target.draw(count);
+				}
+				if (control === "背水！") {
+					player.tempBanSkill("old_sbjiefan", { source: "die" });
 				}
 			},
 			ai: {
@@ -18761,23 +18762,20 @@ const lmCharacter = {
 				global: "useCardAfter",
 			},
 			filter(event, player, name) {
-				if (name == "useCardToPlayer")
+				if (name == "useCardToPlayer") {
 					return (
-						get.is.damageCard(card) > 0.5 &&
+						get.is.damageCard(event.card) &&
 						event.targets.length == 1 &&
 						player.countDiscardableCards(player, "he", card => get.color(card, player) == "red")
 					);
+				}
 				return (
-					get.is.damageCard(card) > 0.5 &&
-					event.targets.includes(player) &&
+					get.is.damageCard(event.card) &&
+					event.targets?.includes(player) &&
 					!player.hasHistory("damage", evt => evt.getParent("useCard") == event) &&
 					player.countDiscardableCards(player, "he", card => get.color(card, player) == "black") &&
 					player.hasUseTarget({ name: "sha", isCard: true }, false, false)
 				);
-			},
-			logTarget(event, player, name) {
-				if (name == "useCardToPlayer") return [event.target];
-				return [];
 			},
 			async cost(event, trigger, player) {
 				const name = event.triggername;
@@ -18788,17 +18786,25 @@ const lmCharacter = {
 							[1, Infinity],
 							"he",
 							"chooseonly",
-							(card, player) => get.color(card, player) == "red"
+							(card, player) => get.color(card, player) == "red",
+							"allowChooseAll"
 						)
 						.set("ai", card => {
 							const player = get.player(),
 								target = get.event().getTrigger().target,
 								cardx = get.event().getTrigger().card;
-							if (get.effect(target, cardx, player, player) < 0 || cardx.name == "huogong") return 0;
-							if (ui.selected.cards?.length == target.countCards("h", { color: "red" })) return 0;
+							if (get.effect(target, cardx, player, player) < 0 || cardx.name == "huogong") {
+								return 0;
+							}
+							if (ui.selected.cards?.length == target.countCards("h", { color: "red" })) {
+								return 0;
+							}
 							return 7 - get.value(card);
 						})
 						.forResult();
+					if (event.result.bool) {
+						event.result.targets = [trigger.target];
+					}
 				} else {
 					event.result = await player
 						.chooseToDiscard(
@@ -18808,7 +18814,9 @@ const lmCharacter = {
 							(card, player) => get.color(card, player) == "black"
 						)
 						.set("ai", card => {
-							if (!get.player().hasValueTarget({ name: "sha", isCard: true }, false, false)) return 0;
+							if (!get.player().hasValueTarget({ name: "sha", isCard: true }, false, false)) {
+								return 0;
+							}
 							return 6 - get.value(card);
 						})
 						.forResult();
@@ -18831,8 +18839,12 @@ const lmCharacter = {
 						.set("ai", card => {
 							const trigger = get.event().getTrigger(),
 								player = get.player();
-							if (get.event().num > 2 || !player.canRespond(trigger) || trigger.card.name == "huogong") return 0;
-							if (player.canRespond(trigger, card)) return 6 - get.value(card);
+							if (get.event().num > 2 || !player.canRespond(trigger) || trigger.card.name == "huogong") {
+								return 0;
+							}
+							if (player.canRespond(trigger, card)) {
+								return 6 - get.value(card);
+							}
 							return 7 - get.value(card);
 						})
 						.set("num", cards.length)
@@ -23808,14 +23820,15 @@ const lmCharacter = {
 				) {
 					list.push(str2);
 				}
-				const { Control: directcontrol } =
+				let directcontrol =
 					str1 ==
 					(await player
 						.chooseControl(list, function (event, player) {
 							return _status.event.choice;
 						})
 						.set("choice", get.attitude(player, target) > 0 ? str1 : str2)
-						.forResult());
+						.forResult()
+					).control;
 				if (directcontrol) {
 					await target.draw(num);
 				} else {
