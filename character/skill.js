@@ -2058,7 +2058,7 @@ const lmCharacter = {
 					if (result.links.includes(2)) {
 						player.addSkill(`${event.name}_buff`);
 						let storage = player.getStorage(`${event.name}_buff`, 0);
-						storage++;
+												storage += num;
 						player.setStorage(`${event.name}_buff`, storage, true);
 					}
 					if (result.links.includes(3) && game.hasPlayer(current => current != player)) {
@@ -30341,3 +30341,4 @@ for (let skill in lmCharacter.skill) {
 	if (lmCharacter.translate[skill + "_info"]) _status.postReconnect.extErdai_skill[2][skill + "_info"] = lmCharacter.translate[skill + "_info"];
 }
 export const skill = lmCharacter;
+
