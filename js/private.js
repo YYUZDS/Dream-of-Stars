@@ -2261,3 +2261,106 @@ lib.skill.jxxiongzi = {
 		},
 	},
 };
+
+
+//合御适配旧骥张辽
+lib.skill.hefeiheyulidian = {
+	audio: 2,
+	trigger: {
+		player: "useCard",
+		global: "discardAfter",
+	},
+	filter(event, player) {
+		const name = event.name == "useCard" ? ["hefei_zhangliao", "old_hefei_zhangliao"] : "hefei_yuejin";
+		if (!name.some(n => get.info("friendgongli").isFriendOf(player, n))) {
+			return false;
+		}
+		const evt = event.getParent(2);
+		if (event.name == "useCard") {
+			return evt?.name == "hefeigaigong";
+		}
+		return evt?.name == "hefeiduanjin" && evt.player == player && event.cards?.someInD("od");
+	},
+	forced: true,
+	async content(event, trigger, player) {
+		if (trigger.name == "useCard") {
+			trigger.directHit.addArray(game.players);
+			return;
+		}
+		const cards = trigger.cards?.filterInD("od");
+		if (cards?.length) {
+			await player.gain(cards, "gain2");
+		}
+	},
+	ai: {
+		combo: ["hefeiduanjin", "hefeigaigong"],
+	},
+};
+lib.skill.hefeiheyuyuejin = {
+	audio: 2,
+	trigger: {
+		source: "damageSource",
+		global: ["loseAfter", "loseAsyncAfter", "equipAfter", "addJudgeAfter", "addToExpansionAfter", "gainAfter"],
+	},
+	filter(event, player) {
+		const name = event.name == "damage" ? ["hefei_zhangliao", "old_hefei_zhangliao"] : "hefei_lidian";
+		if (!name.some(n => get.info("friendgongli").isFriendOf(player, n))) {
+			return false;
+		}
+		if (event.name == "damage") {
+			return event.card?.storage?.hefeixianjian;
+		}
+		const evts = game.getGlobalHistory("everything", evt => {
+			if (!["lose", "gain", "loseAsync", "equip", "addJudge", "addToExpansion"].includes(evt.name)) {
+				return false;
+			}
+			return true;
+		});
+		for (const evt of evts) {
+			for (const current of game.filterPlayer(() => true)) {
+				const evtx = evt.getl(current);
+				if (evtx?.vcard_map?.size && Array.from(evtx.vcard_map.values()).some(card => card.name == "hefei_xianjian")) {
+					return evt == event;
+				}
+			}
+		}
+		return false;
+	},
+	async cost(event, trigger, player) {
+		if (trigger.name !== "damage") {
+			event.result = {
+				bool: true,
+			};
+			return;
+		}
+		const link = trigger.card?.storage?.hefeixianjian,
+			target = trigger.player;
+		const prompt =
+			link !== "draw"
+				? `你摸一张牌，其弃置${get.cnNumber(Math.max(1, target.countCards("ej")))}张牌`
+				: `此杀结算后将对应实体牌置入其一个空置装备栏`;
+		event.result = await player
+			.chooseBool(get.prompt(event.skill, target), prompt)
+			.set("choice", get.attitude(player, target) <= 0)
+			.forResult();
+		event.result.targets = [target];
+	},
+	async content(event, trigger, player) {
+		if (trigger.name != "damage") {
+			await player.draw();
+			return;
+		}
+		const link = trigger.card?.storage?.hefeixianjian == "draw" ? "equip" : "draw";
+		const next = game.createEvent("hefeixianjian_effect", false);
+		next.player = player;
+		next._trigger = trigger;
+		next.targets = [trigger.player];
+		next.cost_data = link;
+		next.triggername = event.triggername;
+		next.setContent(get.info("hefeixianjian").content);
+		await next;
+	},
+	ai: {
+		combo: "hefeixianjian",
+	},
+};

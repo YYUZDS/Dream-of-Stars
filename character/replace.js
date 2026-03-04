@@ -225,6 +225,7 @@ const characterReplaces = {
 		"jy_zhugeliang",
 		"zj_zhugeliang",
 		"you_zhugeliang",
+		"ol_le_zhugeliang",
 	],
 	menghuo: [
 		"old_sb_menghuo",
@@ -396,6 +397,8 @@ const characterReplaces = {
 		"jsrg_zhangliao",
 		"eu_zhangliao",
 		"ol_jsrg_zhangliao",
+		"hefei_zhangliao",
+		"old_hefei_zhangliao",
 	],
 	zhanghe: [
 		"old_sb_zhanghe",
@@ -411,6 +414,7 @@ const characterReplaces = {
 		"wn_zhanghe",
 		"zc26_zhanghe",
 		"star_zhanghe",
+		"ol_jsrg_zhanghe",
 	],
 	guojia: [
 		"old_sb_guojia",

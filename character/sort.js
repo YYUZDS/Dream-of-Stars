@@ -80,6 +80,7 @@ const characterSorts = {
 			"old_mb_caomao",
 			"old_mb_sunquan",
 			"old_pot_dengai",
+			"old_hefei_zhangliao",
 		],
 		ol_old: [
 			"old_shen_caopi",

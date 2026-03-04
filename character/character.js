@@ -649,6 +649,15 @@ const characters = {
     img: "image/character/mb_sunquan.jpg",
     dieAudios: ["mb_sunquan"],
   },
+  old_hefei_zhangliao: {
+    sex: "male",
+    group: "wei",
+    hp: 4,
+    skills: ["old_hefeichonglei", "old_hefeidangshi", "old_hefeiheyuzhangliao"],
+    img: "image/character/hefei_zhangliao.jpg",
+    dieAudios: ["hefei_zhangliao"],
+    tempname: ["hefei_zhangliao"],
+  },
   //OL
   old_shen_caopi: {
     sex: "male",

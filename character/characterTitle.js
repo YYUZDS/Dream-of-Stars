@@ -79,6 +79,7 @@ const characterTitles = {
 	//old_mb_liuhui: "",
 	//old_mb_sunquan: "",
 	//old_jm_yuanshu: "",
+	//hefei_zhangliao: "",
 	//OL
 	old_shen_caopi: "诰天仰颂",
 	oldx_clan_xuncai: "怀刃自誓",
