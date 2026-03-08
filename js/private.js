@@ -2172,9 +2172,7 @@ lib.skill.rezhiheng = {
 		return 6 - get.value(card);
 	},
 	async content(event, trigger, player) {
-		// step 0
 		const { cards } = event;
-		await player.discard(cards);
 		event.num = 1;
 		const hs = player.getCards("h");
 		if (!hs.length) {
@@ -2186,7 +2184,7 @@ lib.skill.rezhiheng = {
 				break;
 			}
 		}
-		// step 1
+		await player.discard(cards);
 		await player.draw(event.num + cards.length);
 	},
 	//group:'rezhiheng_draw',
