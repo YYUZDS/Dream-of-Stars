@@ -30501,7 +30501,7 @@ const lmCharacter = {
 			dialog: "characterDialog",
 		})}在场且与你阵营相同，修改${get.poptip("old_hefeichonglei")}中的“非【杀】手牌”为“手牌”。②若${get.poptip({
 			id: "characterx_hefei_lidian",
-			name: "骥李典",,
+			name: "骥李典",
 			type: "character",
 			dialog: "characterDialog",
 		})}在场且与你阵营相同，将${get.poptip("old_hefeidangshi")}中的X固定为3。`,
