@@ -19301,8 +19301,15 @@ const lmCharacter = {
 						filterCard: () => false,
 						selectCard: -1,
 						popname: true,
+						log: false,
 						viewAs: { name: links[0][2], nature: links[0][3], isCard: true },
-						precontent() {
+						async precontent(event, trigger, player) {
+							player.logSkill("old_olsblucun");
+							const name = "old_ol_sb_zhangrang";
+							const key = ["name", "name2"].find(i => player[i] == name);
+							if (key) {
+								player.changeSkin({ characterName: name }, `${"ol_sb_zhangrang"}${player.skin[key] == name ? "_shadow" : ""}`);
+							}
 							player.addTempSkill("old_olsblucun_used", "roundStart");
 							player.markAuto("old_olsblucun_used", [event.result.card.name]);
 							player.addTempSkill("old_olsblucun_effect");
@@ -19430,6 +19437,12 @@ const lmCharacter = {
 								await player.loseToDiscardpile(cards);
 								await player.draw(1 + cards.some(card => names.includes(get.name(card, false))));
 							}
+							const name = "old_ol_sb_zhangrang";
+							const key = ["name", "name2"].find(i => player[i] == name);
+							if (key) {
+								player.changeSkin({ characterName: name }, `${"ol_sb_zhangrang"}${player.skin[key] == name ? "_shadow" : ""}`);
+							}
+
 						}
 					},
 				},

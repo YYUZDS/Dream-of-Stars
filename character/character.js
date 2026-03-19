@@ -1009,6 +1009,7 @@ const characters = {
     trashBin: ["sex:male_castrated"],
     img: "image/character/ol_sb_zhangrang.jpg",
     dieAudios: ["ol_sb_zhangrang"],
+    tempname: ["ol_sb_zhangrang"],
   },
 
   //十周年

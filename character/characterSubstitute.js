@@ -37,5 +37,6 @@ const characterSubstitute = {
 	],
 	old_dc_sb_xunyu: [["dc_sb_xunyu_shadow", ["tempname:dc_sb_xunyu_shadow"]]],
 	old_dc_sb_luxun: [["dc_sb_luxun_shadow", ["tempname:dc_sb_luxun_shadow"]]],
+	old_ol_sb_zhangrang: [["ol_sb_zhangrang_shadow", ["tempname:ol_sb_zhangrang_shadow"]]],
 };
 export default characterSubstitute;
