@@ -161,6 +161,7 @@ const characterTitles = {
 	old_dc_shen_sunquan: "瀚海碧君",
 	old_hansong: "楚国之望",
 	old_liuyijun: "恶嫉蔑死",
+	old_dc_sb_xuyou: "智士濡足",
 	//海外
 	old_tw_huojun: "葭萌铁狮",
 	old_tw_guohuai: "屡破羌胡",
@@ -182,6 +183,7 @@ const characterTitles = {
 	old_tw_jiangji: "盛魏昌杰",
 	old_tw_zhangzhao: "功勋克举",
 	old_tw_zhanghong: "为世令器",
+	old_tw_huangfusong: "铁血柔肠",
 	//其他
 	diy_zhujun: "功成师克",
 	diy_liaohua: "历尽沧桑",

@@ -1303,6 +1303,14 @@ const characters = {
     img: "image/character/dc_sb_luxun.jpg",
     dieAudios: ["dc_sb_luxun"],
   },
+  old_dc_sb_xuyou: {
+    sex: "male",
+    group: "qun",
+    hp: 3,
+    skills: ["old_dcsbmoyou", "dcsbshiao"],
+    img: "image/character/dc_sb_xuyou.jpg",
+    dieAudios: ["dc_sb_xuyou"],
+  },
   old_v_sunce: {
     sex: "male",
     group: "wu",
@@ -1504,6 +1512,14 @@ const characters = {
     skills: ["old_twlijian", "old_twchungang"],
     img: "image/character/tw_zhangzhao.jpg",
     dieAudios: ["tw_zhangzhao"],
+  },
+  old_tw_huangfusong: {
+    sex: "male",
+    group: "qun",
+    hp: 4,
+    skills: ["old_twtaoluan", "old_twshiji", "old_twzhengjun"],
+    img: "image/character/tw_huangfusong.jpg",
+    dieAudios: ["sp_huangfusong"],
   },
   //其他
   diy_zhujun: {

@@ -165,6 +165,7 @@ const characterSorts = {
 			"old_dc_shen_sunquan",
 			"old_hansong",
 			"old_liuyijun",
+			"old_dc_sb_xuyou",
 		],
 		tw_old: [
 			"old_tw_huojun",
@@ -187,6 +188,7 @@ const characterSorts = {
 			"old_tw_jiangji",
 			"old_tw_zhangzhao",
 			"old_tw_zhanghong",
+			"old_tw_huangfusong",
 		],
 		other_old: [
 			"old_gaowang",

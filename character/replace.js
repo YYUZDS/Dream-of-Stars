@@ -968,9 +968,11 @@ const characterReplaces = {
 		"wu_huangfusong",
 		"sp_huangfusong",
 		"tw_jsrg_huangfusong",
+		"tw_huangfusong",
 		"jsrg_huangfusong",
 		"std_huangfusong",
 		"old_huangfusong",
+		"old_tw_huangfusong",
 	],
 	lukai: [
 		"old_lukai",
@@ -1176,6 +1178,16 @@ const characterReplaces = {
 		"x_yao_yuanshu",
 		"jm_yuanshu",
 		"old_jm_yuanshu",
+	],
+	xuyou: [
+		"xuyou",
+		"ol_sb_xuyou",
+		"dc_sb_xuyou",
+		"sp_xuyou",
+		"jsrg_xuyou",
+		"yj_xuyou",
+		"junk_xuyou",
+		"old_dc_sb_xuyou",
 	],
 
 	shen_sunquan: [

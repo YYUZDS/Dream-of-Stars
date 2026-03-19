@@ -25912,6 +25912,117 @@ const lmCharacter = {
 				},
 			},
 		},
+		//新杀谋许攸
+		old_dcsbmoyou: {
+			audio: "dcsbmoyou",
+			trigger: {
+				player: "useCardAfter",
+			},
+			filter(event, player) {
+				const lose = player.getAllHistory("lose", evt => (evt.relatedEvent || evt.getParent()).name == "useCard");
+				const index = player
+					.getAllHistory("useCard", evt => {
+						return lose.some(evtx => (evtx.relatedEvent || evtx.getParent()) == evt && evtx.hs?.length);
+					})
+					.indexOf(event);
+				return index >= 0 && (index + 1) % 2 == 0;
+			},
+			check: () => true,
+			async content(event, trigger, player) {
+				await player.draw({ num: 4 });
+				const getCards = suit => player.getDiscardableCards(player, "h", { suit: suit });
+				const suits = lib.suit.filter(suit => getCards(suit).length > 0);
+				if (suits.length) {
+					const hs = player.getCards("h");
+					const types = hs.map(card => get.type2(card)).unique();
+					const choice = suits.slice().sort((a, b) => get.value(getCards(a)) - get.value(getCards(b)))[0];
+					const result = await player
+						.chooseControl({
+							controls: suits,
+							prompt: "谟猷：请弃置一种花色的所有手牌",
+							ai() {
+								return get.event().suit;
+							},
+						})
+						.set("suit", choice)
+						.forResult();
+					if (result?.control) {
+						const suit = result.control;
+						const cards = getCards(suit);
+						await player.discard({ cards });
+						if (
+							!player
+								.getCards("h")
+								.map(card => get.type2(card))
+								.containsAll("basic", "trick", "equip")
+						) {
+							player.addTempSkill(`${event.name}_basic`);
+							player.addTempSkill(`${event.name}_trick`);
+						}
+					}
+				}
+			},
+			subSkill: {
+				basic: {
+					mod: {
+						cardUsable(card, player) {
+							if (get.type(card) == "basic") {
+								return Infinity;
+							}
+						},
+						targetInRange(card, player) {
+							if (get.type(card) == "basic") {
+								return true;
+							}
+						},
+					},
+					trigger: {
+						player: "useCard1",
+					},
+					forced: true,
+					charlotte: true,
+					popup: false,
+					firstDo: true,
+					filter(event, player) {
+						return get.type2(event.card) == "basic";
+					},
+					async content(event, trigger, player) {
+						player.removeSkill(event.name);
+						if (trigger.addCount !== false) {
+							trigger.addCount = false;
+							const stat = player.getStat().card,
+								name = trigger.card.name;
+							if (typeof stat[name] == "number") {
+								stat[name]--;
+							}
+						}
+					},
+					mark: true,
+					marktext: "基",
+					intro: {
+						content: "使用下一张基本牌无距离和次数限制",
+					},
+				},
+				trick: {
+					charlotte: true,
+					forced: true,
+					trigger: { player: "useCard" },
+					filter(event, player) {
+						return get.type2(event.card) == "trick";
+					},
+					async content(event, trigger, player) {
+						player.removeSkill(event.name);
+						game.log(trigger.card, "不可被响应");
+						trigger.directHit.addArray(game.players);
+					},
+					mark: true,
+					marktext: "锦",
+					intro: {
+						content: "使用下一张锦囊牌不可响应",
+					},
+				},
+			},
+		},
 		//新杀夏侯玄
 		old_dcyizheng: {
 			audio: "dcyizheng",
@@ -28044,7 +28155,7 @@ const lmCharacter = {
 				}
 			},
 		},
-		//TW皇甫嵩
+		//TW起皇甫嵩
 		old_twjuxia: {
 			audio: "jsrgjuxia",
 			trigger: {
@@ -28100,6 +28211,244 @@ const lmCharacter = {
 			},
 			subSkill: {
 				used: { charlotte: true },
+			},
+		},
+		//海外皇甫嵩
+		old_twtaoluan: {
+			audio: "sptaoluan",
+			trigger: {
+				global: "judgeFixing",
+			},
+			usable: 1,
+			filter(event, player) {
+				return event.result && player.countDiscardableCards(player, "he", card => get.color(card) == event.result.color) > 0;
+			},
+			async cost(event, trigger, player) {
+				const color = trigger.result.color;
+				event.result = await player
+					.chooseToDiscard(
+						get.prompt(event.skill),
+						`你可以弃置一张${get.translation(color)}牌以中止此判定并获得${get.translation(trigger.result.card)}。`,
+						"chooseonly",
+						{ color: color },
+						"he"
+					)
+					.set("ai", card => {
+						if (get.event().goon) {
+							return 6 - get.value(card);
+						}
+						return 0;
+					})
+					.set("goon", trigger.result.judge * get.attitude(player, trigger.player) <= 0)
+					.forResult();
+			},
+			async content(event, trigger, player) {
+				await player.discard(event.cards);
+				let evt = trigger.getParent();
+				if (evt.name === "phaseJudge") {
+					evt.excluded = true;
+				} else {
+					const stopevt = ev => {
+						ev.finish();
+						ev._triggered = null;
+					};
+					stopevt(evt);
+					if (evt.name.startsWith("pre_")) {
+						stopevt(evt.getParent());
+					}
+					trigger.next = trigger.next.filter(next => next.name !== "judgeCallback");
+					const evts = game.getGlobalHistory("cardMove", e => e.getParent(2) === evt);
+					const cards = evts.flatMap(e => e.cards).filter(card => get.position(card, true) === "o");
+					trigger.orderingCards.addArray(cards);
+				}
+				const card = trigger.result.card;
+				if (get.position(card) == "d") {
+					await player.gain(card, "gain2");
+				}
+			},
+		},
+		old_twshiji: {
+			group: "old_twshiji_gain",
+			audio: "spshiji",
+			trigger: {
+				player: ["damageEnd", "phaseZhunbeiBegin"],
+			},
+			forced: true,
+			locked: false,
+			async content(event, trigger, player) {
+				/*const result = await player
+					.chooseControl(["牌堆", "弃牌堆"])
+					.set("ai", () => {
+						return ui.discardPile.childElementCount >= ui.cardPile.childElementCount ? 1 : 0
+					})
+					.set("prompt", `【势击】：请选择获得两张颜色不同的牌的位置`)
+					.forResult();
+				const pos = result.control.includes("弃") ? "discardPile" : "cardPile";*/
+				const cards = [];
+				for (let color of ["black", "red"]) {
+					const card = get.cardPile(card => get.color(card) == color);
+					if (card) {
+						cards.push(card);
+					}
+				}
+				if (cards.length) {
+					await player.gain(cards, "gain2");
+				}
+				const result2 = await player
+					.chooseToDiscard(`势击：你可以弃置一张牌，然后与弃置牌颜色相同的牌于本回合内被展示后，你摸一张牌。`, "he")
+					.set("ai", card => {
+						return 6 - get.value(card);
+					})
+					.forResult();
+				if (result2?.bool && result2?.cards?.length) {
+					const skill = `${event.name}_draw`;
+					player.addTempSkill(skill);
+					player.markAuto(skill, get.color(result2.cards[0]));
+				}
+			},
+			subSkill: {
+				draw: {
+					audio: "mbshiji",
+					trigger: {
+						global: "showCardsAfter",
+					},
+					onremove: true,
+					charlotte: true,
+					forced: true,
+					filter(event, player) {
+						return event.cards?.some(card => player.getStorage("old_twshiji_draw").includes(get.color(card)));
+					},
+					async content(event, trigger, player) {
+						const num = trigger.cards
+							.map(card => get.color(card))
+							.unique()
+							.filter(i => player.getStorage(event.name).includes(i)).length;
+						await player.draw(num);
+					},
+				},
+				gain: {
+					audio: "mbshiji",
+					getcard(event, player) {
+						const { card } = event;
+						if (get.name(card) != "huogong") {
+							return [];
+						}
+						const evt = event.getParent(evt => evt.card == card && evt.name == "huogong", true);
+						if (!evt) {
+							return [];
+						}
+						const cards = evt.showResult?.cards;
+						return cards?.filter(
+							card =>
+								["c", "d"].includes(get.position(card)) ||
+								(get.owner(card) == evt.target && lib.filter.canBeGained(card, player, evt.target))
+						);
+					},
+					trigger: {
+						source: "damageSource",
+					},
+					prompt2(event, player) {
+						return `是否获得${get.translation(get.info("old_twshiji_gain").getcard(event, player))}？`;
+					},
+					filter(event, player) {
+						return get.info("old_twshiji_gain").getcard(event, player)?.length;
+					},
+					async content(event, trigger, player) {
+						const cards = get.info("old_twshiji_gain").getcard(trigger, player);
+						const map = new Map();
+						const directGain = [];
+						for (const card of cards) {
+							const owner = get.owner(card);
+							if (owner) {
+								map.set(owner, (map.get(owner) || []).concat(card));
+							} else {
+								directGain.push(card);
+							}
+						}
+						await player
+							.gain(cards)
+							.set("map", map)
+							.set("directGain", directGain)
+							.set("animate", event => {
+								const { map, directGain } = event;
+								if (directGain.length) {
+									player.$gain2(directGain, true);
+								}
+								if (Array.from(map.values()).flat()?.length) {
+									for (const [giver, cards] of map.entries()) {
+										giver.$giveAuto(cards, player);
+									}
+								}
+							});
+					},
+				},
+			},
+		},
+		old_twzhengjun: {
+			audio: "spzhengjun",
+			trigger: {
+				global: ["loseAfter", "equipAfter", "addJudgeAfter", "gainAfter", "loseAsyncAfter", "addToExpansionAfter"],
+			},
+			filter(event, player) {
+				const evt = event.relatedEvent || event.getParent();
+				const evtx = event?.getl(player);
+				return evtx?.hs?.length && !["useCard", "respond"].includes(evt?.name);
+			},
+			group: "old_twzhengjun_tempBan",
+			async cost(event, trigger, player) {
+				const num = player.maxHp - player.countCards("h");
+				const result = await player
+					.chooseControl(["获得【火攻】", `摸${num >= 0 ? num : 0}张牌`, "cancel2"])
+					.set("ai", () => {
+						const player = get.player();
+						if (player.maxHp - player.countCards("h") > 2) {
+							return 1;
+						}
+						return 0;
+					})
+					.set("prompt", get.prompt2(event.skill))
+					.forResult();
+				event.result = {
+					bool: result.control != "cancel2",
+					cost_data: result.index,
+				};
+			},
+			async content(event, trigger, player) {
+				if (event.cost_data == 0) {
+					const card = get.cardPile(card => get.name(card) == "huogong");
+					if (card) {
+						await player.gain(card, "gain2");
+					} else {
+						player.chat("牌喵？");
+					}
+				} else {
+					const num = player.maxHp - player.countCards("h");
+					if (num > 0) {
+						await player.drawTo(player.maxHp);
+					}
+				}
+			},
+			subSkill: {
+				tempBan: {
+					forced: true,
+					locked: false,
+					audio: "spzhengjun",
+					trigger: {
+						player: "gainAfter",
+					},
+					filter(event, player) {
+						const check = evt =>
+							evt.getParent().name == "old_twzhengjun" || (evt.getParent().name == "draw" && evt.getParent(2).name == "old_twzhengjun");
+						return (
+							event.getg(player)?.length &&
+							check(event) &&
+							player.getHistory("gain", evt => check(evt) && evt.cards.length).flatMap(evt => evt.cards).length >= 3
+						);
+					},
+					async content(event, trigger, player) {
+						player.tempBanSkill("old_twzhengjun");
+					},
+				},
 			},
 		},
 		//幻诸葛亮
@@ -30146,13 +30495,13 @@ const lmCharacter = {
 		old_hefeidangshi_info: "你使用伤害牌结算结束后，可选择一名此牌目标，令其选择一项执行：1.对你使用一张同名牌；2.弃置X张牌（X为其选择此项的次数+1）；3.受到1点伤害。若为本阶段首次执行此项，你摸一张牌且本阶段出杀次数+1。",
 		old_hefeiheyuzhangliao: "合御",
 		old_hefeiheyuzhangliao_info: `锁定技，①若${get.poptip({
-			id: "characterx_hefei_lidian",
-			name: "合李典",
+			id: "characterx_hefei_yuejin",
+			name: "骥乐进",
 			type: "character",
 			dialog: "characterDialog",
 		})}在场且与你阵营相同，修改${get.poptip("old_hefeichonglei")}中的“非【杀】手牌”为“手牌”。②若${get.poptip({
-			id: "characterx_hefei_yuejin",
-			name: "合乐进",
+			id: "characterx_hefei_lidian",
+			name: "骥李典",,
 			type: "character",
 			dialog: "characterDialog",
 		})}在场且与你阵营相同，将${get.poptip("old_hefeidangshi")}中的X固定为3。`,
@@ -30600,6 +30949,10 @@ const lmCharacter = {
 		old_liuyijun_prefix: "旧",
 		old_dcfuji: "缚己",
 		old_dcfuji_info: "你的回合结束时，可令一名其他角色观看你的手牌。若如此做，其使用牌指定你为目标时，你可交给其这些牌中的任意张牌并令此牌无效；你的下个回合开始时，若这些牌仍在你手牌中，其获得这些牌并回复1点体力。",
+		old_dc_sb_xuyou: "旧新杀谋许攸",
+		old_dc_sb_xuyou_prefix: "旧|新杀谋",
+		old_dcsbmoyou: "谟猷",
+		old_dcsbmoyou_info: "你每使用两张手牌结算后，可以摸四张牌，并选择一种花色弃置手牌中所有此花色的牌，若你手牌未含有所有类型，本回合下次使用基本牌无次数与距离限制，使用锦囊牌不可响应。",
 
 		old_tw_huojun: "旧TW霍峻",
 		old_tw_huojun_prefix: "旧|TW",
@@ -30713,6 +31066,14 @@ const lmCharacter = {
 		old_twquanqian_info: `昂扬技。出牌阶段限一次，你可以将至多四张花色各不相同的手牌交给一名其他角色，然后若你交出的牌数大于1，则你从牌堆中获得一张装备牌，然后选择一项：①将手牌数摸至与其相同；②观看其手牌并获得其一种花色的所有牌。<br>${get.poptip("rule_jiang")}：你弃置六张手牌。`,
 		old_twrouke: "柔克",
 		old_twrouke_info: "锁定技。当你于摸牌阶段外得到超过一张牌时，你摸一张牌。",
+		old_tw_huangfusong: "旧TW皇甫嵩",
+		old_tw_huangfusong_prefix: "旧|TW",
+		old_twtaoluan: "讨乱",
+		old_twtaoluan_info: "每回合限一次，当一名角色的判定结果确认时，你可以弃置一张与判定结果颜色相同的牌，然后终止导致此判定发生的上级事件并获得判定牌。",
+		old_twshiji: "势击",
+		old_twshiji_info: "准备阶段或当你受到伤害后，你从牌堆或弃牌堆中获得两张颜色不同的牌，然后你可以弃置一张牌，与弃置牌颜色相同的牌于本回合内被展示后，你摸一张牌。你使用【火攻】造成伤害后，可以获得对方【火攻】展示的牌。",
+		old_twzhengjun: "整军",
+		old_twzhengjun_info: "当你不因使用或打出失去手牌后，你可以选择一项：1.从牌堆或弃牌堆中获得一张【火攻】；2.将手牌补至体力上限。当你一回合内因此技能获得的牌数不小于3时，此技能本回合失效。",
 
 		old_gaowang: "旧高望",
 		old_gaowang_prefix: "旧",
