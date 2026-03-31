@@ -26,16 +26,7 @@ lib.skill.yuqi = {
 		const next = player.chooseToMove_new(true, "隅泣");
 		next.set("list", [
 			["牌堆顶的牌", cards],
-			[
-				[
-					"交给" +
-					get.translation(target) +
-					'<div class="text center">至少一张' +
-					(list[2] > 1 ? "<br>至多" + get.cnNumber(list[2]) + "张" : "") +
-					"</div>",
-				],
-				['交给自己<div class="text center">至多' + get.cnNumber(list[3]) + "张</div>"],
-			],
+			[["交给" + get.translation(target) + '<div class="text center">至少一张' + (list[2] > 1 ? "<br>至多" + get.cnNumber(list[2]) + "张" : "") + "</div>"], ['交给自己<div class="text center">至多' + get.cnNumber(list[3]) + "张</div>"]],
 		]);
 		next.set("filterMove", function (from, to, moved) {
 			var info = lib.skill.yuqi.getInfo(_status.event.player);
@@ -49,8 +40,8 @@ lib.skill.yuqi = {
 		});
 		next.set("processAI", function (list) {
 			var cards = list[0][1].slice(0).sort(function (a, b) {
-				return get.value(b, "raw") - get.value(a, "raw");
-			}),
+					return get.value(b, "raw") - get.value(a, "raw");
+				}),
 				player = _status.event.player,
 				target = _status.event.getTrigger().player;
 			var info = lib.skill.yuqi.getInfo(_status.event.player);
@@ -91,17 +82,7 @@ lib.skill.yuqi = {
 	intro: {
 		content(storage, player) {
 			var info = lib.skill.yuqi.getInfo(player);
-			return (
-				'<div class="text center">距离：<span class=thundertext>' +
-				info[0] +
-				"</span><br>观看牌堆：<span class=firetext>" +
-				info[1] +
-				"</span><br>交给别人：<span class=greentext>" +
-				info[2] +
-				"</span><br>交给自己：<span class=yellowtext>" +
-				info[3] +
-				"</span></div>"
-			);
+			return '<div class="text center">距离：<span class=thundertext>' + info[0] + "</span><br>观看牌堆：<span class=firetext>" + info[1] + "</span><br>交给别人：<span class=greentext>" + info[2] + "</span><br>交给自己：<span class=yellowtext>" + info[3] + "</span></div>";
 		},
 	},
 	ai: {
@@ -122,27 +103,9 @@ lib.skill.shanshen = {
 		});
 		const list = get.info("yuqi").getInfo(player);
 		const result = await player
-			.chooseControl(
-				"<span class=thundertext>距离</span>",
-				"<span class=firetext>观看牌堆</span>",
-				"<span class=greentext>交给别人</span>",
-				"<span class=yellowtext>交给自己</span>",
-				"cancel2"
-			)
+			.chooseControl("<span class=thundertext>距离</span>", "<span class=firetext>观看牌堆</span>", "<span class=greentext>交给别人</span>", "<span class=yellowtext>交给自己</span>", "cancel2")
 			.set("prompt", get.prompt(event.skill))
-			.set(
-				"prompt2",
-				"令“当有角色受到伤害后，若你至其的距离不大于[<span class=thundertext>" +
-				list[0] +
-				"</span>]，则你可以观看牌堆顶的[<span class=firetext>" +
-				list[1] +
-				"</span>]张牌，你将其中至多[<span class=greentext>" +
-				list[2] +
-				"</span>]张牌交给受伤角色，然后可以获得剩余牌中的至多[<span class=yellowtext>" +
-				list[3] +
-				"</span>]张牌，并将其余牌以原顺序放回牌堆顶。”中的一个数字+2" +
-				(event.goon ? "并回复1点体力" : "")
-			)
+			.set("prompt2", "令“当有角色受到伤害后，若你至其的距离不大于[<span class=thundertext>" + list[0] + "</span>]，则你可以观看牌堆顶的[<span class=firetext>" + list[1] + "</span>]张牌，你将其中至多[<span class=greentext>" + list[2] + "</span>]张牌交给受伤角色，然后可以获得剩余牌中的至多[<span class=yellowtext>" + list[3] + "</span>]张牌，并将其余牌以原顺序放回牌堆顶。”中的一个数字+2" + (event.goon ? "并回复1点体力" : ""))
 			.set("ai", function () {
 				const player = _status.event.player,
 					info = lib.skill.yuqi.getInfo(player);
@@ -208,26 +171,9 @@ lib.skill.xianjing = {
 	async cost(event, trigger, player) {
 		const list = get.info("yuqi").getInfo(player);
 		const result = await player
-			.chooseControl(
-				"<span class=thundertext>距离</span>",
-				"<span class=firetext>观看牌堆</span>",
-				"<span class=greentext>交给别人</span>",
-				"<span class=yellowtext>交给自己</span>",
-				"cancel2"
-			)
+			.chooseControl("<span class=thundertext>距离</span>", "<span class=firetext>观看牌堆</span>", "<span class=greentext>交给别人</span>", "<span class=yellowtext>交给自己</span>", "cancel2")
 			.set("prompt", get.prompt(event.skill))
-			.set(
-				"prompt2",
-				"令“当有角色受到伤害后，若你至其的距离不大于[<span class=thundertext>" +
-				list[0] +
-				"</span>]，则你可以观看牌堆顶的[<span class=firetext>" +
-				list[1] +
-				"</span>]张牌，你将其中至多[<span class=greentext>" +
-				list[2] +
-				"</span>]张牌交给受伤角色，然后可以获得剩余牌中的至多[<span class=yellowtext>" +
-				list[3] +
-				"</span>]张牌，并将其余牌以原顺序放回牌堆顶。”中的一个数字+1"
-			)
+			.set("prompt2", "令“当有角色受到伤害后，若你至其的距离不大于[<span class=thundertext>" + list[0] + "</span>]，则你可以观看牌堆顶的[<span class=firetext>" + list[1] + "</span>]张牌，你将其中至多[<span class=greentext>" + list[2] + "</span>]张牌交给受伤角色，然后可以获得剩余牌中的至多[<span class=yellowtext>" + list[3] + "</span>]张牌，并将其余牌以原顺序放回牌堆顶。”中的一个数字+1")
 			.set("ai", function () {
 				const player = _status.event.player,
 					info = lib.skill.yuqi.getInfo(player);
@@ -277,26 +223,9 @@ lib.skill.xianjing = {
 			return;
 		}
 		const result = await player
-			.chooseControl(
-				"<span class=thundertext>距离</span>",
-				"<span class=firetext>观看牌堆</span>",
-				"<span class=greentext>交给别人</span>",
-				"<span class=yellowtext>交给自己</span>",
-				"cancel2"
-			)
+			.chooseControl("<span class=thundertext>距离</span>", "<span class=firetext>观看牌堆</span>", "<span class=greentext>交给别人</span>", "<span class=yellowtext>交给自己</span>", "cancel2")
 			.set("prompt", get.prompt(event.skill))
-			.set(
-				"prompt2",
-				"令“当有角色受到伤害后，若你至其的距离不大于[<span class=thundertext>" +
-				list[0] +
-				"</span>]，则你可以观看牌堆顶的[<span class=firetext>" +
-				list[1] +
-				"</span>]张牌，你将其中至多[<span class=greentext>" +
-				list[2] +
-				"</span>]张牌交给受伤角色，然后可以获得剩余牌中的至多[<span class=yellowtext>" +
-				list[3] +
-				"</span>]张牌，并将其余牌以原顺序放回牌堆顶。”中的一个数字+1"
-			)
+			.set("prompt2", "令“当有角色受到伤害后，若你至其的距离不大于[<span class=thundertext>" + list[0] + "</span>]，则你可以观看牌堆顶的[<span class=firetext>" + list[1] + "</span>]张牌，你将其中至多[<span class=greentext>" + list[2] + "</span>]张牌交给受伤角色，然后可以获得剩余牌中的至多[<span class=yellowtext>" + list[3] + "</span>]张牌，并将其余牌以原顺序放回牌堆顶。”中的一个数字+1")
 			.set("ai", function () {
 				const player = _status.event.player,
 					info = lib.skill.yuqi.getInfo(player);
@@ -384,8 +313,7 @@ if (lib.config.extension_星之梦_tmEnhance) {
 			},
 		},
 	};
-	lib.translate.tianming_info =
-		"当你成为【杀】的目标时，你可以弃置两张牌（不足则全弃，无牌则不弃），然后摸两张牌。然后你可以选择一名角色，令其弃置两张牌（不足则全弃，无牌则不弃），然后摸两张牌。";
+	lib.translate.tianming_info = "当你成为【杀】的目标时，你可以弃置两张牌（不足则全弃，无牌则不弃），然后摸两张牌。然后你可以选择一名角色，令其弃置两张牌（不足则全弃，无牌则不弃），然后摸两张牌。";
 }
 //十常侍增强
 if (lib.config.extension_星之梦_scsEnhance) {
@@ -397,20 +325,7 @@ if (lib.config.extension_星之梦_scsEnhance) {
 		filter(event, player) {
 			return event.name != "phase" || game.phaseNumber == 0;
 		},
-		derivation: [
-			"mbdanggu_faq",
-			"mbdanggu_faq2",
-			"scstaoluan",
-			"scschiyan",
-			"scszimou",
-			"scspicai",
-			"scsyaozhuo",
-			"scsxiaolu",
-			"scskuiji",
-			"scschihe",
-			"scsniqu",
-			"scsanruo",
-		],
+		derivation: ["mbdanggu_faq", "mbdanggu_faq2", "scstaoluan", "scschiyan", "scszimou", "scspicai", "scsyaozhuo", "scsxiaolu", "scskuiji", "scschihe", "scsniqu", "scsanruo"],
 		forced: true,
 		unique: true,
 		onremove(player) {
@@ -504,11 +419,11 @@ if (lib.config.extension_星之梦_scsEnhance) {
 				result = { bool: true, links: others };
 			} else {
 				const map = {
-					scs_bilan: "scs_hankui",
-					scs_hankui: "scs_bilan",
-					scs_duangui: "scs_guosheng",
-					scs_guosheng: "scs_duangui",
-				},
+						scs_bilan: "scs_hankui",
+						scs_hankui: "scs_bilan",
+						scs_duangui: "scs_guosheng",
+						scs_guosheng: "scs_duangui",
+					},
 					map2 = lib.skill.mbdanggu.conflictMap(player);
 				const conflictList = others.filter(changshi => {
 					if (map[first] && others.some(changshi2 => map[first] == changshi2)) {
@@ -534,10 +449,7 @@ if (lib.config.extension_星之梦_scsEnhance) {
 					);
 				}
 				result = await player
-					.chooseButton(
-						["党锢：请选择结党对象", [[first], "character"], '<div class="text center">可选常侍</div>', [others, "character"]],
-						true
-					)
+					.chooseButton(["党锢：请选择结党对象", [[first], "character"], '<div class="text center">可选常侍</div>', [others, "character"]], true)
 					.set("filterButton", button => {
 						return _status.event.canChoose.includes(button.link);
 					})
@@ -596,13 +508,7 @@ if (lib.config.extension_星之梦_scsEnhance) {
 		},
 		isSingleShichangshi(player) {
 			var map = lib.skill.mbdanggu.conflictMap(player);
-			return (
-				player.name == "shichangshi" &&
-				((map[player.name1] && map[player.name2]) ||
-					(map[player.name1] && !player.name2) ||
-					(!player.name1 && !player.name2) ||
-					(player.name == player.name1 && !player.name2))
-			);
+			return player.name == "shichangshi" && ((map[player.name1] && map[player.name2]) || (map[player.name1] && !player.name2) || (!player.name1 && !player.name2) || (player.name == player.name1 && !player.name2));
 		},
 		mod: {
 			aiValue(player, card, num) {
@@ -812,10 +718,7 @@ if (lib.config.extension_星之梦_scsEnhance) {
 			var next = player.choosePlayerCard(trigger.target, "he", [1, 2], get.prompt("scschiyan", trigger.target));
 			setTimeout(function () {
 				game.broadcastAll(function () {
-					decadeUI.animation.playSpine(
-						{ name: "shichangshi/scs_zhaozhong/XingXiang", action: "GongJi" },
-						{ x: [0, 0.4], y: [0, 0.4], scale: 0.44 }
-					);
+					decadeUI.animation.playSpine({ name: "shichangshi/scs_zhaozhong/XingXiang", action: "GongJi" }, { x: [0, 0.4], y: [0, 0.4], scale: 0.44 });
 				});
 			}, 100);
 			next.set("ai", function (button) {
@@ -879,11 +782,7 @@ if (lib.config.extension_星之梦_scsEnhance) {
 				logTarget: "player",
 				filter(event, player) {
 					var target = event.player;
-					return (
-						event.getParent().name == "sha" &&
-						player.countCards("h") >= target.countCards("h") &&
-						player.countCards("e") >= target.countCards("e")
-					);
+					return event.getParent().name == "sha" && player.countCards("h") >= target.countCards("h") && player.countCards("e") >= target.countCards("e");
 				},
 				content() {
 					trigger.num++;
@@ -946,10 +845,7 @@ if (lib.config.extension_星之梦_scsEnhance) {
 			"step 0";
 			setTimeout(function () {
 				game.broadcastAll(function () {
-					decadeUI.animation.playSpine(
-						{ name: "shichangshi/scs_hankui/XingXiang", action: "GongJi" },
-						{ x: [0, 0.4], y: [0, 0.4], scale: 0.49 }
-					);
+					decadeUI.animation.playSpine({ name: "shichangshi/scs_hankui/XingXiang", action: "GongJi" }, { x: [0, 0.4], y: [0, 0.4], scale: 0.49 });
 				});
 			}, 100);
 			player.draw(3);
@@ -1006,10 +902,8 @@ if (lib.config.extension_星之梦_scsEnhance) {
 			result: { player: 2 },
 		},
 	};
-	lib.translate.mbdanggu_info =
-		"锁定技。①游戏开始时，你获得十张“常侍”牌，然后你进行一次结党。②当你修整结束后，你进行一次结党并摸两张牌。③若你有亮出的“常侍”牌，你视为拥有这些牌的技能。";
-	lib.translate.scschiyan_info =
-		"①当你使用【杀】指定目标后，你可以将其的至多两张牌置于其武将牌上，然后其于当前回合结束时获得这些牌。②当你因执行【杀】的效果对一名角色造成伤害时，若该角色的手牌数和装备区内的牌数均不大于你，此伤害+1。";
+	lib.translate.mbdanggu_info = "锁定技。①游戏开始时，你获得十张“常侍”牌，然后你进行一次结党。②当你修整结束后，你进行一次结党并摸两张牌。③若你有亮出的“常侍”牌，你视为拥有这些牌的技能。";
+	lib.translate.scschiyan_info = "①当你使用【杀】指定目标后，你可以将其的至多两张牌置于其武将牌上，然后其于当前回合结束时获得这些牌。②当你因执行【杀】的效果对一名角色造成伤害时，若该角色的手牌数和装备区内的牌数均不大于你，此伤害+1。";
 	lib.translate.scsyaozhuo_info = "出牌阶段限一次。你可以与一名角色拼点，若你赢，其跳过下一个摸牌阶段；若你没赢，你弃置一张牌。";
 	lib.translate.scsxiaolu_info = "出牌阶段限一次。你可以摸三张牌，然后选择一项：1.弃置三张牌；2.将三张牌交给一名其他角色。";
 	lib.character.scs_gaowang = ["male", "qun", "", ["scsanruo"], ["unseen", "sex:male_castrated"]];
@@ -1129,8 +1023,7 @@ if (lib.config.extension_星之梦_zxEnhance) {
 						event.dialog.textPrompt.innerHTML = '<div class="text center">叫你别点毒你非得点 这下翻车了吧</div>';
 					} else {
 						if (lib.config.background_speak) game.playAudio("skill", "zhengjing_finish");
-						event.dialog.textPrompt.innerHTML =
-							'<div class="text center">整理经典结束！共整理出' + get.cnNumber(event.finishedx.length) + "份经典</div>";
+						event.dialog.textPrompt.innerHTML = '<div class="text center">整理经典结束！共整理出' + get.cnNumber(event.finishedx.length) + "份经典</div>";
 					}
 					while (event.zhengjing_nodes.length) {
 						event.zhengjing_nodes.shift().delete();
@@ -1464,9 +1357,7 @@ if (lib.config.extension_星之梦_zxEnhance) {
 						const left = Math.ceil(Math.random() * 560),
 							card = ui.create.card(null, "noclick", true);
 						card.init({ name: name });
-						if (name == "du")
-							card.style["box-shadow"] =
-								"rgba(0, 0, 0, 0.2) 0 0 0 1px,rgba(255, 0, 0, 0.4) 0 0 5px, rgba(255, 0, 0, 0.4) 0 0 12px, rgba(255, 0, 0, 0.8) 0 0 15px";
+						if (name == "du") card.style["box-shadow"] = "rgba(0, 0, 0, 0.2) 0 0 0 1px,rgba(255, 0, 0, 0.4) 0 0 5px, rgba(255, 0, 0, 0.4) 0 0 12px, rgba(255, 0, 0, 0.8) 0 0 15px";
 						card.style["pointer-events"] = "none";
 						card.style.position = "absolute";
 						card.style.top = dialog.offsetHeight - 5 + "px";
@@ -1545,15 +1436,7 @@ if (lib.config.extension_星之梦_zxEnhance) {
 											var y2 = line1[1][1];
 											var y3 = line2[0][1];
 											var y4 = line2[1][1];
-											if (
-												!(
-													Math.min(x1, x2) <= Math.max(x3, x4) &&
-													Math.min(y3, y4) <= Math.max(y1, y2) &&
-													Math.min(x3, x4) <= Math.max(x1, x2) &&
-													Math.min(y1, y2) <= Math.max(y3, y4)
-												)
-											)
-												return false;
+											if (!(Math.min(x1, x2) <= Math.max(x3, x4) && Math.min(y3, y4) <= Math.max(y1, y2) && Math.min(x3, x4) <= Math.max(x1, x2) && Math.min(y1, y2) <= Math.max(y3, y4))) return false;
 											else return true;
 										};
 										var line = [
@@ -1912,11 +1795,7 @@ if (lib.config.extension_星之梦_vtbEnhance) {
 				content() {
 					"step 0";
 					player
-						.chooseToDiscard(
-							get.prompt("vtbshanwu_shan"),
-							"弃置一张【闪】，取消此【杀】对" + get.translation(trigger.targets) + "的目标",
-							{ name: "shan" }
-						)
+						.chooseToDiscard(get.prompt("vtbshanwu_shan"), "弃置一张【闪】，取消此【杀】对" + get.translation(trigger.targets) + "的目标", { name: "shan" })
 						.set("logSkill", "vtbshanwu")
 						.set("ai", card => {
 							if (_status.event.goon) return 6 - get.value(card);
@@ -2009,8 +1888,7 @@ if (lib.config.extension_星之梦_vtbEnhance) {
 			},
 		},
 	};
-	lib.translate.vtbshanwu_info =
-		"当其他角色成为【杀】的第一个目标时，你可以弃置一张【闪】，然后取消此【杀】的所有目标。当你成为其他角色使用【杀】或普通锦囊牌的目标后，你可以打出一张【闪】令此牌对你无效，然后你摸一张牌。你可以将一张装备牌当作【闪】使用或打出。";
+	lib.translate.vtbshanwu_info = "当其他角色成为【杀】的第一个目标时，你可以弃置一张【闪】，然后取消此【杀】的所有目标。当你成为其他角色使用【杀】或普通锦囊牌的目标后，你可以打出一张【闪】令此牌对你无效，然后你摸一张牌。你可以将一张装备牌当作【闪】使用或打出。";
 }
 //孙翊凶疑修改
 if (lib.config.extension_星之梦_syEnhance) {
@@ -2225,12 +2103,7 @@ lib.skill.rezhiheng = {
 		nokeep: true,
 		skillTagFilter(player, tag, arg) {
 			if (tag === "nokeep") {
-				return (
-					(!arg || (arg && arg.card && get.name(arg.card) === "tao")) &&
-					player.isPhaseUsing() &&
-					!player.getStat().skill.rezhiheng &&
-					player.hasCard(card => get.name(card) !== "tao", "h")
-				);
+				return (!arg || (arg && arg.card && get.name(arg.card) === "tao")) && player.isPhaseUsing() && !player.getStat().skill.rezhiheng && player.hasCard(card => get.name(card) !== "tao", "h");
 			}
 		},
 		threaten: 1.55,
@@ -2259,7 +2132,6 @@ lib.skill.jxxiongzi = {
 		},
 	},
 };
-
 
 //合御适配旧骥张辽
 lib.skill.hefeiheyulidian = {
@@ -2333,10 +2205,7 @@ lib.skill.hefeiheyuyuejin = {
 		}
 		const link = trigger.card?.storage?.hefeixianjian,
 			target = trigger.player;
-		const prompt =
-			link !== "draw"
-				? `你摸一张牌，其弃置${get.cnNumber(Math.max(1, target.countCards("ej")))}张牌`
-				: `此杀结算后将对应实体牌置入其一个空置装备栏`;
+		const prompt = link !== "draw" ? `你摸一张牌，其弃置${get.cnNumber(Math.max(1, target.countCards("ej")))}张牌` : `此杀结算后将对应实体牌置入其一个空置装备栏`;
 		event.result = await player
 			.chooseBool(get.prompt(event.skill, target), prompt)
 			.set("choice", get.attitude(player, target) <= 0)

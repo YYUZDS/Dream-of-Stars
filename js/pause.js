@@ -75,8 +75,7 @@ if (lib.config.extension_星之梦_pause) {
 											key: "cnty6",
 										};
 										var group = tar.group;
-										if (group in group_dict)
-											identity.setBackgroundImage(`extension/星之梦/image/pause/game_hist_gz_${group_dict[group]}.png`);
+										if (group in group_dict) identity.setBackgroundImage(`extension/星之梦/image/pause/game_hist_gz_${group_dict[group]}.png`);
 										else identity.setBackgroundImage(`extension/星之梦/image/pause/game_hist_gz_${group_dict["unknown"]}.png`);
 										// 修改namebg的颜色
 										var namebgs = headbg.querySelectorAll(".char>.namebg");
@@ -87,8 +86,7 @@ if (lib.config.extension_星之梦_pause) {
 												else if (tar.group == "shu") namebg.style.backgroundColor = "rgba(133, 1, 1, 0.5)";
 												else if (tar.group == "wu") namebg.style.backgroundColor = "rgba(94, 140, 49, 0.5)";
 												else if (tar.group == "shen") namebg.style.backgroundColor = "rgba(248, 213, 104, 0.5)";
-												else if (tar.group == "jin" || tar.group == "ye" || tar.group == "western")
-													namebg.style.backgroundColor = "rgba(147, 112, 219, 0.5)";
+												else if (tar.group == "jin" || tar.group == "ye" || tar.group == "western") namebg.style.backgroundColor = "rgba(147, 112, 219, 0.5)";
 												else namebg.style.backgroundColor = "rgba(210, 206, 133, 0.5)";
 											}
 										}
@@ -230,12 +228,7 @@ if (lib.config.extension_星之梦_pause) {
 				else char.style.backgroundImage = tar.isUnseen(0) ? "linear-gradient(0deg, #000000, #000000)" : tar.node.avatar.style.backgroundImage;
 				var char_biaoji = ui.create.div(".char_biaoji", char);
 				char_biaoji.innerHTML = "主";
-			} else
-				char.style.backgroundImage = tar.isUnseen(0)
-					? tar.isUnseen(1)
-						? "linear-gradient(0deg, #000000, #000000)"
-						: tar.node.avatar2.style.backgroundImage
-					: tar.node.avatar.style.backgroundImage;
+			} else char.style.backgroundImage = tar.isUnseen(0) ? (tar.isUnseen(1) ? "linear-gradient(0deg, #000000, #000000)" : tar.node.avatar2.style.backgroundImage) : tar.node.avatar.style.backgroundImage;
 			var namebg = ui.create.div(".namebg", char);
 			if (game.dead.includes(tar)) char.style.filter = "grayscale(100%)";
 			if (game.dead.includes(tar)) namebg.style.filter = "grayscale(0%)";
@@ -254,10 +247,7 @@ if (lib.config.extension_星之梦_pause) {
 				var gzchar = ui.create.div(".char", headbg);
 				gzchar.classList.add("guozhan");
 				if (tar == game.me) gzchar.style.backgroundImage = tar.node.avatar2.style.backgroundImage;
-				else
-					gzchar.style.backgroundImage = tar.isUnseen(1)
-						? "linear-gradient(0deg, #000000, #000000)"
-						: tar.node.avatar2.style.backgroundImage;
+				else gzchar.style.backgroundImage = tar.isUnseen(1) ? "linear-gradient(0deg, #000000, #000000)" : tar.node.avatar2.style.backgroundImage;
 				var gzchar_biaoji = ui.create.div(".char_biaoji", gzchar);
 				gzchar_biaoji.innerHTML = "副";
 				var gznamebg = ui.create.div(".namebg", gzchar);
@@ -267,8 +257,7 @@ if (lib.config.extension_星之梦_pause) {
 				else if (tar.group == "shu") gznamebg.style.backgroundColor = "rgba(133, 1, 1, 0.5)";
 				else if (tar.group == "wu") gznamebg.style.backgroundColor = "rgba(94, 140, 49, 0.5)";
 				else if (tar.group == "shen") gznamebg.style.backgroundColor = "rgba(248, 213, 104, 0.5)";
-				else if (tar.group == "jin" || tar.group == "ye" || tar.group == "western")
-					gznamebg.style.backgroundColor = "rgba(147, 112, 219, 0.5)";
+				else if (tar.group == "jin" || tar.group == "ye" || tar.group == "western") gznamebg.style.backgroundColor = "rgba(147, 112, 219, 0.5)";
 				else gznamebg.style.backgroundColor = "rgba(210, 206, 133, 0.5)";
 				var gzname = document.createElement("span");
 				gzname.classList.add("name");
