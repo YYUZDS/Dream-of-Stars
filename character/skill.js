@@ -23875,8 +23875,8 @@ const lmCharacter = {
 		old_dcweijing: {
 			trigger: { global: "phaseBegin" },
 			derivation: "old_dczhifeng",
-			filter(event) {
-				return event.player.group === "wu" && event.player.isIn();
+			filter(event, player) {
+				return event.player != player && event.player.group === "wu" && event.player.isIn();
 			},
 			async cost(event, trigger, player) {
 				const choiceList = [`对${get.translation(trigger.player)}造成1点伤害`, `令${get.translation(trigger.player)}交给你一张牌然后其可发动一次〖猘锋〗`],
@@ -23954,7 +23954,7 @@ const lmCharacter = {
 						.set("_backupevent", "old_dczhifeng_backup")
 						.set("custom", {
 							add: {},
-							replace: { window() {} },
+							replace: { window() { } },
 						})
 						.set("filterTarget", (card, player, target) => {
 							if (card.name == "sha") {
@@ -29950,9 +29950,9 @@ const lmCharacter = {
 		old_v_sunce: "旧威孙策",
 		old_v_sunce_prefix: "旧|威",
 		old_dczhifeng: "猘锋",
-		old_dczhifeng_info: "每回合限X次（X为场上人数）。当你的手牌数：大于体力值时，你可将至少两张黑色牌当作不计入次数的【酒】使用；小于体力值时，你可将一张红色牌当作【杀】或【闪】使用或打出，然后将手牌摸至体力上限；等于体力值时，你可将任意张牌当作【决斗】使用。",
+		old_dczhifeng_info: "每回合限X次（X为游戏人数）。当你的手牌数：大于体力值时，你可将至少两张黑色牌当作不计入次数的【酒】使用；小于体力值时，你可将一张红色牌当作【杀】或【闪】使用或打出，然后将手牌摸至体力上限；等于体力值时，你可将任意张牌当作【决斗】使用。",
 		old_dcweijing: "威靖",
-		old_dcweijing_info: "吴势力角色的回合开始时，你可令其执行一项：1.受到你造成的1点伤害；2.交给你一张牌，然后其可发动一次对应条件的〖猘锋〗。",
+		old_dcweijing_info: "其他吴势力角色的回合开始时，你可令其执行一项：1.受到你造成的1点伤害；2.交给你一张牌，然后其可发动一次对应条件的〖猘锋〗。",
 		old_dc_shen_sunquan: "旧新杀神孙权",
 		old_dc_shen_sunquan_prefix: "旧|新杀|神",
 		old_dccangming: "沧溟",
