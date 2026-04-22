@@ -124,7 +124,7 @@ if (lib.config.extension_星之梦_lianji) {
 		ui.connectShareButton = shareButton;
 	};
 	//连续交互
-	get.nodeintro = function (node, simple, evt) {
+	get.nodeintro = function (node, simple, evt, uiintro) {
 		var uiintro = uiintro ?? ui.create.dialog("hidden", "notouchscroll");
 		uiintro.setAttribute("id", "nodeintro");
 		if (node.classList.contains("player") && !node.name) {
@@ -134,6 +134,61 @@ if (lib.config.extension_星之梦_lianji) {
 		if (node._nointro) {
 			return;
 		}
+		let created = false;
+		const createButtons = function (nameskin, avatarSetter) {
+			const srcBase = get.skinPath(nameskin);
+			if (!srcBase) {
+				return;
+			}
+			game.getFileList(
+				srcBase,
+				(folders, files) => {
+					if (!files.length) {
+						return;
+					}
+					if (!created) {
+						created = true;
+						uiintro.add('<div class="text center">更改皮肤</div>');
+					}
+					const avatars = ui.create.div(".buttons.smallzoom.scrollbuttons");
+					lib.setMousewheel(avatars);
+					uiintro.add(avatars);
+					const originButton = ui.create.div(".button.character.pointerdiv", avatars, function () {
+						delete lib.config.skin[nameskin];
+						if (lib.characterSubstitute[nameskin]) {
+							for (const list of lib.characterSubstitute[nameskin]) delete lib.config.skin[list[0]];
+						}
+						avatarSetter("origin");
+						game.saveConfig("skin", lib.config.skin);
+					});
+					originButton.setBackground(nameskin, "character", "noskin");
+					const originSkin = ui.create.caption(`<div class="text" data-nature=shenmm style="font-size: 12px">经典形象</div>`, originButton);
+					originSkin.style.left = "1px";
+					originSkin.style.bottom = "-1px";
+					files.forEach(file => {
+						const src = `${srcBase}${file}`,
+							skinname = file;
+						const button = ui.create.div(".button.character.pointerdiv", avatars, function () {
+							lib.config.skin[nameskin] = [skinname, src];
+							if (lib.characterSubstitute[nameskin]) {
+								for (const list of lib.characterSubstitute[nameskin]) {
+									const sub = list[0],
+										[fold, prefix] = skinname.split(".");
+									lib.config.skin[sub] = [skinname, `${srcBase}${fold}/${sub}.${prefix}`];
+								}
+							}
+							avatarSetter(src);
+							game.saveConfig("skin", lib.config.skin);
+						});
+						button.setBackgroundImage(src);
+						const skinCaption = ui.create.caption(`<div class="text" data-nature=shenmm style="font-size: 12px">${get.translation(skinname.slice(0, -4))}</div>`, button);
+						skinCaption.style.left = "1px";
+						skinCaption.style.bottom = "-1px";
+					});
+				},
+				() => {}
+			);
+		};
 		if (typeof node._customintro == "function") {
 			if (node._customintro(uiintro, evt) === false) {
 				return;
@@ -167,12 +222,15 @@ if (lib.config.extension_星之梦_lianji) {
 				capt += `&nbsp;&nbsp;${get.translation(group)}`;
 			}
 			uiintro.add(capt);
+
 			if (lib.characterTitle[node.name]) {
 				uiintro.addText(get.colorspan(lib.characterTitle[node.name]));
 			}
+
 			if (lib.characterAppend[node.name]) {
 				uiintro.addText(get.colorspan(lib.characterAppend[node.name]));
 			}
+
 			if (lib.config.show_sortPack) {
 				for (let packname in lib.characterPack) {
 					if (node.name in lib.characterPack[packname]) {
@@ -196,6 +254,7 @@ if (lib.config.extension_星之梦_lianji) {
 					}
 				}
 			}
+
 			if (get.characterInitFilter(node.name)) {
 				const initFilters = get.characterInitFilter(node.name).filter(tag => {
 					if (!lib.characterInitFilter[node.name]) {
@@ -204,10 +263,11 @@ if (lib.config.extension_星之梦_lianji) {
 					return lib.characterInitFilter[node.name](tag) !== false;
 				});
 				if (initFilters.length) {
-					const str2 = initFilters.reduce((strx, stry) => strx + lib.InitFilter[stry] + "<br>", "").slice(0, -4);
-					uiintro.addText(str2);
+					const str = initFilters.reduce((strx, stry) => strx + lib.InitFilter[stry] + "<br>", "").slice(0, -4);
+					uiintro.addText(str);
 				}
 			}
+
 			if (!node.noclick) {
 				const allShown = node.isUnderControl() || (!game.observe && game.me && game.me.hasSkillTag("viewHandcard", null, node, true));
 				const shownHs = node.getShownCards();
@@ -230,6 +290,7 @@ if (lib.config.extension_星之梦_lianji) {
 					}
 				}
 			}
+
 			var skills = node.getSkills(null, false, false).slice(0);
 			var skills2 = game.filterSkills(skills, node);
 			if (node == game.me && node.hiddenSkills.length) {
@@ -253,6 +314,7 @@ if (lib.config.extension_星之梦_lianji) {
 							translation = `【${translation.slice(0, 2)}】`;
 						}
 					}
+
 					if (node.forbiddenSkills[skills[i]]) {
 						var forbidstr = '<div style="opacity:0.5"><div class="skill">' + translation + "</div><div>";
 						if (node.forbiddenSkills[skills[i]].length) {
@@ -264,13 +326,7 @@ if (lib.config.extension_星之梦_lianji) {
 						uiintro.add(forbidstr);
 					} else if (!skills2.includes(skills[i])) {
 						if (lib.skill[skills[i]].preHidden && get.mode() == "guozhan") {
-							uiintro.add(
-								'<div><div class="skill" style="opacity:0.5">' +
-									translation +
-									'</div><div><span style="opacity:0.5">' +
-									get.skillInfoTranslation(skills[i], node, false) +
-									'</span><br><div class="underlinenode on gray" style="position:relative;padding-left:0;padding-top:7px">预亮技能</div></div></div>'
-							);
+							uiintro.add('<div><div class="skill" style="opacity:0.5">' + translation + '</div><div><span style="opacity:0.5">' + get.skillInfoTranslation(skills[i], node, false) + '</span><br><div class="underlinenode on gray" style="position:relative;padding-left:0;padding-top:7px">预亮技能</div></div></div>');
 							var underlinenode = uiintro.content.lastChild.querySelector(".underlinenode");
 							if (_status.prehidden_skills.includes(skills[i])) {
 								underlinenode.classList.remove("on");
@@ -278,23 +334,11 @@ if (lib.config.extension_星之梦_lianji) {
 							underlinenode.link = skills[i];
 							underlinenode.listen(ui.click.hiddenskill);
 						} else {
-							uiintro.add(
-								'<div style="opacity:0.5"><div class="skill">' +
-									translation +
-									"</div><div>" +
-									get.skillInfoTranslation(skills[i], node, false) +
-									"</div></div>"
-							);
+							uiintro.add('<div style="opacity:0.5"><div class="skill">' + translation + "</div><div>" + get.skillInfoTranslation(skills[i], node, false) + "</div></div>");
 						}
 					} else if (lib.skill[skills[i]].temp || !node.skills.includes(skills[i]) || lib.skill[skills[i]].thundertext) {
 						if (lib.skill[skills[i]].frequent || lib.skill[skills[i]].subfrequent) {
-							uiintro.add(
-								'<div><div class="skill thundertext thunderauto">' +
-									translation +
-									'</div><div class="thundertext thunderauto">' +
-									get.skillInfoTranslation(skills[i], node, false) +
-									'<br><div class="underlinenode on gray" style="position:relative;padding-left:0;padding-top:7px">自动发动</div></div></div>'
-							);
+							uiintro.add('<div><div class="skill thundertext thunderauto">' + translation + '</div><div class="thundertext thunderauto">' + get.skillInfoTranslation(skills[i], node, false) + '<br><div class="underlinenode on gray" style="position:relative;padding-left:0;padding-top:7px">自动发动</div></div></div>');
 							var underlinenode = uiintro.content.lastChild.querySelector(".underlinenode");
 							if (lib.skill[skills[i]].frequent) {
 								if (lib.config.autoskilllist.includes(skills[i])) {
@@ -314,22 +358,10 @@ if (lib.config.extension_星之梦_lianji) {
 							underlinenode.link = skills[i];
 							underlinenode.listen(ui.click.autoskill2);
 						} else {
-							uiintro.add(
-								'<div><div class="skill thundertext thunderauto">' +
-									translation +
-									'</div><div class="thundertext thunderauto">' +
-									get.skillInfoTranslation(skills[i], node, false) +
-									"</div></div>"
-							);
+							uiintro.add('<div><div class="skill thundertext thunderauto">' + translation + '</div><div class="thundertext thunderauto">' + get.skillInfoTranslation(skills[i], node, false) + "</div></div>");
 						}
 					} else if (lib.skill[skills[i]].frequent || lib.skill[skills[i]].subfrequent) {
-						uiintro.add(
-							'<div><div class="skill">' +
-								translation +
-								"</div><div>" +
-								get.skillInfoTranslation(skills[i], node, false) +
-								'<br><div class="underlinenode on gray" style="position:relative;padding-left:0;padding-top:7px">自动发动</div></div></div>'
-						);
+						uiintro.add('<div><div class="skill">' + translation + "</div><div>" + get.skillInfoTranslation(skills[i], node, false) + '<br><div class="underlinenode on gray" style="position:relative;padding-left:0;padding-top:7px">自动发动</div></div></div>');
 						var underlinenode = uiintro.content.lastChild.querySelector(".underlinenode");
 						if (lib.skill[skills[i]].frequent) {
 							if (lib.config.autoskilllist.includes(skills[i])) {
@@ -349,15 +381,7 @@ if (lib.config.extension_星之梦_lianji) {
 						underlinenode.link = skills[i];
 						underlinenode.listen(ui.click.autoskill2);
 					} else if (lib.skill[skills[i]].clickable && node.isIn() && node.isUnderControl(true)) {
-						var intronode = uiintro
-							.add(
-								'<div><div class="skill">' +
-									translation +
-									"</div><div>" +
-									get.skillInfoTranslation(skills[i], node, false) +
-									'<br><div class="menubutton skillbutton" style="position:relative;margin-top:5px">点击发动</div></div></div>'
-							)
-							.querySelector(".skillbutton");
+						var intronode = uiintro.add('<div><div class="skill">' + translation + "</div><div>" + get.skillInfoTranslation(skills[i], node, false) + '<br><div class="menubutton skillbutton" style="position:relative;margin-top:5px">点击发动</div></div></div>').querySelector(".skillbutton");
 						if (!_status.gameStarted || (lib.skill[skills[i]].clickableFilter && !lib.skill[skills[i]].clickableFilter(node))) {
 							intronode.classList.add("disabled");
 							intronode.style.opacity = 0.5;
@@ -369,19 +393,33 @@ if (lib.config.extension_星之梦_lianji) {
 							intronode.listen(ui.click.skillbutton);
 						}
 					} else {
-						uiintro.add(
-							'<div><div class="skill">' +
-								translation +
-								"</div><div>" +
-								get.skillInfoTranslation(skills[i], node, false) +
-								"</div></div>"
-						);
+						uiintro.add('<div><div class="skill">' + translation + "</div><div>" + get.skillInfoTranslation(skills[i], node, false) + "</div></div>");
 					}
 					if (lib.translate[skills[i] + "_append"]) {
 						uiintro._place_text = uiintro.add('<div class="text">' + lib.translate[skills[i] + "_append"] + "</div>");
 					}
 				}
 			}
+			// if(get.is.phoneLayout()){
+			// 	var storage=node.storage;
+			// 	for(i in storage){
+			// 		if(get.info(i)&&get.info(i).intro){
+			// 			intro=get.info(i).intro;
+			// 			if(node.getSkills().concat(lib.skill.global).includes(i)==false&&!intro.show) continue;
+			// 			var name=intro.name?intro.name:get.translation(i);
+			// 			if(typeof name=='function'){
+			// 				name=name(storage[i],node);
+			// 			}
+			// 			translation='<div><div class="skill">『'+name.slice(0,2)+'』</div><div>';
+			// 			var stint=get.storageintro(intro.content,storage[i],node,null,i);
+			// 			if(stint){
+			// 				translation+=stint+'</div></div>';
+			// 				uiintro.add(translation);
+			// 			}
+			// 		}
+			// 	}
+			// }
+
 			if (lib.config.right_range && _status.gameStarted) {
 				uiintro.add(ui.create.div(".placeholder"));
 				var table, tr, td;
@@ -400,6 +438,7 @@ if (lib.config.extension_星之梦_lianji) {
 				td = document.createElement("td");
 				td.innerHTML = "伤害";
 				tr.appendChild(td);
+
 				tr = document.createElement("tr");
 				table.appendChild(tr);
 				td = document.createElement("td");
@@ -423,11 +462,12 @@ if (lib.config.extension_星之梦_lianji) {
 				td.innerHTML = node.phaseNumber;
 				tr.appendChild(td);
 				td = document.createElement("td");
+
 				(function () {
 					let num = 0;
-					for (var j2 = 0; j2 < node.stat.length; j2++) {
-						if (typeof node.stat[j2].damage == "number") {
-							num += node.stat[j2].damage;
+					for (var j = 0; j < node.stat.length; j++) {
+						if (typeof node.stat[j].damage == "number") {
+							num += node.stat[j].damage;
 						}
 					}
 					td.innerHTML = num;
@@ -435,6 +475,7 @@ if (lib.config.extension_星之梦_lianji) {
 				tr.appendChild(td);
 				table.style.width = "calc(100% - 20px)";
 				table.style.marginLeft = "10px";
+
 				uiintro.content.appendChild(table);
 				if (!lib.config.show_favourite) {
 					table.style.paddingBottom = "5px";
@@ -443,37 +484,34 @@ if (lib.config.extension_星之梦_lianji) {
 			if (!simple || get.is.phoneLayout()) {
 				var es = node.getCards("e");
 				for (var i = 0; i < es.length; i++) {
-					const special = [es[i]].concat(es[i].cards || []).find(j2 => j2.name == es[i].name && lib.card[j2.name]?.cardPrompt);
+					const special = [es[i]].concat(es[i].cards || []).find(j => j.name == es[i].name && lib.card[j.name]?.cardPrompt);
 					var str = special ? lib.card[special.name].cardPrompt(special, node) : lib.translate[es[i].name + "_info"];
 					uiintro.add('<div><div class="skill">' + es[i].outerHTML + "</div><div>" + str + "</div></div>");
 					uiintro.content.lastChild.querySelector(".skill>.card").style.transform = "";
+
 					if (lib.translate[es[i].name + "_append"]) {
 						uiintro.add('<div class="text">' + lib.translate[es[i].name + "_append"] + "</div>");
 					}
 				}
 				var js = node.getCards("j");
 				for (var i = 0; i < js.length; i++) {
-					const Vcard2 = js[i][js[i].cardSymbol];
-					if (js[i].viewAs && Vcard2.cards.length == 1 && js[i].viewAs != Vcard2.cards[0].name) {
-						let html = Vcard2.cards[0].outerHTML;
-						let cardInfo2 = lib.card[js[i].viewAs],
-							showCardIntro2 = true;
-						if (cardInfo2.blankCard) {
+					const Vcard = js[i][js[i].cardSymbol];
+					if (js[i].viewAs && Vcard.cards.length == 1 && js[i].viewAs != Vcard.cards[0].name) {
+						let html = Vcard.cards[0].outerHTML;
+						let cardInfo = lib.card[js[i].viewAs],
+							showCardIntro = true;
+						if (cardInfo.blankCard) {
 							var cardOwner = get.owner(js[i]);
 							if (cardOwner && !cardOwner.isUnderControl(true)) {
-								showCardIntro2 = false;
+								showCardIntro = false;
 							}
 						}
-						if (!showCardIntro2) {
+						if (!showCardIntro) {
 							html = ui.create.button(js[i], "blank").outerHTML;
 						}
-						uiintro.add(
-							`<div><div class="skill">${html}</div><div>${lib.translate[js[i].viewAs]}：${lib.card[js[i].viewAs]?.cardPrompt?.(js[i], node) || lib.translate[`${js[i].viewAs}_info`]}</div></div>`
-						);
+						uiintro.add(`<div><div class="skill">${html}</div><div>${lib.translate[js[i].viewAs]}：${lib.card[js[i].viewAs]?.cardPrompt?.(js[i], node) || lib.translate[`${js[i].viewAs}_info`]}</div></div>`);
 					} else {
-						uiintro.add(
-							`<div><div class="skill">${js[i].outerHTML}</div><div>${lib.translate[js[i].name]}：${lib.card[js[i].name]?.cardPrompt?.(js[i], node) || lib.translate[`${js[i].name}_info`]}</div></div>`
-						);
+						uiintro.add(`<div><div class="skill">${js[i].outerHTML}</div><div>${lib.translate[js[i].name]}：${lib.card[js[i].name]?.cardPrompt?.(js[i], node) || lib.translate[`${js[i].name}_info`]}</div></div>`);
 					}
 					uiintro.content.lastChild.querySelector(".skill>.card").style.transform = "";
 				}
@@ -528,12 +566,12 @@ if (lib.config.extension_星之梦_lianji) {
 						function () {
 							_status.throwEmotionWait = false;
 							if (ui.throwEmotion) {
-								for (var i2 of ui.throwEmotion) {
-									i2.classList.remove("exclude");
+								for (var i of ui.throwEmotion) {
+									i.classList.remove("exclude");
 								}
 							}
 						},
-						emotion == "flower" || emotion == "egg" ? 500 : 5e3
+						emotion == "flower" || emotion == "egg" ? 500 : 5000
 					);
 				};
 				//连续交互
@@ -628,13 +666,7 @@ if (lib.config.extension_星之梦_lianji) {
 				//结束
 			}
 			var modepack = lib.characterPack["mode_" + get.mode()];
-			if (
-				lib.config.show_favourite &&
-				lib.character[node.name] &&
-				game.players.includes(node) &&
-				(!modepack || !modepack[node.name]) &&
-				(!simple || get.is.phoneLayout())
-			) {
+			if (lib.config.show_favourite && lib.character[node.name] && game.players.includes(node) && (!modepack || !modepack[node.name]) && (!simple || get.is.phoneLayout())) {
 				var addFavourite = ui.create.div(".text.center.pointerdiv");
 				addFavourite.link = node.name;
 				addFavourite.style.marginRight = "15px";
@@ -651,20 +683,25 @@ if (lib.config.extension_星之梦_lianji) {
 				viewInfo.link = node;
 				viewInfo.innerHTML = "查看资料";
 				viewInfo.listen(function () {
-					let player2 = this.link;
-					let audioName = player2.skin.name || player2.name1 || player2.name;
-					ui.click.charactercard(player2.name1 || player2.name, null, null, true, player2.node.avatar, audioName);
+					let player = this.link;
+					let audioName = player.skin.name || player.name1 || player.name;
+					ui.click.charactercard(player.name1 || player.name, null, null, true, player.node.avatar, audioName);
 				});
 				uiintro.add(viewInfo);
 			}
+			if ((lib.config.change_skin || lib.skin) && (!simple || get.is.phoneLayout())) {
+				[node.name1, node.name2].forEach((nameskin, index) => {
+					if (nameskin) {
+						createButtons(nameskin, src => {
+							const avatar = node.node[index ? "avatar2" : "avatar"];
+							if (src === "origin") avatar.setBackground(nameskin, "character");
+							else avatar.style.backgroundImage = `url('${src}')`;
+						});
+					}
+				});
+			}
 			uiintro.add(ui.create.div(".placeholder.slim"));
-		} else if (
-			node.classList.contains("mark") &&
-			node.info &&
-			node.parentNode &&
-			node.parentNode.parentNode &&
-			node.parentNode.parentNode.classList.contains("player")
-		) {
+		} else if (node.classList.contains("mark") && node.info && node.parentNode && node.parentNode.parentNode && node.parentNode.parentNode.classList.contains("player")) {
 			var info = node.info;
 			var player = node.parentNode.parentNode;
 			if (info.name) {
@@ -679,13 +716,7 @@ if (lib.config.extension_星之梦_lianji) {
 			} else if (info.name !== false) {
 				uiintro.add(get.translation(node.skill));
 			}
-			if (
-				typeof info.id == "string" &&
-				info.id.startsWith("subplayer") &&
-				player.isUnderControl(true) &&
-				player.storage[info.id] &&
-				!_status.video
-			) {
+			if (typeof info.id == "string" && info.id.startsWith("subplayer") && player.isUnderControl(true) && player.storage[info.id] && !_status.video) {
 				var storage = player.storage[info.id];
 				uiintro.addText("当前体力：" + storage.hp + "/" + storage.maxHp);
 				if (storage.hs.length) {
@@ -712,7 +743,16 @@ if (lib.config.extension_星之梦_lianji) {
 					if (!stint.startsWith('<div class="skill"')) {
 						uiintro._place_text = placetext;
 					}
+					// if(stint.length<=100){
+					// 	uiintro.add('<div class="text center">'+stint+'</div>');
+					// }
+					// else{
+					// 	uiintro.add('<div class="text">'+stint+'</div>');
+					// }
 				}
+				/*if (evt) {
+					lib.placePoppedDialog(uiintro, evt);
+				}*/
 			} else {
 				var stint = get.storageintro(info.content, player.storage[node.skill], player, uiintro, node.skill);
 				if (stint) {
@@ -724,10 +764,17 @@ if (lib.config.extension_星之梦_lianji) {
 							uiintro._place_text = placetext;
 						}
 					}
+					// else if(stint.length<=100){
+					// 	uiintro.add('<div class="text center">'+stint+'</div>');
+					// }
+					// else{
+					// 	uiintro.add('<div class="text">'+stint+'</div>');
+					// }
 				}
 			}
 			uiintro.add(ui.create.div(".placeholder.slim"));
 		} else if (node.classList.contains("card")) {
+			//卡牌长按介绍
 			if (ui.arena.classList.contains("observe") && node.parentNode.classList.contains("handcards")) {
 				return;
 			}
@@ -754,10 +801,7 @@ if (lib.config.extension_星之梦_lianji) {
 				trueCard = node.link;
 			}
 			var cardPosition = get.position(trueCard);
-			if (
-				((cardPosition === "e" || cardPosition === "j") && trueCard.viewAs && trueCard.viewAs != name) ||
-				(Vcard && (Vcard.cards.length != 1 || Vcard.cards[0].name != name))
-			) {
+			if (((cardPosition === "e" || cardPosition === "j") && trueCard.viewAs && trueCard.viewAs != name) || (Vcard && (Vcard.cards.length != 1 || Vcard.cards[0].name != name))) {
 				uiintro.add(get.translation(trueCard.viewAs));
 				var cardInfo = lib.card[trueCard.viewAs],
 					showCardIntro = true;
@@ -770,6 +814,8 @@ if (lib.config.extension_星之梦_lianji) {
 				if (cardOwner && showCardIntro) {
 					uiintro.isNotCard = true;
 				}
+				// uiintro.add(get.translation(node.viewAs)+'<br><div class="text center" style="padding-top:5px;">（'+get.translation(node)+'）</div>');
+				//uiintro.nosub = true;
 				name = trueCard.viewAs;
 			} else {
 				if (node.extraEquip) {
@@ -781,13 +827,13 @@ if (lib.config.extension_星之梦_lianji) {
 			}
 			if (node._banning) {
 				var clickBanned = function () {
-					var banned2 = lib.config[this.bannedname] || [];
-					if (banned2.includes(name)) {
-						banned2.remove(name);
+					var banned = lib.config[this.bannedname] || [];
+					if (banned.includes(name)) {
+						banned.remove(name);
 					} else {
-						banned2.push(name);
+						banned.push(name);
 					}
-					game.saveConfig(this.bannedname, banned2);
+					game.saveConfig(this.bannedname, banned);
 					this.classList.toggle("on");
 					if (node.updateBanned) {
 						node.updateBanned();
@@ -839,24 +885,16 @@ if (lib.config.extension_星之梦_lianji) {
 				}
 				ui.create.div(".menubutton.pointerdiv", banall ? "全部禁用" : "全部启用", uiintro.content, function () {
 					if (this.innerHTML == "全部禁用") {
-						for (var i2 = 0; i2 < page.childElementCount; i2++) {
-							if (
-								page.childNodes[i2].bannedname.indexOf("zhinang_tricks") == -1 &&
-								page.childNodes[i2].bannedname &&
-								page.childNodes[i2].classList.contains("on")
-							) {
-								clickBanned.call(page.childNodes[i2]);
+						for (var i = 0; i < page.childElementCount; i++) {
+							if (page.childNodes[i].bannedname.indexOf("zhinang_tricks") == -1 && page.childNodes[i].bannedname && page.childNodes[i].classList.contains("on")) {
+								clickBanned.call(page.childNodes[i]);
 							}
 						}
 						this.innerHTML = "全部启用";
 					} else {
-						for (var i2 = 0; i2 < page.childElementCount; i2++) {
-							if (
-								page.childNodes[i2].bannedname.indexOf("zhinang_tricks") == -1 &&
-								page.childNodes[i2].bannedname &&
-								!page.childNodes[i2].classList.contains("on")
-							) {
-								clickBanned.call(page.childNodes[i2]);
+						for (var i = 0; i < page.childElementCount; i++) {
+							if (page.childNodes[i].bannedname.indexOf("zhinang_tricks") == -1 && page.childNodes[i].bannedname && !page.childNodes[i].classList.contains("on")) {
+								clickBanned.call(page.childNodes[i]);
 							}
 						}
 						this.innerHTML = "全部禁用";
@@ -870,9 +908,7 @@ if (lib.config.extension_星之梦_lianji) {
 							if (typeof lib.card[name].derivation == "string") {
 								uiintro.add('<div class="text center">来源：' + get.translation(lib.card[name].derivation) + "</div>");
 							} else if (lib.card[name].derivationpack) {
-								uiintro.add(
-									'<div class="text center">来源：' + get.translation(lib.card[name].derivationpack + "_card_config") + "包</div>"
-								);
+								uiintro.add('<div class="text center">来源：' + get.translation(lib.card[name].derivationpack + "_card_config") + "包</div>");
 							}
 						}
 						let typeinfo = "";
@@ -921,7 +957,7 @@ if (lib.config.extension_星之梦_lianji) {
 						}
 					}
 					if (lib.card[name].cardPrompt) {
-						var str = lib.card[name].cardPrompt(node.link || node, player),
+						var str = lib.card[name].cardPrompt(node.link || node, get.owner(node)),
 							placetext = uiintro.add('<div class="text" style="display:inline">' + str + "</div>");
 						if (!str.startsWith('<div class="skill"')) {
 							uiintro._place_text = placetext;
@@ -941,9 +977,7 @@ if (lib.config.extension_星之梦_lianji) {
 							}
 						}
 						if (yingbianEffects.length && showCardIntro) {
-							uiintro.add(
-								`<div class="text" style="font-family: yuanli">应变：${yingbianEffects.map(value => lib.yingbian.prompt.get(value)).join("；")}</div>`
-							);
+							uiintro.add(`<div class="text" style="font-family: yuanli">应变：${yingbianEffects.map(value => lib.yingbian.prompt.get(value)).join("；")}</div>`);
 						}
 					}
 					if (lib.translate[name + "_append"]) {
@@ -955,6 +989,24 @@ if (lib.config.extension_星之梦_lianji) {
 							uiintro.addSmall(Vcard.cards);
 						} else {
 							uiintro.add('<div class="text center">（这是一张虚拟牌）</div>');
+						}
+					}
+					if (node.gaintag?.length) {
+						let gaintag = node.gaintag
+							.map(tag => {
+								let translate = get.translation(tag);
+								if (translate === tag && tag.startsWith("eternal_")) {
+									translate = get.translation(tag.slice(8));
+								}
+								if (translate === "invisible") {
+									return "";
+								}
+								return translate;
+							})
+							.filter(tag => tag.length);
+						if (gaintag?.length) {
+							uiintro.add(" ");
+							uiintro.add(`<div class="text" style="display:inline">此牌标签：${gaintag}</div>`);
 						}
 					}
 				}
@@ -980,12 +1032,15 @@ if (lib.config.extension_星之梦_lianji) {
 				}
 			}
 			uiintro.add(capt);
+
 			if (lib.characterTitle[node.link]) {
 				uiintro.addText(get.colorspan(lib.characterTitle[node.link]));
 			}
+
 			if (lib.characterAppend[node.link]) {
 				uiintro.addText(get.colorspan(lib.characterAppend[node.link]));
 			}
+
 			if (lib.config.show_sortPack) {
 				for (let packname in lib.characterPack) {
 					if (node.link in lib.characterPack[packname]) {
@@ -1009,6 +1064,7 @@ if (lib.config.extension_星之梦_lianji) {
 					}
 				}
 			}
+
 			if (get.characterInitFilter(node.link)) {
 				const initFilters = get.characterInitFilter(node.link).filter(tag => {
 					if (!lib.characterInitFilter[node.link]) {
@@ -1017,19 +1073,20 @@ if (lib.config.extension_星之梦_lianji) {
 					return lib.characterInitFilter[node.link](tag) !== false;
 				});
 				if (initFilters.length) {
-					const str2 = initFilters.reduce((strx, stry) => strx + lib.InitFilter[stry] + "<br>", "").slice(0, -4);
-					uiintro.addText(str2);
+					const str = initFilters.reduce((strx, stry) => strx + lib.InitFilter[stry] + "<br>", "").slice(0, -4);
+					uiintro.addText(str);
 				}
 			}
+
 			if (node._banning) {
 				var clickBanned = function () {
-					var banned2 = lib.config[this.bannedname] || [];
-					if (banned2.includes(character)) {
-						banned2.remove(character);
+					var banned = lib.config[this.bannedname] || [];
+					if (banned.includes(character)) {
+						banned.remove(character);
 					} else {
-						banned2.push(character);
+						banned.push(character);
 					}
-					game.saveConfig(this.bannedname, banned2);
+					game.saveConfig(this.bannedname, banned);
 					this.classList.toggle("on");
 					if (node.updateBanned) {
 						node.updateBanned();
@@ -1096,16 +1153,16 @@ if (lib.config.extension_星之梦_lianji) {
 				}
 				ui.create.div(".menubutton.pointerdiv", banall ? "全部禁用" : "全部启用", uiintro.content, function () {
 					if (this.innerHTML == "全部禁用") {
-						for (var i2 = 0; i2 < page.childElementCount; i2++) {
-							if (page.childNodes[i2].bannedname && page.childNodes[i2].classList.contains("on")) {
-								clickBanned.call(page.childNodes[i2]);
+						for (var i = 0; i < page.childElementCount; i++) {
+							if (page.childNodes[i].bannedname && page.childNodes[i].classList.contains("on")) {
+								clickBanned.call(page.childNodes[i]);
 							}
 						}
 						this.innerHTML = "全部启用";
 					} else {
-						for (var i2 = 0; i2 < page.childElementCount; i2++) {
-							if (page.childNodes[i2].bannedname && !page.childNodes[i2].classList.contains("on")) {
-								clickBanned.call(page.childNodes[i2]);
+						for (var i = 0; i < page.childElementCount; i++) {
+							if (page.childNodes[i].bannedname && !page.childNodes[i].classList.contains("on")) {
+								clickBanned.call(page.childNodes[i]);
 							}
 						}
 						this.innerHTML = "全部禁用";
@@ -1124,25 +1181,16 @@ if (lib.config.extension_星之梦_lianji) {
 								translation = `【${translation.slice(0, 2)}】`;
 							}
 						}
-						uiintro.add(
-							'<div><div class="skill">' +
-								translation +
-								"</div><div>" +
-								get.skillInfoTranslation(skills[i], null, false) +
-								"</div></div>"
-						);
+
+						uiintro.add('<div><div class="skill">' + translation + "</div><div>" + get.skillInfoTranslation(skills[i], null, false) + "</div></div>");
+
 						if (lib.translate[skills[i] + "_append"]) {
 							uiintro._place_text = uiintro.add('<div class="text">' + lib.translate[skills[i] + "_append"] + "</div>");
 						}
 					}
 				}
 				var modepack = lib.characterPack["mode_" + get.mode()];
-				if (
-					lib.config.show_favourite &&
-					lib.character[node.link] &&
-					(!modepack || !modepack[node.link]) &&
-					(!simple || get.is.phoneLayout())
-				) {
+				if (lib.config.show_favourite && lib.character[node.link] && (!modepack || !modepack[node.link]) && (!simple || get.is.phoneLayout())) {
 					var addFavourite = ui.create.div(".text.center.pointerdiv");
 					addFavourite.link = node.link;
 					addFavourite.style.marginBottom = "15px";
@@ -1167,12 +1215,21 @@ if (lib.config.extension_星之梦_lianji) {
 					});
 					uiintro.add(viewInfo);
 				}
+				if ((lib.config.change_skin || lib.skin) && (!simple || get.is.phoneLayout())) {
+					const nameskin = node.link;
+					if (nameskin) {
+						createButtons(nameskin, src => {
+							if (src === "origin") node.setBackground(nameskin, "character");
+							else node.style.backgroundImage = `url('${src}')`;
+						});
+					}
+				}
 			}
 		} else if (node.classList.contains("equips") && ui.arena.classList.contains("selecting")) {
 			(function () {
 				uiintro.add("选择装备");
 				uiintro.addSmall(
-					Array.from(node.childNodes).filter(node2 => !node2.classList.contains("emptyequip") && !node2.classList.contains("feichu")),
+					Array.from(node.childNodes).filter(node => !node.classList.contains("emptyequip") && !node.classList.contains("feichu")),
 					true
 				);
 				uiintro.clickintro = true;
@@ -1181,8 +1238,8 @@ if (lib.config.extension_星之梦_lianji) {
 					ui.control.show();
 				};
 				var confirmbutton;
-				for (var i2 = 0; i2 < uiintro.buttons.length; i2++) {
-					var button = uiintro.buttons[i2];
+				for (var i = 0; i < uiintro.buttons.length; i++) {
+					var button = uiintro.buttons[i];
 					button.classList.add("pointerdiv");
 					if (button.link.classList.contains("selected")) {
 						button.classList.add("selected");
