@@ -3046,7 +3046,7 @@ const lmCharacter = {
 			},
 		},
 		//手杀界朱治
-		old_sbanguo:{
+		old_sbanguo: {
 			audio: "sbanguo",
 			trigger: { global: "phaseBefore", player: "enterGame" },
 			group: ["old_sbanguo_move", "old_sbanguo_damage", "old_sbanguo_dying"],
