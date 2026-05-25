@@ -3539,110 +3539,126 @@ const lmCharacter = {
 			},
 			getLimit: 5,
 			audio: "yichong",
-			trigger: {
-				player: "phaseZhunbeiBegin",
+			trigger: { player: "phaseZhunbeiBegin" },
+			filter(event, player) {
+				return game.hasPlayer(current => current != player);
 			},
-			direct: true,
-			content() {
-				"step 0";
-				player.chooseTarget(get.prompt("old_yichong"), "选择一名其他角色并选择一个花色，获得其此花色的所有牌并令其获得“雀”标记", lib.filter.notMe).set("ai", function (target) {
-					var player = _status.event.player;
-					var att = get.attitude(player, target);
-					if (att > 0) return 0;
-					var getNum = function (player) {
-						var list = [];
-						for (var i of lib.suit) list.push(player.countCards("he", { suit: i }) + 3);
-						return list.sort((a, b) => b - a)[0];
-					};
-					return getNum(target) + target.countCards("h") / 10;
-				});
-				("step 1");
-				if (result.bool) {
-					var target = result.targets[0];
-					player.logSkill("old_yichong", target);
-					event.target = target;
-					player
-						.chooseControl(lib.suit.slice(0).reverse())
-						.set("prompt", "请声明一个花色")
-						.set("ai", function () {
-							var target = _status.event.target,
-								cards = target.getCards("he");
-							var suits = lib.suit.slice(0);
-							suits.sort(function (a, b) {
-								var num = function (suit) {
-									return cards.filter(function (card) {
-										return get.suit(card) == suit;
-									}).length;
-								};
-								return num(b) - num(a);
-							});
-							return suits[0];
-						})
-						.set("target", target);
-				} else event.finish();
-				("step 2");
-				var suit = result.control;
+			async cost(event, trigger, player) {
+				event.result = await player
+					.chooseTarget(get.prompt("old_yichong"), "选择一名其他角色并选择一个花色，获得其此花色的所有牌并令其获得“雀”标记", lib.filter.notMe)
+					.set("ai", target => {
+						const player = get.player();
+						const att = get.attitude(player, target);
+						if (att > 0) {
+							return 0;
+						}
+						const getNum = function (player) {
+							const list = [];
+							for (const i of lib.suit) {
+								list.push(player.countCards("he", { suit: i }) + 3);
+							}
+							return list.sort((a, b) => b - a)[0];
+						};
+						return getNum(target) + target.countCards("h") / 10;
+					})
+					.forResult();
+			},
+			async content(event, trigger, player) {
+				const target = event.targets[0];
+				const result = await player
+					.chooseControl(lib.suit.slice(0).reverse())
+					.set("prompt", "请声明一个花色")
+					.set("ai", () => {
+						const target = _status.event.target,
+							cards = target.getCards("he");
+						const suits = lib.suit.slice(0);
+						suits.sort(function (a, b) {
+							var num = function (suit) {
+								return cards.filter(function (card) {
+									return get.suit(card) == suit;
+								}).length;
+							};
+							return num(b) - num(a);
+						});
+						return suits[0];
+					})
+					.set("target", target)
+					.forResult();
+				if (!result?.control) {
+					return;
+				}
+				const suit = result.control;
 				event.suit = suit;
 				player.chat(get.translation(suit + 2));
 				game.log(player, "选择了", "#y" + get.translation(suit + 2));
 				if (target.countCards("he", { suit: suit })) player.gain(target.getCards("he", { suit: suit }), target, "giveAuto");
-				("step 3");
-				var suit = event.suit;
 				player.storage.old_yichong = suit;
 				player.markSkill("old_yichong");
-				var skill = "old_yichong_" + player.playerid;
+				const skill = `old_yichong_${player.playerid}`;
 				game.broadcastAll(lib.skill.old_yichong.initSkill, skill);
 				game.broadcastAll(
 					function (player, suit) {
-						if (player.marks.old_yichong) player.marks.old_yichong.firstChild.innerHTML = get.translation(suit);
+						if (player.marks.old_yichong) {
+							player.marks.old_yichong.firstChild.innerHTML = get.translation(suit);
+						}
 					},
 					player,
 					suit
 				);
 				game.countPlayer(function (current) {
-					current.removeSkill("old_yichong_" + player.playerid);
-					if (current == target) target.addSkill("old_yichong_" + player.playerid);
+					current.removeSkill(`old_yichong_${player.playerid}`);
+					if (current == target) {
+						target.addSkill(`old_yichong_${player.playerid}`);
+					}
 				});
 				player.addTempSkill("old_yichong_clear", { player: "phaseBegin" });
 			},
 			onremove: true,
-			intro: {
-				content: "拥有“雀”标记的角色得到$牌后，你获得之",
-			},
+			intro: { content: "拥有“雀”标记的角色得到$牌后，你获得之" },
 			group: "old_yichong_gain",
 			subSkill: {
 				gain: {
 					audio: "yichong",
-					trigger: {
-						global: ["gainAfter", "loseAsyncAfter"],
-					},
+					trigger: { global: ["gainAfter", "loseAsyncAfter"] },
 					filter(event, player) {
-						if (!player.storage.old_yichong) return false;
+						if (!player.storage.old_yichong) {
+							return false;
+						}
 						return game.hasPlayer(function (current) {
-							if (!event.getg(current).length || !current.hasSkill("old_yichong_" + player.playerid)) return false;
-							if (current.countMark("old_yichong_" + player.playerid) >= lib.skill.old_yichong.getLimit) return false;
+							if (!event.getg(current).length || !current.hasSkill(`old_yichong_${player.playerid}`)) {
+								return false;
+							}
+							if (current.countMark(`old_yichong_${player.playerid}`) >= lib.skill.old_yichong.getLimit) {
+								return false;
+							}
 							return event.getg(current).some(card => get.suit(card, current) == player.storage.old_yichong && lib.filter.canBeGained(card, current, player));
 						});
 					},
 					forced: true,
-					content() {
-						var target = game.findPlayer(function (current) {
-							if (!trigger.getg(current).length || !current.hasSkill("old_yichong_" + player.playerid)) return false;
-							if (current.countMark("old_yichong_" + player.playerid) >= lib.skill.old_yichong.getLimit) return false;
+					async content(event, trigger, player) {
+						const target = game.findPlayer(function (current) {
+							if (!trigger.getg(current).length || !current.hasSkill(`old_yichong_${player.playerid}`)) {
+								return false;
+							}
+							if (current.countMark(`old_yichong_${player.playerid}`) >= lib.skill.old_yichong.getLimit) {
+								return false;
+							}
 							return trigger.getg(current).some(card => get.suit(card, current) == player.storage.old_yichong && lib.filter.canBeGained(card, current, player));
 						});
-						var cards = trigger.getg(target).filter(card => get.suit(card, target) == player.storage.old_yichong && lib.filter.canBeGained(card, target, player));
-						var num = lib.skill.old_yichong.getLimit - target.countMark("old_yichong_" + player.playerid);
+						let cards = trigger.getg(target).filter(card => get.suit(card, target) == player.storage.old_yichong && lib.filter.canBeGained(card, target, player));
+						const num = lib.skill.old_yichong.getLimit - target.countMark(`old_yichong_${player.playerid}`);
 						cards = cards.randomGets(num);
-						player.gain(cards, target, "giveAuto");
-						target.addMark("old_yichong_" + player.playerid, cards.length, false);
+						if (cards.length) {
+							await player.gain(cards, target, "giveAuto");
+							target.addMark(`old_yichong_${player.playerid}`, cards.length, false);
+						}
 					},
 				},
 				clear: {
 					charlotte: true,
 					onremove(player) {
 						game.countPlayer(function (current) {
-							current.removeSkill("old_yichong_" + player.playerid);
+							current.removeSkill(`old_yichong_${player.playerid}`);
 						});
 					},
 				},
@@ -3650,57 +3666,53 @@ const lmCharacter = {
 		},
 		old_wufei: {
 			audio: "wufei",
-			trigger: {
-				player: ["useCardToPlayered", "damageEnd"],
-			},
-			filter(event, player) {
-				var target = game.findPlayer(current => current.hasSkill("old_yichong_" + player.playerid));
-				if (!target) return false;
-				if (event.name == "damage") return target.hp > 1 && target.hp > player.hp;
-				return event.isFirstTarget && (event.card.name == "sha" || (get.type(event.card) == "trick" && get.is.damageCard(card)));
-			},
-			direct: true,
-			content() {
-				"step 0";
-				var target = game.findPlayer(current => current.hasSkill("old_yichong_" + player.playerid));
-				event.target = target;
-				if (trigger.name == "damage") {
-					player.chooseBool(get.prompt("old_wufei", target), "令" + get.translation(target) + "受到1点无来源伤害").set("choice", get.damageEffect(target, player, player) > 0);
-				} else {
-					player.logSkill("old_wufei", target);
-					player.addTempSkill("old_wufei_effect");
-					player.markAuto("old_wufei_effect", [trigger.card]);
-					game.log(target, "成为了", trigger.card, "的伤害来源");
-					event.finish();
+			trigger: { source: "damageBefore" },
+			filter(event, player, name) {
+				const target = game.findPlayer(current => current.hasSkill(`old_yichong_${player.playerid}`));
+				if (!target) {
+					return false;
 				}
-				("step 1");
-				if (result.bool) {
-					player.logSkill("old_wufei", target);
-					target.damage("nosource");
-				}
+				return event.card && (event.card.name == "sha" || (get.type(event.card) == "trick" && get.is.damageCard(event.card)));
 			},
+			forced: true,
+			locked: false,
+			logTarget(event, player) {
+				return game.findPlayer(current => current.hasSkill(`old_yichong_${player.playerid}`));
+			},
+			async content(event, trigger, player) {
+				const target = event.targets[0];
+				trigger.source = target;
+				game.log(target, "成为了", trigger.card, "的伤害来源");
+			},
+			ai: { combo: "old_yichong" },
+			group: "old_wufei_damage",
 			subSkill: {
-				effect: {
-					charlotte: true,
-					trigger: {
-						source: "damageBefore",
+				damage: {
+					audio: "wufei",
+					trigger: { player: "damageEnd" },
+					filter(event, player, name) {
+						const target = game.findPlayer(current => current.hasSkill(`old_yichong_${player.playerid}`));
+						if (!target) {
+							return false;
+						}
+						const num = target.getHp();
+						return num > 1 && num > player.getHp();
 					},
-					filter(event, player) {
-						if (!event.card) return false;
-						return player.getStorage("old_wufei_effect").includes(event.card);
+					async cost(event, trigger, player) {
+						const target = game.findPlayer(current => current.hasSkill(`old_yichong_${player.playerid}`));
+						event.result = await player
+							.chooseBool(get.prompt(event.skill, target), `令${get.translation(target)}受到1点无来源伤害`)
+							.set("choice", get.damageEffect(target, player, player) > 0)
+							.forResult();
 					},
-					forced: true,
-					popup: false,
-					firstDo: true,
-					content() {
-						var target = game.findPlayer(current => current.hasSkill("old_yichong_" + player.playerid));
-						if (!target) delete trigger.source;
-						else trigger.source = target;
+					logTarget(event, player) {
+						return game.findPlayer(current => current.hasSkill(`old_yichong_${player.playerid}`));
+					},
+					async content(event, trigger, player) {
+						const target = event.targets[0];
+						await target.damage("nosource");
 					},
 				},
-			},
-			ai: {
-				combo: "old_yichong",
 			},
 		},
 		//手杀陈珪
