@@ -19227,6 +19227,7 @@ const lmCharacter = {
 			},
 		},
 		old_clandandao: {
+			audio: "clandandao",
 			trigger: { player: "judgeAfter" },
 			forced: true,
 			filter(event, player) {
@@ -19254,6 +19255,7 @@ const lmCharacter = {
 			},
 		},
 		old_clanqingli: {
+			audio: "clanqingli",
 			trigger: { global: "phaseEnd" },
 			forced: true,
 			filter(event, player) {
