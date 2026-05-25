@@ -3046,7 +3046,7 @@ const lmCharacter = {
 			},
 		},
 		//手杀界朱治
-		old_sbanguo: {
+		old_sbanguo:{
 			audio: "sbanguo",
 			trigger: { global: "phaseBefore", player: "enterGame" },
 			group: ["old_sbanguo_move", "old_sbanguo_damage", "old_sbanguo_dying"],
@@ -3057,7 +3057,7 @@ const lmCharacter = {
 			async cost(event, trigger, player) {
 				event.result = await player.chooseTarget("安国：令一名其他角色获得“安国”标记", lib.filter.notMe, true).forResult();
 			},
-			content() {
+			async content(event, trigger, player) {
 				const target = event.targets[0];
 				target.addMark("old_sbanguo_mark", 1, false);
 				target.addAdditionalSkill("old_sbanguo_" + player.playerid, "old_sbanguo_mark");
@@ -3081,16 +3081,14 @@ const lmCharacter = {
 				},
 				move: {
 					audio: ["sbanguo1.mp3", "sbanguo2.mp3"],
-					direct: true,
 					trigger: { player: "phaseUseBegin" },
 					filter(event, player) {
 						return game.hasPlayer(current => current.hasSkill("old_sbanguo_mark")) && game.hasPlayer(current => !current.hasMark("old_sbanguo_marked") && current != player);
 					},
-					content() {
-						"step 0";
-						var targets = game.filterPlayer(current => current.hasSkill("old_sbanguo_mark"));
-						var prompt2 = targets.length == 1 ? "将" + get.translation(targets[0]) + "的“安国”交给一名未获得过“安国”的其他角色" : "选择一名有“安国”的角色，将该标记交给一名未获得过“安国”的其他角色";
-						player
+					async cost(event, trigger, player) {
+						const targets = game.filterPlayer(current => current.hasSkill("old_sbanguo_mark"));
+						const prompt2 = targets.length == 1 ? "将" + get.translation(targets[0]) + "的“安国”交给一名未获得过“安国”的其他角色" : "选择一名有“安国”的角色，将该标记交给一名未获得过“安国”的其他角色";
+						event.result = await player
 							.chooseTarget(get.prompt("old_sbanguo"), prompt2, targets.length == 1 ? 1 : 2, (card, player, target) => {
 								if (ui.selected.targets.length == 0 && _status.event.targets.length > 1) {
 									return target.hasSkill("old_sbanguo_mark");
@@ -3104,30 +3102,31 @@ const lmCharacter = {
 								}
 								return get.attitude(player, _status.event.targets[0]) < get.attitude(player, target);
 							})
-							.set("targets", targets);
-						("step 1");
-						if (result.bool) {
-							var targets = result.targets;
-							if (targets.length == 1) {
-								var target1 = game.filterPlayer(current => current.hasSkill("old_sbanguo_mark"))[0];
-								var target2 = targets[0];
-							} else {
-								var target1 = targets[0];
-								var target2 = targets[1];
+							.set("targets", targets)
+							.set("line", false)
+							.forResult();
+					},
+					async content(event, trigger, player) {
+						const { targets } = event;
+						let target1, target2;
+						if (targets.length == 1) {
+							target1 = game.filterPlayer(current => current.hasSkill("old_sbanguo_mark"))[0];
+							target2 = targets[0];
+						} else {
+							target1 = targets[0];
+							target2 = targets[1];
+						}
+						player.line2([target1, target2], "green");
+						const map = target1.additionalSkills;
+						for (const key in map) {
+							if (key.indexOf("old_sbanguo_") != 0) {
+								continue;
 							}
-							player.logSkill("old_sbanguo_move", target2, false);
-							player.line2([target1, target2], "green");
-							var map = target1.additionalSkills;
-							for (var key in map) {
-								if (key.indexOf("old_sbanguo_") != 0) {
-									continue;
-								}
-								var id = parseInt(key.slice(8));
-								target1.removeAdditionalSkill("old_sbanguo_" + id);
-								target2.addMark("old_sbanguo_mark", 1, false);
-								target2.addAdditionalSkill("old_sbanguo_" + id, "old_sbanguo_mark");
-								target2.addMark("old_sbanguo_marked", 1, false);
-							}
+							const id = parseInt(key.slice(8));
+							target1.removeAdditionalSkill("old_sbanguo_" + id);
+							target2.addMark("old_sbanguo_mark", 1, false);
+							target2.addAdditionalSkill("old_sbanguo_" + id, "old_sbanguo_mark");
+							target2.addMark("old_sbanguo_marked", 1, false);
 						}
 					},
 				},
@@ -3145,7 +3144,7 @@ const lmCharacter = {
 						}
 						return event.num >= player.hp;
 					},
-					content() {
+					async content(event, trigger, player) {
 						trigger.cancel();
 					},
 					ai: {
@@ -3180,34 +3179,37 @@ const lmCharacter = {
 						return skills && skills.length;
 					},
 					logTarget: "player",
-					content() {
-						"step 0";
-						trigger.player.removeAdditionalSkill("old_sbanguo_" + player.playerid);
-						var num = 1 - trigger.player.hp;
-						if (num > 0) trigger.player.recover(num);
-						("step 1");
-						var hp = player.hp - 1,
+					async content(event, trigger, player) {
+						const target = trigger.player;
+						target.removeAdditionalSkill("old_sbanguo_" + player.playerid);
+						await target.recoverTo(1);
+						const hp = player.hp - 1,
 							maxhp = player.maxHp - 1;
+						let result;
 						if (hp > 0 && maxhp > 0) {
-							player
+							result = await player
 								.chooseControl()
 								.set("prompt", "安国：请选择一项")
-								.set("choiceList", ["失去" + hp + "点体力，令" + get.translation(trigger.player) + "获得" + hp + "点护甲", "减" + maxhp + "点体力上限，令" + get.translation(trigger.player) + "获得" + maxhp + "点护甲"])
-								.set("ai", () => "选项一");
-						} else if (hp > 0) event._result = { control: "选项一" };
-						else if (maxhp > 0) event._result = { control: "选项二" };
-						else event.finish();
-						("step 2");
-						if (result.control == "选项一") {
+								.set("choiceList", ["失去" + hp + "点体力，令" + get.translation(target) + "获得1点护甲", "减" + maxhp + "点体力上限，令" + get.translation(target) + "获得1点护甲"])
+								.set("ai", () => "选项一")
+								.forResult();
+						} else if (hp > 0) {
+							result = { control: "选项一" };
+						} else if (maxhp > 0) {
+							result = { control: "选项二" };
+						} else {
+							return;
+						}
+						if (result?.control == "选项一") {
 							var num = player.hp - 1;
 							if (num > 0) {
-								player.loseHp(num);
+								await player.loseHp(num);
 								trigger.player.changeHujia(num);
 							}
-						} else {
+						} else if (result?.control == "选项二") {
 							var num = player.maxHp - 1;
 							if (num > 0) {
-								player.loseMaxHp(num);
+								await player.loseMaxHp(num);
 								trigger.player.changeHujia(num);
 							}
 						}
