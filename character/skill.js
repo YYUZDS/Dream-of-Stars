@@ -3190,7 +3190,7 @@ const lmCharacter = {
 							result = await player
 								.chooseControl()
 								.set("prompt", "安国：请选择一项")
-								.set("choiceList", ["失去" + hp + "点体力，令" + get.translation(target) + "获得1点护甲", "减" + maxhp + "点体力上限，令" + get.translation(target) + "获得1点护甲"])
+								.set("choiceList", ["失去" + hp + "点体力，令" + get.translation(target) + "获得"+ hp +"点护甲", "减" + maxhp + "点体力上限，令" + get.translation(target) + "获得"+ maxhp +"点护甲"])
 								.set("ai", () => "选项一")
 								.forResult();
 						} else if (hp > 0) {
