@@ -19180,6 +19180,7 @@ const lmCharacter = {
 		},
 		//族荀爽
 		old_clanyangji: {
+			audio: "clanyangji",
 			trigger: {
 				player: "phaseZhunbeiBegin",
 				global: "phaseEnd",
