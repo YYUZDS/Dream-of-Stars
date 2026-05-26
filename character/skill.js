@@ -13625,142 +13625,213 @@ const lmCharacter = {
 			},
 		},
 		//族荀采
-		oldx_clanlieshi: {
+				oldx_clanlieshi: {
 			audio: "clanlieshi",
 			enable: "phaseUse",
-			content() {
-				"step 0";
-				var choice = [];
-				var list = ["受到1点火属性伤害并废除判定区", "弃置所有【闪】", "弃置所有【杀】"];
-				for (var i = 1; i <= 3; i++) {
-					if (i == 2 && !player.countCards("h", { name: "shan" })) list[i - 1] = '<span style="opacity:0.5">' + list[i - 1] + "</span>";
-					else if (i == 3 && !player.countCards("h", { name: "sha" })) list[i - 1] = '<span style="opacity:0.5">' + list[i - 1] + "</span>";
-					else choice.push("选项" + get.cnNumber(i, true));
-				}
-				if (choice.length)
-					player
-						.chooseControl(choice)
-						.set("choiceList", list)
-						.set("ai", function () {
-							if (choice.length == 1) return choice[0];
-							var player = _status.event.player;
-							if (get.damageEffect(player, player, player, "fire") > 0) return "选项一";
-							return choice[choice.length - 1];
-						})
-						.set("prompt", "烈誓：请选择一项执行，然后选择一名其他角色执行另一项");
-				else event.finish();
-				("step 1");
-				var num = result.control;
-				event.num = num;
-				game.log(player, "选择执行", "#g【烈誓】", "的" + result.control);
-				switch (num) {
-					case "选项一":
-						player.damage(1, "fire");
-						if (!player.storage._disableJudge) player.disableJudge();
-						break;
-					case "选项二":
-						player.discard(player.getCards("h", { name: "shan" }));
-						break;
-					case "选项三":
-						player.discard(player.getCards("h", { name: "sha" }));
-						break;
-				}
-				("step 2");
-				if (!player.isIn() || game.countPlayer() < 2) event.finish();
-				else
-					player
-						.chooseTarget("请选择一名其他角色，执行【烈誓】的剩余选项", lib.filter.notMe, true)
-						.set("ai", function (target) {
-							var player = _status.event.player;
-							var choice = [],
-								att = get.attitude(player, target);
-							for (var i = 1; i <= 3; i++) {
-								if ("选项" + get.cnNumber(i, true) == _status.event.control) continue;
-								else if (i == 2 && !target.countCards("h", { name: "shan" })) continue;
-								else if (i == 3 && !target.countCards("h", { name: "sha" })) continue;
-								else choice.push("选项" + get.cnNumber(i, true));
-							}
-							if (!choice.length) return -1 / Infinity;
-							if (choice.length == 1) {
-								if (choice[0] == "选项一") return -att * 3;
-								return -att * 2;
-							}
-							return -att;
-						})
-						.set("control", num);
-				("step 3");
-				if (!result.bool) {
-					event.finish();
-					return;
-				}
-				player.addExpose(0.3);
-				var target = result.targets[0];
-				event.target = target;
-				player.line(target);
-				var choice = [];
-				var list = ["受到1点火属性伤害并废除判定区", "弃置所有【闪】", "弃置所有【杀】"];
-				for (var i = 1; i <= 3; i++) {
-					if ("选项" + get.cnNumber(i, true) == num) list[i - 1] = '<span style="opacity:0.5">' + list[i - 1] + "</span>";
-					else if (i == 2 && !target.countCards("h", { name: "shan" })) list[i - 1] = '<span style="opacity:0.5">' + list[i - 1] + "</span>";
-					else if (i == 3 && !target.countCards("h", { name: "sha" })) list[i - 1] = '<span style="opacity:0.5">' + list[i - 1] + "</span>";
-					else choice.push("选项" + get.cnNumber(i, true));
-				}
-				if (choice.length)
-					target
-						.chooseControl(choice)
-						.set("choiceList", list)
-						.set("ai", function () {
-							if (get.damageEffect(target, target, target, "fire") > 0) return "选项一";
-							return choice[choice.length - 1];
-						})
-						.set("prompt", "烈誓：请选择一项执行");
-				else event.finish();
-				("step 4");
-				game.log(target, "选择执行", "#g【烈誓】", "的" + result.control);
-				switch (result.control) {
-					case "选项一":
-						target.damage(1, "fire");
-						if (!target.storage._disableJudge) target.disableJudge();
-						break;
-					case "选项二":
-						target.discard(target.getCards("h", { name: "shan" }));
-						break;
-					case "选项三":
-						target.discard(target.getCards("h", { name: "sha" }));
-						break;
-				}
+			filter(event, player) {
+				return true;
 			},
-			ai: {
-				order: 1,
-				nokeep: true,
-				skillTagFilter(player) {
-					if (!player.hasSkill("bolhuanyin")) return false;
+			chooseButton: {
+				dialog(event, player) {
+					var dialog = ui.create.dialog("烈誓：选择一项", "hidden");
+					dialog.add([lib.skill.oldx_clanlieshi.choices.slice(), "textbutton"]);
+					return dialog;
 				},
-				result: {
-					player(player) {
-						var choice = [];
-						for (var i = 1; i <= 3; i++) {
-							if (i == 2 && !player.countCards("h", { name: "shan" })) continue;
-							else if (i == 3 && !player.countCards("h", { name: "sha" })) continue;
-							else choice.push("选项" + get.cnNumber(i, true));
+				filter(button, player) {
+					var link = button.link;
+					if (link == "damage") {
+						return true;
+					}
+					var num = player.countCards("h", link);
+					return num > 0 && num == player.getDiscardableCards(player, "h").filter(i => get.name(i) == link).length;
+				},
+				check(button) {
+					var player = _status.event.player;
+					switch (button.link) {
+						case "damage":
+							if (get.damageEffect(player, player, player, "fire") >= 0) {
+								return 10;
+							}
+							if (player.hp >= Math.max(2, 3 - player.getFriends().length) && game.countPlayer(current => get.attitude(player, current) < 0 && current.countCards("h", card => ["sha", "shan"].includes(get.name(card))))) {
+								return 0.8 + Math.random();
+							}
+							return 0;
+						case "shan":
+							if (player.countCards("h", "shan") == 1) {
+								return 8 + Math.random();
+							}
+							return 1 + Math.random();
+						case "sha":
+							if (player.countCards("h", "sha") == 1) {
+								return 8 + Math.random();
+							}
+							return 0.9 + Math.random();
+					}
+				},
+				backup(links) {
+					var next = get.copy(lib.skill["oldx_clanlieshi_backupx"]);
+					next.choice = links[0];
+					return next;
+				},
+				prompt(links) {
+					if (links[0] == "damage") {
+						return "受到1点火焰伤害并废除判定区";
+					}
+					return "弃置所有【" + get.translation(links[0]) + "】";
+				},
+			},
+			choices: [
+				["damage", "受到1点火焰伤害并废除判定区"],
+				["shan", "弃置所有【闪】"],
+				["sha", "弃置所有【杀】"],
+			],
+			ai: {
+				order(item, player) {
+					if (!player) {
+						return;
+					}
+					var eff = get.damageEffect(player, player, player, "fire"),
+						disabled = !player.isDisabledJudge();
+					if ((player.countCards("h", "sha") == 1 || player.countCards("h", "shan") == 1) && eff < 0 && !disabled) {
+						return 8;
+					} else if (eff >= 0 && !disabled) {
+						return 5.8;
+					}
+					if (!disabled && !player.countCards("h", card => ["sha", "shan"].includes(get.name(card)))) {
+						if ((!player.hasSkill("clanhuanyin") || !player.canSave(player)) && player.hp <= 1) {
+							return 0;
 						}
-						var control = get.damageEffect(player, player, player, "fire") > 0 ? "选项一" : choice[choice.length - 1];
-						if (choice[choice.length - 1] == "选项一" && player.hp + player.countCards("hs", { name: ["tao", "jiu"] }) < 2 && (player.identity == "zhu" || !player.hasFriend() || !player.hasSkill("bolhuanyin") || !player.countCards("h") >= 4)) return 0;
-						if (
-							game.hasPlayer(function (target) {
-								if (get.attitude(player, target) >= 0) return false;
-								var list = [];
-								for (var i = 1; i <= 3; i++) {
-									if ("选项" + get.cnNumber(i, true) == control) continue;
-									else if (i == 2 && !target.countCards("h", { name: "shan" })) continue;
-									else if (i == 3 && !target.countCards("h", { name: "sha" })) continue;
-									else list.push("选项" + get.cnNumber(i, true));
+						if (player.canSave(player) && player.hp == 1 && player.countCards("h") <= 1) {
+							return 2.6;
+						}
+						if (player.hp < Math.max(2, 3 - player.getFriends().length) || !game.countPlayer(current => get.attitude(player, current) < 0 && current.countCards("h", card => ["sha", "shan"].includes(get.name(card))))) {
+							return 0;
+						}
+					}
+					return 2.5;
+				},
+				expose: 0.2,
+				result: { player: 1 },
+			},
+			subSkill: {
+				backup: {},
+				backupx: {
+					audio: "clanlieshi",
+					selectCard: -1,
+					selectTarget: -1,
+					filterCard: () => false,
+					filterTarget: () => false,
+					multitarget: true,
+					async content(event, trigger, player) {
+						const choice = lib.skill.oldx_clanlieshi_backup.choice;
+						if (choice == "damage") {
+							await player.damage("fire");
+							if (!player.isDisabledJudge()) {
+								player.disableJudge();
+							}
+						} else {
+							const cards = player.getCards("h", choice);
+							if (cards.length) {
+								await player.discard(cards);
+							}
+						}
+
+						if (!player.isIn() || !game.hasPlayer(current => current != player)) {
+							return;
+						}
+
+						let result = await player
+							.chooseTarget("烈誓：令一名其他角色选择另一项", lib.filter.notMe, true)
+							.set("ai", target => {
+								const player = _status.event.player;
+								const chosen = _status.event.getParent().choice;
+								const att = get.attitude(player, target);
+								if (chosen == "damage") {
+									if (att > 0) {
+										return 0;
+									}
+									return -att / 2 + target.countCards("h", card => ["sha", "shan"].includes(get.name(card)));
 								}
-								if (list.length) return 1;
+								return get.damageEffect(target, player, player, "fire");
 							})
-						)
-							return 1;
-						return 0;
+							.set("choice", choice)
+							.forResult();
+
+						if (!result.bool) {
+							return;
+						}
+
+						const target = result.targets[0];
+						player.line(target, "fire");
+
+						const list = [];
+						let choiceList = lib.skill.oldx_clanlieshi.choices.slice();
+						choiceList = choiceList.map((link, ind, arr) => {
+							let text = link[1];
+							let ok = true;
+							if (arr[ind][0] == choice) {
+								text += "（" + get.translation(player) + "已选）";
+								ok = false;
+							} else if (ind > 0) {
+								const name = ind == 1 ? "shan" : "sha";
+								if (!target.countCards("h", name)) {
+									ok = false;
+								}
+							}
+							if (!ok) {
+								text = '<span style="opacity:0.5">' + text + "</span>";
+							} else {
+								list.push("选项" + get.cnNumber(ind + 1, true));
+							}
+							return text;
+						});
+
+						if (!list.length) {
+							game.log(target, "没有能执行的选项");
+							return;
+						}
+
+						result = await target
+							.chooseControl(list)
+							.set("choiceList", choiceList)
+							.set("ai", () => {
+								const controls = _status.event.controls.slice();
+								const player = _status.event.player;
+								const user = _status.event.getParent().player;
+								if (controls.length == 1) {
+									return controls[0];
+								}
+								if (controls.includes("选项一") && get.damageEffect(player, user, player, "fire") >= 0) {
+									return "选项一";
+								}
+								if (controls.includes("选项一") && player.hp <= 2 && player.countCards("h", card => ["sha", "shan"].includes(get.name(card))) <= 3) {
+									controls.remove("选项一");
+								}
+								if (controls.length == 1) {
+									return controls[0];
+								}
+								if (player.getCards("h", "sha").reduce((p, c) => p + get.value(c, player), 0) > player.getCards("h", "sha").reduce((p, c) => p + get.value(c, player), 0)) {
+									if (controls.includes("选项三")) {
+										return "选项三";
+									}
+								} else if (controls.includes("选项二")) {
+									return "选项二";
+								}
+								return controls.randomGet();
+							})
+							.forResult();
+
+						if (result.control == "选项一") {
+							if (!target.isDisabledJudge()) {
+								target.disableJudge();
+							}
+							await target.damage("fire");
+						} else {
+							const cards = target.getCards("h", result.control == "选项二" ? "shan" : "sha");
+							if (cards.length) {
+								await target.discard(cards);
+							}
+						}
 					},
 				},
 			},
