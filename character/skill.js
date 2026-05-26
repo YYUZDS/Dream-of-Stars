@@ -14137,29 +14137,43 @@ const lmCharacter = {
 			audio: "clanxieshu",
 			trigger: { player: "damageEnd", source: "damageSource" },
 			filter(event, player) {
-				if (!event.card) return false;
+				if (!event.card) {
+					return false;
+				}
 				var num = get.cardNameLength(event.card);
 				return typeof num == "number" && num > 0 && player.countCards("he") > 0;
 			},
-			direct: true,
-			content() {
-				"step 0";
+			async cost(event, trigger, player) {
 				var num = get.cardNameLength(trigger.card),
 					str = "";
-				if (player.getDamagedHp() > 0) str += "并摸" + get.cnNumber(player.getDamagedHp()) + "张牌";
-				player
-					.chooseToDiscard(get.prompt("old_clanxieshu"), "弃置" + get.cnNumber(num) + "张牌" + str, "he", num)
+				if (player.getDamagedHp() > 0) {
+					str += "，然后摸" + get.cnNumber(player.getDamagedHp()) + "张牌";
+				}
+				event.result = await player
+					.chooseToDiscard(get.prompt(event.skill), "弃置" + get.cnNumber(num) + "张牌" + str, "he", num, "chooseonly")
 					.set("ai", function (card) {
 						var player = _status.event.player;
 						var num = _status.event.num;
 						var num2 = player.getDamagedHp();
-						if (num < num2) return 8 - get.value(card);
-						if (num == num2 || num2 >= 2 + num - num2) return lib.skill.zhiheng.check(card);
+						if (!num2) {
+							return 0;
+						}
+						if (num < num2) {
+							return 8 - get.value(card);
+						}
+						if (num == num2 || num2 >= 2 + num - num2) {
+							return lib.skill.zhiheng.check(card);
+						}
 						return 0;
 					})
-					.set("num", num).logSkill = "old_clanxieshu";
-				("step 1");
-				if (result.bool && player.getDamagedHp() > 0) player.draw(player.getDamagedHp());
+					.set("num", num)
+					.forResult();
+			},
+			async content(event, trigger, player) {
+				await player.discard(event.cards);
+				if (player.getDamagedHp() > 0) {
+					await player.draw(player.getDamagedHp());
+				}
 			},
 			ai: { threaten: 3 },
 		},
