@@ -14045,79 +14045,6 @@ const lmCharacter = {
 			},
 		},
 		//族钟会
-		// old_clanyuzhi: {
-		//     mod: {
-		//         aiOrder(player, card, num) {
-		//             if (card.name == "tao") return num / 114514;
-		//         },
-		//     },
-		//     audio: "clanyuzhi",
-		//     trigger: { global: "roundStart" },
-		//     direct: true,
-		//     locked: true,
-		//     content() {
-		//         "step 0";
-		//         player.unmarkSkill("old_clanyuzhi");
-		//         var num1 = 0,
-		//             num2 = 0,
-		//             num3 = 0,
-		//             bool = true;
-		//         var history = player.actionHistory;
-		//         for (var i = history.length - 2; i >= 0; i--) {
-		//             for (var evt of history[i].gain) {
-		//                 if (evt.getParent().name == "draw" && evt.getParent(2).name == "old_clanyuzhi") {
-		//                     if (bool) num1 += evt.cards.length;
-		//                     else num2 += evt.cards.length;
-		//                 }
-		//             }
-		//             if (bool) num3 += history[i].useCard.length;
-		//             if (history[i].isRound) {
-		//                 if (bool) bool = false;
-		//                 else break;
-		//             }
-		//         }
-		//         event.num1 = num1;
-		//         if ((num1 > 0 && num2 > 0 && num1 > num2) || num1 > num3) {
-		//             player.logSkill("old_clanyuzhi");
-		//             if (num2 > 0 && num1 > num2) game.log(player, "的野心已开始膨胀", "#y(" + num1 + "张>" + num2 + "张)");
-		//             if (num1 > num3) game.log(player, "的行动未达到野心", "#y(" + num3 + "张<" + num1 + "张)");
-		//             if (player.hasSkill("clanbaozu", null, false, false)) player.chooseBool("迂志：是否失去〖保族〗？", "若选择“否”，则你失去1点体力").set("choice", player.awakenedSkills.includes("clanbaozu"));
-		//             else event._result = { bool: false };
-		//         } else event.goto(2);
-		//         "step 1";
-		//         if (result.bool) {
-		//             player.removeSkills("clanbaozu");
-		//         } else player.loseHp();
-		//         "step 2";
-		//         if (!player.countCards("h")) event.finish();
-		//         "step 3";
-		//         player
-		//             .chooseCard("迂志：请展示一张手牌", "摸此牌牌名字数的牌。下一轮开始时，若本轮你使用的牌数或上一轮你以此法摸的牌数小于此牌牌名字数，则你失去1点体力。", true, function (card, player) {
-		//                 var num = get.cardNameLength(card);
-		//                 return typeof num == "number" && num > 0;
-		//             })
-		//             .set("ai", function (card) {
-		//                 if (_status.event.dying && _status.event.num > 0 && get.cardNameLength(card) > _status.event.num) return 1 / get.cardNameLength(card); //怂
-		//                 return get.cardNameLength(card); //勇
-		//             })
-		//             .set("dying", player.hp + player.countCards("hs", { name: ["tao", "jiu"] }) < 1)
-		//             .set("num", event.num1);
-		//         "step 4";
-		//         if (result.bool) {
-		//             player.logSkill("old_clanyuzhi");
-		//             player.showCards(result.cards, get.translation(player) + "发动了【迂志】");
-		//             player.draw(get.cardNameLength(result.cards[0]));
-		//             player.storage.old_clanyuzhi = get.cardNameLength(result.cards[0]);
-		//             player.markSkill("old_clanyuzhi");
-		//         }
-		//     },
-		//     ai: {
-		//         threaten: 3,
-		//         nokeep: true,
-		//     },
-		//     onremove: true,
-		//     intro: { content: "本轮野心：#张" },
-		// },
 		old_clanyuzhi: {
 			mod: {
 				aiOrder(player, card, num) {
@@ -14143,7 +14070,7 @@ const lmCharacter = {
 						const result = await player
 							.chooseCard(
 								"迂志：请展示一张手牌",
-								"摸此牌牌名字数的牌。本轮结束时弃置此牌，若本轮你使用的牌数或上一轮你以此法摸的牌数小于此牌牌名字数，则你受到1点雷属性伤害或失去〖保族〗。",
+								"摸此牌牌名字数的牌。本轮结束时弃置此牌，若本轮你使用的牌数或上一轮你以此法摸的牌数小于此牌牌名字数，则你失去1点体力或失去〖保族〗。",
 								function (card, player) {
 									var num = get.cardNameLength(card);
 									return typeof num == "number" && num > 0;
@@ -14181,7 +14108,7 @@ const lmCharacter = {
 							let result2;
 							if (num2 > 0 && num1 > num2) game.log(player, "的野心已开始膨胀", "#y(" + num1 + "张>" + num2 + "张)");
 							if (num1 > num3) game.log(player, "的行动未达到野心", "#y(" + num3 + "张<" + num1 + "张)");
-							if (player.hasSkill("clanbaozu", null, false, false)) result2 = await player.chooseBool("迂志：是否失去〖保族〗？", "若选择“否”，则你受到1点雷属性伤害").set("choice", player.awakenedSkills.includes("clanbaozu")).forResult();
+							if (player.hasSkill("clanbaozu", null, false, false)) result2 = await player.chooseBool("迂志：是否失去〖保族〗？", "若选择“否”，则你失去1点体力").set("choice", player.awakenedSkills.includes("clanbaozu")).forResult();
 							else result2 = { bool: false };
 							if (result2?.bool) await player.removeSkills("clanbaozu");
 							else await player.loseHp();
