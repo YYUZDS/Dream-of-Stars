@@ -13568,26 +13568,26 @@ const lmCharacter = {
 		},
 		old_dengji: {
 			audio: "dengji",
-			derivation: ["old_dengji", "new_rejianxiong", "rerende", "rezhiheng", "olluanji", "olfangquan"],
+			derivation: ["old_tianxing", "new_rejianxiong", "rerende", "rezhiheng", "olluanji", "olfangquan"],
 			trigger: { player: "phaseZhunbeiBegin" },
 			forced: true,
 			juexingji: true,
 			skillAnimation: true,
 			animationColor: "water",
 			filter(event, player) {
-				return player.getExpansions("old_chuyuan").length >= 3;
+				return player.getExpansions("chuyuan").length >= 3;
 			},
 			async content(event, trigger, player) {
 				player.awakenSkill(event.name);
-				await player.addSkills(["old_dengji", "new_rejianxiong"]);
+				await player.addSkills(["old_tianxing", "new_rejianxiong"]);
 				await player.loseMaxHp();
-				await player.gain(player.getExpansions("old_chuyuan"), "gain2", "fromStorage");
+				await player.gain(player.getExpansions("chuyuan"), "gain2", "fromStorage");
 			},
 			ai: {
-				combo: "old_chuyuan",
+				combo: "chuyuan",
 			},
 		},
-		old_dengji: {
+		old_tianxing: {
 			audio: "tianxing",
 			trigger: { player: "phaseZhunbeiBegin" },
 			forced: true,
@@ -13595,18 +13595,16 @@ const lmCharacter = {
 			skillAnimation: true,
 			animationColor: "thunder",
 			filter(event, player) {
-				return player.getExpansions("old_chuyuan").length >= 3;
+				return player.getExpansions("chuyuan").length >= 3;
 			},
 			async content(event, trigger, player) {
 				player.awakenSkill(event.name);
 				await player.loseMaxHp();
-				await player.gain(player.getExpansions("old_chuyuan"), "gain2", "fromStorage");
-				await player.removeSkills("old_chuyuan");
+				await player.gain(player.getExpansions("chuyuan"), "gain2", "fromStorage");
+				await player.removeSkills("chuyuan");
 				const result = await player.chooseControl("rerende", "rezhiheng", "olluanji", "olfangquan").set("prompt", "选择获得一个技能").set("ai", processAI).forResult();
 				await player.addSkills(result.control);
-
 				return;
-
 				function processAI() {
 					const player = get.player();
 
@@ -13623,7 +13621,7 @@ const lmCharacter = {
 				}
 			},
 			ai: {
-				combo: "old_chuyuan",
+				combo: "chuyuan",
 			},
 		},
 		//族荀采
