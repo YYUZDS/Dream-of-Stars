@@ -13543,16 +13543,13 @@ const lmCharacter = {
 			},
 			logTarget: "player",
 			locked: false,
-			content() {
-				"step 0";
-				trigger.player.draw();
-				("step 1");
+			async content(event, trigger, player) {
+				await trigger.player.draw();
 				if (!trigger.player.countCards("h")) {
-					event.finish();
-				} else {
-					trigger.player.chooseCard("h", true, "选择一张牌置于" + get.translation(player) + "的武将牌上作为「储」");
+					return;
 				}
-				("step 2");
+
+				const result = await trigger.player.chooseCard("h", true, "选择一张牌置于" + get.translation(player) + "的武将牌上作为「储」").forResult();
 				player.addToExpansion(result.cards, trigger.player, "give").gaintag.add("old_chuyuan");
 			},
 			intro: {
@@ -13571,7 +13568,7 @@ const lmCharacter = {
 		},
 		old_dengji: {
 			audio: "dengji",
-			derivation: ["old_tianxing", "new_rejianxiong", "rerende", "rezhiheng", "olluanji", "olfangquan"],
+			derivation: ["old_dengji", "new_rejianxiong", "rerende", "rezhiheng", "olluanji", "olfangquan"],
 			trigger: { player: "phaseZhunbeiBegin" },
 			forced: true,
 			juexingji: true,
@@ -13580,17 +13577,17 @@ const lmCharacter = {
 			filter(event, player) {
 				return player.getExpansions("old_chuyuan").length >= 3;
 			},
-			content() {
+			async content(event, trigger, player) {
 				player.awakenSkill(event.name);
-				player.addSkills(["old_tianxing", "new_rejianxiong"]);
-				player.loseMaxHp();
-				player.gain(player.getExpansions("old_chuyuan"), "gain2", "fromStorage");
+				await player.addSkills(["old_dengji", "new_rejianxiong"]);
+				await player.loseMaxHp();
+				await player.gain(player.getExpansions("old_chuyuan"), "gain2", "fromStorage");
 			},
 			ai: {
 				combo: "old_chuyuan",
 			},
 		},
-		old_tianxing: {
+		old_dengji: {
 			audio: "tianxing",
 			trigger: { player: "phaseZhunbeiBegin" },
 			forced: true,
@@ -13600,31 +13597,30 @@ const lmCharacter = {
 			filter(event, player) {
 				return player.getExpansions("old_chuyuan").length >= 3;
 			},
-			content() {
-				"step 0";
+			async content(event, trigger, player) {
 				player.awakenSkill(event.name);
-				player.loseMaxHp();
-				player.gain(player.getExpansions("old_chuyuan"), "gain2", "fromStorage");
-				("step 1");
-				player.removeSkills("old_chuyuan");
-				player
-					.chooseControl("rerende", "rezhiheng", "olluanji", "olfangquan")
-					.set("prompt", "选择获得一个技能")
-					.set("ai", function () {
-						var player = _status.event.player;
-						if (!player.hasSkill("luanji") && !player.hasSkill("olluanji") && player.getUseValue({ name: "wanjian" }) > 4) {
-							return "olluanji";
-						}
-						if (!player.hasSkill("rezhiheng")) {
-							return "rezhiheng";
-						}
-						if (!player.hasSkill("olfangquan")) {
-							return "olfangquan";
-						}
-						return "rerende";
-					});
-				("step 2");
-				player.addSkills(result.control);
+				await player.loseMaxHp();
+				await player.gain(player.getExpansions("old_chuyuan"), "gain2", "fromStorage");
+				await player.removeSkills("old_chuyuan");
+				const result = await player.chooseControl("rerende", "rezhiheng", "olluanji", "olfangquan").set("prompt", "选择获得一个技能").set("ai", processAI).forResult();
+				await player.addSkills(result.control);
+
+				return;
+
+				function processAI() {
+					const player = get.player();
+
+					if (!player.hasSkill("luanji") && !player.hasSkill("olluanji") && player.getUseValue({ name: "wanjian" }) > 4) {
+						return "olluanji";
+					}
+					if (!player.hasSkill("rezhiheng")) {
+						return "rezhiheng";
+					}
+					if (!player.hasSkill("olfangquan")) {
+						return "olfangquan";
+					}
+					return "rerende";
+				}
 			},
 			ai: {
 				combo: "old_chuyuan",
