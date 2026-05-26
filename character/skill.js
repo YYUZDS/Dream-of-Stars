@@ -5688,7 +5688,10 @@ const lmCharacter = {
 			audio: "sbtianxiang",
 			enable: "phaseUse",
 			filter(event, player) {
-				return player.countCards("he", card => lib.skill.old_sbtianxiang.filterCard(card, player)) && game.hasPlayer(target => lib.skill.old_sbtianxiang.filterTarget(null, player, target));
+				return (
+					player.countCards("he", card => lib.skill.old_sbtianxiang.filterCard(card, player)) &&
+					game.hasPlayer(target => lib.skill.old_sbtianxiang.filterTarget(null, player, target))
+				);
 			},
 			filterCard(card, player) {
 				return get.color(card, player) == "red";
@@ -5733,7 +5736,7 @@ const lmCharacter = {
 					},
 					forced: true,
 					locked: false,
-					content() {
+					async content(event, trigger, player) {
 						var num = 0;
 						game.countPlayer(target => {
 							var skills = target.getSkills().filter(skill => skill.indexOf("old_sbtianxiang_") == 0);
@@ -5741,7 +5744,7 @@ const lmCharacter = {
 							num += skills.length;
 						});
 						num += 3;
-						player.draw(num);
+						await player.draw(num);
 					},
 				},
 				effect: {
@@ -5749,37 +5752,34 @@ const lmCharacter = {
 					filter(event, player) {
 						return game.hasPlayer(target => target.getSkills().some(skill => skill.indexOf("old_sbtianxiang_") == 0));
 					},
-					direct: true,
-					content() {
-						"step 0";
-						player
+					async cost(event, trigger, player) {
+						event.result = await player
 							.chooseTarget(get.prompt("old_sbtianxiang"), "移去一名角色的“天香”标记并执行相应效果", function (card, player, target) {
 								return target.getSkills().some(skill => skill.indexOf("old_sbtianxiang_") == 0);
 							})
 							.set("ai", target => {
 								var player = _status.event.player;
 								return -get.attitude(player, target) * target.getSkills().filter(skill => skill.indexOf("old_sbtianxiang_") == 0).length;
-							});
-						("step 1");
-						if (result.bool) {
-							var target = result.targets[0];
-							event.target = target;
-							player.logSkill("old_sbtianxiang", target);
-							var skills = target.getSkills().filter(skill => skill.indexOf("old_sbtianxiang_") == 0);
-							target.removeSkill(skills);
-							if (skills.includes("old_sbtianxiang_heart")) {
-								target.damage(trigger.source ? trigger.source : "nosource");
-								trigger.cancel();
+							})
+							.forResult();
+					},
+					async content(event, trigger, player) {
+						const target = event.targets[0];
+						const skills = target.getSkills().filter(skill => skill.indexOf("old_sbtianxiang_") == 0);
+						target.removeSkill(skills);
+						if (skills.includes("old_sbtianxiang_heart")) {
+							target.damage(trigger.source ? trigger.source : "nosource");
+							trigger.cancel();
+						}
+						if (skills.includes("old_sbtianxiang_diamond")) {
+							var cards = target.getCards("he");
+							if (!cards.length) {
+								return;
 							}
-							if (skills.includes("old_sbtianxiang_diamond")) {
-								var cards = target.getCards("he");
-								if (!cards.length) event.finish();
-								else if (cards.length <= 2) event._result = { bool: true, cards: cards };
-								else target.chooseCard("he", 2, "天香：交给" + get.translation(player) + "两张牌", true);
-							} else event.finish();
-						} else event.finish();
-						("step 2");
-						if (result.bool) player.gain(result.cards, target, "giveAuto");
+							await target.chooseToGive(player, "he", 2, "天香：交给" + get.translation(player) + "两张牌", true);
+						} else {
+							return;
+						}
 					},
 				},
 			},
