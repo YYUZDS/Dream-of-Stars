@@ -7573,7 +7573,9 @@ const lmCharacter = {
 				const target = event.targets[0],
 					cards = event.cards;
 				await player.give(cards, target);
-				if (player.storage[event.name] && player.storage[event.name][target.playerid]) delete player.storage[event.name][target.playerid];
+				if (player.storage[event.name] && player.storage[event.name][target.playerid]) {
+					delete player.storage[event.name][target.playerid];
+				}
 				target.addMark(event.name + "_mark");
 				var history = target.getAllHistory("lose");
 				if (history.length) {
@@ -7586,20 +7588,30 @@ const lmCharacter = {
 				if (history.length) {
 					for (var i = history.length - 1; i >= 0; i--) {
 						var evt = history[i];
-						if (evt[mark]) break;
+						if (evt[mark]) {
+							break;
+						}
 						if (typeof skill == "string") {
-							if (evt.getParent(2).name == skill || evt.getParent(3).name == skill) num += evt.cards2.length;
+							if (evt.getParent(2).name == skill || evt.getParent(3).name == skill) {
+								num += evt.cards2.length;
+							}
 						} else {
 							var evtx = evt.getParent(),
 								player = skill;
 							if (evtx.name == "gain") {
 								var cards = evtx.cards;
-								if (evtx.player == player && cards.length > 0) num += cards.length;
+								if (evtx.player == player && cards.length > 0) {
+									num += cards.length;
+								}
 							} else if (evtx.name == "loseAsync") {
-								if (evtx.type != "gain" || evtx.giver) return false;
+								if (evtx.type != "gain" || evtx.giver) {
+									return false;
+								}
 								var cards = evtx.getl(current).cards2;
 								var cardsx = evtx.getg(player);
-								if (cardsx.length > 0) num += cardsx.length;
+								if (cardsx.length > 0) {
+									num += cardsx.length;
+								}
 							}
 						}
 					}
@@ -7617,7 +7629,9 @@ const lmCharacter = {
 			marktext: "惑",
 			intro: {
 				content(storage, player) {
-					if (!storage || get.is.empty(storage)) return "未得到过牌";
+					if (!storage || get.is.empty(storage)) {
+						return "未得到过牌";
+					}
 					var map = _status.connectMode ? lib.playerOL : game.playerMap;
 					var str = "已得到";
 					for (var i in storage) {
@@ -7642,21 +7656,24 @@ const lmCharacter = {
 						global: ["gainAfter", "loseAsyncAfter"],
 					},
 					filter(event, player, name, target) {
-						const evt = event.getParent("phaseDraw");
-						if (evt && evt.name == "phaseDraw") return false;
-						if (!event.getg(target).length || !target.hasMark("old_sbxuanhuo_mark")) return false;
-						if (evt && evt.player == target) return false;
-						if (lib.skill.old_sbxuanhuo.getNum(target, "old_sbxuanhuo_rob", "old_sbxuanhuo_mark") >= 5) return false;
-						return target.hasCard(card => lib.filter.canBeGained(card, target, player), "he");
+						return target?.isIn();
 					},
 					getIndex(event, player) {
 						const evt = event.getParent("phaseDraw");
-						if (evt && evt.name == "phaseDraw") return false;
+						if (evt?.name == "phaseDraw") {
+							return false;
+						}
 						return game
 							.filterPlayer(current => {
-								if (!event.getg(current).length || !current.hasMark("old_sbxuanhuo_mark")) return false;
-								if (evt && evt.player == current) return false;
-								if (lib.skill.old_sbxuanhuo.getNum(current, "old_sbxuanhuo_rob", "old_sbxuanhuo_mark") >= 5) return false;
+								if (!event.getg(current).length || !current.hasMark("old_sbxuanhuo_mark")) {
+									return false;
+								}
+								if (evt?.player == current) {
+									return false;
+								}
+								if (lib.skill.old_sbxuanhuo.getNum(current, "old_sbxuanhuo_rob", "old_sbxuanhuo_mark") >= 5) {
+									return false;
+								}
 								return current.hasCard(card => lib.filter.canBeGained(card, current, player), "he");
 							})
 							.sortBySeat();
@@ -7671,7 +7688,9 @@ const lmCharacter = {
 							hs = target.getCards("h", card => lib.filter.canBeGained(card, target, player));
 						if (hs.length) {
 							await player.gain(hs.randomGet(), target, "giveAuto");
-							if (!player.storage.old_sbxuanhuo) player.storage.old_sbxuanhuo = {};
+							if (!player.storage.old_sbxuanhuo) {
+								player.storage.old_sbxuanhuo = {};
+							}
 							player.storage.old_sbxuanhuo[target.playerid] = lib.skill.old_sbxuanhuo.getNum(target, "old_sbxuanhuo_rob", "old_sbxuanhuo_mark");
 							player.markSkill("old_sbxuanhuo");
 						}
@@ -7681,44 +7700,43 @@ const lmCharacter = {
 		},
 		old_sbenyuan: {
 			audio: "sbenyuan",
-			forced: true,
-			direct: true,
 			trigger: { player: "phaseZhunbeiBegin" },
-			filter(event, player) {
-				return game.hasPlayer(current => current.hasMark("old_sbxuanhuo_mark"));
+			filter(event, player, name, target) {
+				return target?.isIn();
 			},
-			content() {
-				"step 0";
-				var targets = game.filterPlayer(current => current.hasMark("old_sbxuanhuo_mark"));
-				event.targets = targets;
-				("step 1");
-				var target = targets.shift();
-				event.target = target;
-				player.logSkill("old_sbenyuan", target);
-				target.removeMark("old_sbxuanhuo_mark", target.countMark("old_sbxuanhuo_mark"));
-				game.players.forEach(current => {
-					var storage = current.storage.old_sbxuanhuo;
-					if (storage && storage[target.playerid]) delete storage[target.playerid];
+			getIndex(event, player) {
+				return game.filterPlayer(target => target.hasMark("old_sbxuanhuo_mark")).sortBySeat();
+			},
+			logTarget(event, player, triggername, target) {
+				return target;
+			},
+			logAudio: index => (typeof index === "number" ? "old_sbenyuan" + index + ".mp3" : 2),
+			direct: true,
+			locked: true,
+			async content(event, trigger, player) {
+				const target = event.targets[0];
+				target.clearMark("old_sbxuanhuo_mark");
+				for (const current of game.players) {
+					const storage = current.storage.old_sbxuanhuo;
+					if (storage && storage[target.playerid]) {
+						delete storage[target.playerid];
+					}
 					if (storage && get.is.empty(storage)) {
 						delete current.storage.old_sbxuanhuo;
 						current.unmarkSkill("old_sbxuanhuo");
 					}
-				});
-				var num = lib.skill.old_sbxuanhuo.getNum(target, player);
-				if (num >= 3) {
-					var cards = player.getCards("he");
-					if (!cards.length) event._result = { bool: false };
-					else if (cards.length <= 3) event._result = { bool: true, cards: cards };
-					else player.chooseCard("恩怨：交给" + get.translation(target) + "两张牌", true, 2, "he");
-				} else {
-					target.loseHp();
-					player.recover();
-					event.goto(3);
 				}
-				("step 2");
-				if (result.bool) player.give(result.cards, target);
-				("step 3");
-				if (targets.length) event.goto(1);
+				const num = lib.skill.old_sbxuanhuo.getNum(target, player, "old_sbxuanhuo_mark");
+				player.logSkill("old_sbenyuan", target, null, null, [num >= 3 ? 1 : 2]);
+				if (num >= 3) {
+					const num = Math.min(player.countCards("he"), 2);
+					if (num) {
+						await player.chooseToGive(target, `恩怨：交给${get.translation(target)}${get.cnNumber(num)}张牌`, true, num, "he");
+					}
+				} else {
+					await target.loseHp();
+					await player.recover();
+				}
 			},
 			ai: {
 				combo: "old_sbxuanhuo",
