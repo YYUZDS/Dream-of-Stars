@@ -12105,7 +12105,7 @@ const lmCharacter = {
 				},
 			},
 		},
-				old_mbweizhuang: {
+		old_mbweizhuang: {
 			// @ts-ignore audio的类型注释不够全
 			audio: ["guidian", "dongjiao", "xiuge"].map(key => `mbweizhuang_${key}`),
 			// 手杀：一名角色装备区和判定区的牌都是明置牌，但是一名角色的明置牌不包括其判定区的牌
@@ -12337,12 +12337,12 @@ const lmCharacter = {
 							?.map(card => get.type2(card))
 							?.toUniqued()?.length;
 						if (name == "useCard") {
-							return num >= 1 && type == "basic";
+							return num >= 1 && get.type(event.card) == "basic";
 						}
 						if (name == "useCardAfter") {
 							return (
 								num >= 3 &&
-								type == "equip" &&
+								get.type(event.card) == "equip" &&
 								game.hasPlayer(current => {
 									if (player.getStorage("old_mbweizhuang_block").includes(current)) {
 										return false;
@@ -12354,7 +12354,7 @@ const lmCharacter = {
 						return (
 							event.isFirstTarget &&
 							num >= 2 &&
-							type == "trick" &&
+							get.type(event.card) == "trick" &&
 							event.targets?.length &&
 							event.targets.some(target => {
 								const pos = target == player ? "e" : "he";
