@@ -29179,7 +29179,7 @@ const lmCharacter = {
 		old_mb_caocao: "旧手杀SP曹操",
 		old_mb_caocao_prefix: "旧|手杀SP",
 		old_mblingfa: "令法",
-		old_mblingfa_info: `①第一轮开始时，你可令本轮其他角色使用【杀】时，则其需弃置一张牌，否则你对其造成1点伤害。②第二轮游戏开始时，你可令本轮其他角色使用【桃】结算结束后，则其需交给你一张牌，否则你对其造成1点伤害。③非前两轮游戏开始时，你可以失去〖令法〗并获得${get.poptip("new_rejianxiong")}。`,
+		old_mblingfa_info: `①第一轮开始时，你可令本轮其他角色使用【杀】时，其需弃置一张牌，否则你对其造成1点伤害。②第二轮游戏开始时，你可令本轮其他角色使用【桃】结算结束后，其需交给你一张牌，否则你对其造成1点伤害。③非前两轮游戏开始时，你可以失去〖令法〗并获得${get.poptip("new_rejianxiong")}。`,
 		old_pot_lusu: "旧势鲁肃",
 		old_pot_lusu_prefix: "旧|势",
 		old_pothaoshi: "好施",
