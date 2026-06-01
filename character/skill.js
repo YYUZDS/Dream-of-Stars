@@ -12105,9 +12105,10 @@ const lmCharacter = {
 				},
 			},
 		},
-		old_mbweizhuang: {
+				old_mbweizhuang: {
 			// @ts-ignore audio的类型注释不够全
 			audio: ["guidian", "dongjiao", "xiuge"].map(key => `mbweizhuang_${key}`),
+			// 手杀：一名角色装备区和判定区的牌都是明置牌，但是一名角色的明置牌不包括其判定区的牌
 			getFaceupCards(player, judge = false) {
 				const cards = player.getCards("h", card => card.hasGaintag("faceup_tag"));
 				if (player.countCards("e")) {
@@ -12139,7 +12140,7 @@ const lmCharacter = {
 						return ["mbweizhuang_guidian2.mp3", "mbweizhuang_guidian3.mp3"];
 					},
 					trigger: {
-						global: ["faceUpCardAfter", "phaseJieshuBegin"],
+						global: ["faceUpCardAfter", "phaseJieshuBegin", "equipAfter", "addJudgeAfter"],
 						player: "phaseDrawBegin2",
 					},
 					filter(event, player) {
@@ -12154,7 +12155,7 @@ const lmCharacter = {
 							return !event.numFixed && player.getStorage("old_mbweizhuang_guidian", [0, 0, 0])[0] !== 0;
 						}
 						if (event.name == "phaseJieshu") {
-							if (!get.info("old_mbweizhuang").getFaceupCards(event.player).length) {
+							if (!get.info("old_mbweizhuang").getFaceupCards(event.player, true).length) {
 								return false;
 							}
 							return true;
@@ -12163,14 +12164,16 @@ const lmCharacter = {
 							return false;
 						}
 						let num = 0,
-							evts = game.getAllGlobalHistory("everything", evt => evt.name == "faceUpCard");
+							evts = game.getAllGlobalHistory("everything", evt => ["faceUpCard", "equip", "addJudge"].includes(evt.name));
 						for (let i = evts.indexOf(event); i >= 0; i--) {
 							const evt = evts[i];
 							if (evt?.old_mbweizhuang_count) {
 								break;
 							}
-							if (evt.cards?.length) {
+							if (evt.name == "faceUpCard" && evt.cards?.length) {
 								num += evt.cards.length;
+							} else if (["equip", "addJudge"].includes(evt.name)) {
+								num++;
 							}
 						}
 						return num > game.countPlayer2(() => true, true);
@@ -12310,9 +12313,7 @@ const lmCharacter = {
 				},
 				dongjiao: {
 					audio: "mbweizhuang_dongjiao",
-					trigger: {
-						player: ["useCard", "useCardToPlayered", "useCardAfter"],
-					},
+					trigger: { player: ["useCard", "useCardToPlayered", "useCardAfter"] },
 					logAudio(event, player, name) {
 						if (name == "useCardAfter") {
 							return ["mbweizhuang_dongjiao3.mp3", "mbweizhuang_dongjiao6.mp3"];
@@ -12336,12 +12337,12 @@ const lmCharacter = {
 							?.map(card => get.type2(card))
 							?.toUniqued()?.length;
 						if (name == "useCard") {
-							return num >= 1 && get.type(event.card) == "basic";
+							return num >= 1 && type == "basic";
 						}
 						if (name == "useCardAfter") {
 							return (
 								num >= 3 &&
-								get.type(event.card) == "equip" &&
+								type == "equip" &&
 								game.hasPlayer(current => {
 									if (player.getStorage("old_mbweizhuang_block").includes(current)) {
 										return false;
@@ -12353,7 +12354,7 @@ const lmCharacter = {
 						return (
 							event.isFirstTarget &&
 							num >= 2 &&
-							get.type2(event.card) == "trick" &&
+							type == "trick" &&
 							event.targets?.length &&
 							event.targets.some(target => {
 								const pos = target == player ? "e" : "he";
