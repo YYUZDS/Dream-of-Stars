@@ -9148,7 +9148,7 @@ const lmCharacter = {
 			},
 			derivation: "old_sbbeifa",
 		},
-				old_sbbeifa: {
+		old_sbbeifa: {
 			audio: "sbbeifa",
 			chargeSkill: 9,
 			logAudio: index => (typeof index === "number" ? "sbbeifa" + index + ".mp3" : 2),
