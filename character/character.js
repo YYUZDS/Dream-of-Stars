@@ -596,7 +596,7 @@ const characters = {
         hp: 4,
         maxHp: 4,
         hujia: 1,
-        skills: ["old_sbtiaoxin", "old_sbzhiji"],
+        skills: ["sbtiaoxin", "old_sbzhiji"],
         img: "image/character/sb_jiangwei.jpg",
         dieAudios: ["sb_jiangwei"],
     },
