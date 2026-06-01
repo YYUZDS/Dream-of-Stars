@@ -504,7 +504,7 @@ const characters = {
         sex: "male",
         group: "shu",
         hp: 4,
-        skills: ["old_potwanglie", "old_pothongyi"],
+        skills: ["potwanglie", "old_pothongyi"],
         img: "image/character/pot_chendao.jpg",
         dieAudios: ["pot_chendao"],
     },
