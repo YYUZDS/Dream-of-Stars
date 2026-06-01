@@ -9148,7 +9148,7 @@ const lmCharacter = {
 			},
 			derivation: "old_sbbeifa",
 		},
-		old_sbbeifa: {
+				old_sbbeifa: {
 			audio: "sbbeifa",
 			chargeSkill: 9,
 			logAudio: index => (typeof index === "number" ? "sbbeifa" + index + ".mp3" : 2),
@@ -9294,9 +9294,13 @@ const lmCharacter = {
 					async content(event, trigger, player) {
 						let num = 0;
 						if (trigger.name.indexOf("lose") == 0) {
-							game.filterPlayer(current => {
-								num += trigger.getl(current).cards2.length;
-							});
+							game.filterPlayer2(
+								current => {
+									num += trigger.getl(current).cards2.length;
+								},
+								null,
+								true
+							);
 						} else {
 							num += trigger.cards.length;
 						}
