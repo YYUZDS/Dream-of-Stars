@@ -11750,16 +11750,16 @@ const lmCharacter = {
 						content: "当前记录值为：#",
 					},
 					trigger: { player: "phaseDrawBegin" },
-					content() {
+					async content(event, trigger, player) {
 						const record = player.storage[event.name];
-						if (typeof record == "number") {
+						if (typeof record === "number") {
 							player.logSkill("old_mbxiugeng", null, null, null, [player.countCards("h") >= record ? 4 : 3]);
 							if (player.countCards("h") <= record) {
-								player.draw(2);
+								await player.draw({ num: 2 });
 							}
 							if (player.countCards("h") >= record) {
-								player.addSkill("mbxiugeng_handcard");
-								player.addMark("mbxiugeng_handcard", 1, false);
+								player.addSkill("old_mbxiugeng_handcard");
+								player.addMark("old_mbxiugeng_handcard", 1, false);
 							}
 						}
 						player.removeSkill(event.name);
