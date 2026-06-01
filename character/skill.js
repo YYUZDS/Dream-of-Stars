@@ -12336,13 +12336,14 @@ const lmCharacter = {
 							.getFaceupCards(player)
 							?.map(card => get.type2(card))
 							?.toUniqued()?.length;
+						const type = get.type2(event.card);
 						if (name == "useCard") {
-							return num >= 1 && get.type(event.card) == "basic";
+							return num >= 1 && type == "basic";;
 						}
 						if (name == "useCardAfter") {
 							return (
 								num >= 3 &&
-								get.type(event.card) == "equip" &&
+								type == "equip" &&
 								game.hasPlayer(current => {
 									if (player.getStorage("old_mbweizhuang_block").includes(current)) {
 										return false;
@@ -12354,7 +12355,7 @@ const lmCharacter = {
 						return (
 							event.isFirstTarget &&
 							num >= 2 &&
-							get.type(event.card) == "trick" &&
+							type == "trick" &&
 							event.targets?.length &&
 							event.targets.some(target => {
 								const pos = target == player ? "e" : "he";
