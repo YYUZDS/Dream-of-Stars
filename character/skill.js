@@ -10939,89 +10939,6 @@ const lmCharacter = {
 			},
 		},
 		//势陈到
-		old_potwanglie: {
-			audio: "potwanglie",
-			trigger: { player: "phaseUseBegin" },
-			filter(event, player) {
-				return player.countCards("h");
-			},
-			async cost(event, trigger, player) {
-				event.result = await player
-					.chooseCard(get.prompt2("old_potwanglie"), "h")
-					.set("ai", card => {
-						const player = get.player();
-						if (player.hasValueTarget(card, true)) {
-							return player.getUseValue(card, false, true) * (get.tag(card, "damage") > 0.5 ? 2 : 1);
-						}
-						return 0.1 + Math.random();
-					})
-					.forResult();
-			},
-			async content(event, trigger, player) {
-				const card = event.cards[0];
-				player.addGaintag(card, "old_potwanglie");
-				player.addTempSkill(event.name + "_effect", "phaseUseAfter");
-				await game.delayx();
-			},
-			locked: false,
-			mod: {
-				aiOrder(player, card, num) {
-					if (!player.isPhaseUsing() || typeof card !== "object" || num <= 0) return;
-					if (get.itemtype(card) == "card" && card.hasGaintag("old_potwanglie")) num / 20;
-					return num;
-				},
-			},
-			subSkill: {
-				effect: {
-					charlotte: true,
-					onremove(player) {
-						player.removeGaintag("old_potwanglie");
-					},
-					mod: {
-						targetInRange(card, player, target) {
-							if (card.cards?.some(cardx => cardx.hasGaintag("old_potwanglie"))) return true;
-						},
-					},
-					audio: "potwanglie",
-					trigger: { player: ["useCard", "useCardAfter"] },
-					filter(event, player) {
-						return player.hasHistory("lose", evt => {
-							const evtx = evt.relatedEvent || evt.getParent();
-							if (event !== evtx) {
-								return false;
-							}
-							return Object.values(evt.gaintag_map).flat().includes("old_potwanglie");
-						});
-					},
-					silent: true,
-					content() {
-						if (event.triggername == "useCard") {
-							player.logSkill(event.name);
-							trigger.directHit.addArray(game.players);
-							game.log(trigger.card, "不可被响应");
-						} else {
-							player.addTempSkill("old_potwanglie_debuff", "phaseUseAfter");
-						}
-					},
-					ai: {
-						directHit_ai: true,
-						skillTagFilter(player, tag, arg) {
-							if (arg?.card?.cards?.some(card => card.hasGaintag("old_potwanglie"))) return true;
-						},
-					},
-				},
-				debuff: {
-					mark: true,
-					charlotte: true,
-					intro: { content: "本阶段不能对其他角色使用牌" },
-					mod: {
-						playerEnabled(card, player, target) {
-							if (player !== target) return false;
-						},
-					},
-				},
-			},
-		},
 		old_pothongyi: {
 			audio: "pothongyi",
 			locked: true,
@@ -29462,8 +29379,6 @@ const lmCharacter = {
 		old_potjiyu_info: "①出牌阶段限一次，你可以弃置一张手牌，从牌堆中随机获得与此牌类别不同的牌各一张。②当你失去本阶段因〖急御①〗获得的所有牌后，你重置〖急御①〗。",
 		old_pot_chendao: "旧势陈到",
 		old_pot_chendao_prefix: "旧|势",
-		old_potwanglie: "往烈",
-		old_potwanglie_info: "出牌阶段开始时，你可以选择一张手牌，你此阶段使用此牌无距离限制且不可被响应，且你使用此牌结算结束后，你于此阶段不能对其他角色使用牌。",
 		old_pothongyi: "弘毅",
 		old_pothongyi_info: "锁定技。①游戏开始时，你获得2个「毅」标记；当你造成或受到1点伤害后，你获得1个「毅」标记；你至多拥有4个「毅」标记。②准备阶段，你选择一项：1.摸X张牌（X为你拥有的「毅」标记数）；2.移去所有「毅」标记，视为使用等量的【杀】。",
 		old_pot_yuji: "旧势于吉",
