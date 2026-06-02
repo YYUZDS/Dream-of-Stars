@@ -14267,425 +14267,368 @@ const lmCharacter = {
 		//滕芳兰
 		old_luochong: {
 			audio: "luochong",
-			trigger: {
-				player: ["phaseZhunbeiBegin", "damageEnd"],
-			},
-			direct: true,
+			trigger: { player: ["phaseZhunbeiBegin", "damageEnd"] },
 			filter(event, player) {
-				var bool = false;
-				for (var i = 0; i < 4; i++) {
-					if (!player.storage.old_luochong[i] && !player.storage.old_luochong_round[i]) bool = true;
+				var storage1 = player.storage.old_luochong_round,
+					storage2 = player.getStorage("old_luochong");
+				if (!storage1) {
+					storage1 = [[]];
 				}
-				return bool;
-			},
-			init(player) {
-				player.storage.old_luochong = [false, false, false, false];
-				player.storage.old_luochong_round = [false, false, false, false];
-			},
-			onremove: true,
-			content() {
-				"step 0";
-				var list = [];
-				var choiceList = ["令一名角色回复1点体力。", "令一名角色失去1点体力。", "弃置至多两名角色场上的各一张牌。", "摸两张牌，并可以将其分配给任意角色。"];
 				for (var i = 0; i < 4; i++) {
-					if (player.storage.old_luochong[i]) choiceList[i] += "（已移除）";
-					else if (player.storage.old_luochong_round[i]) choiceList[i] += "（本轮已发动过）";
-					else {
-						if (
-							i == 0 &&
-							game.hasPlayer(function (current) {
-								return current.isDamaged();
-							})
-						)
-							list.push("选项一");
-						if (i == 1) list.push("选项二");
-						if (
-							i == 2 &&
-							game.countPlayer(function (current) {
-								return current.countDiscardableCards(player, "ej") > 0;
-							}) > 0
-						)
-							list.push("选项三");
-						if (i == 3) list.push("选项四");
+					if (
+						!storage1[0].includes(i) &&
+						!storage2.includes(i) &&
+						game.hasPlayer(function (current) {
+							return lib.skill.old_luochong.filterx[i](current);
+						})
+					) {
+						return true;
 					}
+				}
+				return false;
+			},
+			filterx: [target => target.isDamaged(), () => true, target => target.countCards("he") > 0, () => true],
+			onremove: true,
+			async cost(event, trigger, player) {
+				let choiceList = ["令一名角色回复1点体力。", "令一名角色失去1点体力。", "令一名角色弃置两张牌。", "令一名角色摸两张牌并可以将这些牌分配任意名角色。"],
+					list = [];
+				let storage1 = player.getStorage("old_luochong_round", null),
+					storage2 = player.getStorage("old_luochong");
+				if (!storage1) {
+					storage1 = [[]];
+				}
+				for (let i = 0; i < 4; i++) {
+					if (storage2.includes(i)) {
+						choiceList[i] = ["deleted", `<span style="text-decoration: line-through; opacity:0.5; ">${choiceList[i]}</span>`];
+					} else if (
+						storage1[0].includes(i) ||
+						!game.hasPlayer(function (current) {
+							return lib.skill.old_luochong.filterx[i](current);
+						})
+					) {
+						choiceList[i] = ["used", `<span style="opacity:0.5;">${choiceList[i]}</span>`];
+					} else {
+						choiceList[i] = [i, choiceList[i]];
+						list.push(i);
+					}
+				}
+				if (!list.length) {
+					return;
 				}
 				list.push("cancel2");
-				player
-					.chooseControl(list)
-					.set("prompt", get.prompt("old_luochong"))
-					.set("choiceList", choiceList)
-					.set("ai", function () {
-						var player = _status.event.player;
-						var list = _status.event.controls.slice(0);
-						var gett = function (choice) {
-							if (choice == "cancel2") return 0.1;
-							switch (choice) {
-								case "选项一":
-									if (
-										game.hasPlayer(function (current) {
-											return get.recoverEffect(current, player, player);
-										})
-									)
-										return 4;
-									else return -1;
-								case "选项二":
-									return 5;
-								case "选项三":
-									if (
-										game.hasPlayer(function (target) {
-											return (
-												6 -
-													target
-														.getCards("ej")
-														.map(i => {
-															var sign = get.sgnAttitude(_status.event.player, target);
-															var val = 0;
-															if (get.position(i) == "e") val = get.value(i, target);
-															else {
-																val = get.effect(player, { name: i.viewAs || i.name, cards: [i] }, target, target);
-															}
-															return sign * val;
-														})
-														.sort((a, b) => a - b)[0] >
-												0
-											);
-										})
-									)
-										return 2;
-									else return -1;
-								case "选项四":
-									return 3;
-							}
-						};
-						return list.sort(function (a, b) {
-							return gett(b) - gett(a);
-						})[0];
-					});
-				("step 1");
-				if (result.control != "cancel2") {
-					var index = ["选项一", "选项二", "选项三", "选项四"].indexOf(result.control);
-					event.index = index;
-					switch (index) {
-						case 0:
-							player
-								.chooseTarget("选择一名角色，令其回复1点体力", true, function (card, player, target) {
-									return target.isDamaged();
-								})
-								.set("ai", function (target) {
-									return get.attitude(_status.event.player, target);
-								});
-							break;
-						case 1:
-							player.chooseTarget("选择一名角色，令其失去1点体力", true).set("ai", function (target) {
-								return -get.attitude(_status.event.player, target);
-							});
-							break;
-						case 2:
-							player
-								.chooseTarget("选择至多两名角色，弃置其场上各一张牌", true, [1, 2], function (card, player, target) {
-									return target.countDiscardableCards(player, "ej") > 0;
-								})
-								.set("ai", function (target) {
-									var player = _status.event.player;
-									var sign = get.sgnAttitude(_status.event.player, target);
-									return (
-										6 -
-										target
-											.getCards("ej")
-											.map(i => {
-												var val = 0;
-												if (get.position(i) == "e") val = get.value(i, target);
-												else {
-													val = get.effect(player, { name: i.viewAs || i.name, cards: [i] }, target, target);
-												}
-												return sign * val;
-											})
-											.sort((a, b) => a - b)[0]
-									);
-								});
-							break;
-						case 3:
-							player.draw(2);
+				let gett = choice => {
+					if (choice == "cancel2") {
+						return 0.1;
 					}
-				} else event.finish();
-				("step 2");
-				switch (event.index) {
+					let max = 0,
+						func = [
+							target => {
+								if (target.isDamaged()) {
+									max = Math.max(max, get.recoverEffect(target, player, player));
+								}
+							},
+							target => {
+								max = Math.max(max, get.effect(target, { name: "losehp" }, player, player));
+							},
+							target => {
+								let num = target.countDiscardableCards(player, "he");
+								if (num > 0) {
+									max = Math.max(max, Math.sqrt(Math.min(2, num)) * get.effect(target, { name: "guohe_copy2" }, player, player));
+								}
+							},
+							target => {
+								max = Math.max(max, 2 * get.effect(target, { name: "draw" }, player, player));
+							},
+						][choice];
+					game.countPlayer(current => {
+						func(current);
+					});
+					return max;
+				};
+				const choice = list.sort((a, b) => {
+					return gett(b) - gett(a);
+				})[0];
+				const { bool, targets, links } = await player
+					.chooseButtonTarget({
+						createDialog: [get.prompt(event.skill), [choiceList, "textbutton"]],
+						filterButton(button) {
+							return typeof button.link == "number";
+						},
+						choice: choice,
+						complexTarget: true,
+						filterTarget(card, player, target) {
+							const buttons = ui.selected.buttons;
+							if (!buttons?.length || typeof buttons[0].link != "number") {
+								return false;
+							}
+							const filter = lib.skill.old_luochong.filterx[buttons[0].link];
+							return filter(target);
+						},
+						ai1(button) {
+							if (button.link == get.event().choice) {
+								return 1;
+							}
+							return 0;
+						},
+						ai2(target) {
+							const buttons = ui.selected.buttons;
+							if (!buttons?.length || typeof buttons[0].link != "number") {
+								return 0;
+							}
+							let filter = [
+								(player, target) => {
+									return get.recoverEffect(target, player, player);
+								},
+								(player, target) => {
+									return get.effect(target, { name: "losehp" }, player, player);
+								},
+								(player, target) => {
+									return get.effect(target, { name: "guohe_copy2" }, player, player) * Math.sqrt(Math.min(2, target.countCards("he")));
+								},
+								(player, target) => {
+									return 2 * get.effect(target, { name: "draw" }, player, player);
+								},
+							][buttons[0].link];
+							return filter(get.player(), target);
+						},
+					})
+					.forResult();
+				event.result = {
+					bool: bool,
+					targets: targets,
+					cost_data: links,
+				};
+			},
+			async content(event, trigger, player) {
+				const {
+					targets: [target],
+					cost_data: [index],
+				} = event;
+				if (player != target) {
+					player.addExpose(0.2);
+				}
+				player.addTempSkill("old_luochong_round", "roundStart");
+				if (!player.getStorage("old_luochong_round", null)) {
+					player.setStorage("old_luochong_round", [[]]);
+				}
+				player.storage.old_luochong_round[0].push(index);
+				switch (index) {
 					case 0:
-						var target = result.targets[0];
-						player.line(target, "green");
-						target.recover();
+						await target.recover();
 						break;
 					case 1:
-						var target = result.targets[0];
-						player.line(target, "green");
-						target.loseHp();
+						await target.loseHp();
 						break;
 					case 2:
-						player.line(result.targets, "green");
-						for (var target of result.targets) {
-							player.discardPlayerCard(target, "ej", true);
+						await target.chooseToDiscard(true, "he", 2);
+						break;
+					case 3:
+						await target.draw(2);
+						let evt = target.getHistory("gain", evt => evt.getParent(2) == event)[0];
+						if (!evt || !evt.cards || evt.cards.length === 0) break;
+						let cardsToGive = evt.cards.slice();
+						if (!game.hasPlayer(p => p != target)) break;
+						let given_map = [];
+						let remaining = cardsToGive.length;
+						target.addGaintag(cardsToGive, "old_luochong_given");
+						while (remaining > 0 && target.hasCard(card => card.hasGaintag && card.hasGaintag("old_luochong_given"), "h")) {
+							const result = await target
+								.chooseCardTarget({
+									filterCard(card) {
+										return card.hasGaintag && card.hasGaintag("old_luochong_given");
+									},
+									selectCard: [1, remaining],
+									filterTarget: lib.filter.notMe,
+									prompt: "落宠：请选择要分配的卡牌和目标",
+									prompt2: `（还可分配 ${remaining} 张）`,
+									ai1(card) { return card.name == "du" ? 1 : 0; },
+									ai2(target) {
+										const player = get.event().player;
+										const card = ui.selected.cards[0];
+										if (card) return get.value(card, target) * get.attitude(player, target);
+										return 0;
+									},
+								})
+								.forResult();
+							if (result?.bool && result?.cards?.length && result?.targets?.length) {
+								const { cards } = result;
+								remaining -= cards.length;
+								const targetPlayer = result.targets[0];
+								if (given_map.some(i => i[0] == targetPlayer)) {
+									given_map[given_map.indexOf(given_map.find(i => i[0] == targetPlayer))][1].addArray(cards);
+								} else {
+									given_map.push([targetPlayer, cards]);
+								}
+								cards.forEach(c => { if (c && c.removeGaintag) c.removeGaintag("old_luochong_given"); });
+							} else {
+								break;
+							}
+						}
+						cardsToGive.forEach(c => { if (c && c.removeGaintag) c.removeGaintag("old_luochong_given"); });
+						if (given_map.length) {
+							await game.loseAsync({
+								gain_list: given_map,
+								player: target,
+								cards: given_map.slice().flatMap(list => list[1]),
+								giver: target,
+								animate: "giveAuto",
+							}).setContent("gaincardMultiple");
 						}
 						break;
 				}
-				player.storage.old_luochong_round[event.index] = true;
-				("step 3");
-				if (event.index == 3) {
-					var e1 = player.getHistory("gain", function (evt) {
-						return evt.getParent(2) == event;
-					})[0];
-					event.cardsL = e1.cards;
-					event.given_map = {};
-					event.num = 2;
-				} else event.finish();
-				("step 4");
-				player.chooseCardTarget({
-					filterCard(card) {
-						return get.itemtype(card) == "card" && !card.hasGaintag("old_luochong") && event.cardsL.contains(card);
-					},
-					filterTarget: lib.filter.notMe,
-					selectCard: [1, event.num],
-					prompt: "请选择要分配的卡牌和目标",
-					ai1(card) {
-						if (!ui.selected.cards.length) return 1;
-						return 0;
-					},
-					ai2(target) {
-						var player = _status.event.player,
-							card = ui.selected.cards[0];
-						var val = target.getUseValue(card);
-						if (val > 0) return val * get.attitude(player, target) * 2;
-						return get.value(card, target) * get.attitude(player, target);
-					},
-				});
-				("step 5");
-				if (result.bool) {
-					var res = result.cards,
-						target = result.targets[0].playerid;
-					player.addGaintag(res, "old_luochong");
-					event.num -= res.length;
-					if (!event.given_map[target]) event.given_map[target] = [];
-					event.given_map[target].addArray(res);
-					if (event.num > 0) event.goto(4);
-				} else if (event.num == 2) {
-					event.finish();
-				}
-				("step 6");
-				var map = [],
-					cards = [];
-				for (var i in event.given_map) {
-					var source = (_status.connectMode ? lib.playerOL : game.playerMap)[i];
-					player.line(source, "green");
-					if (player !== source && (get.mode() !== "identity" || player.identity !== "nei")) player.addExpose(0.18);
-					map.push([source, event.given_map[i]]);
-					cards.addArray(event.given_map[i]);
-				}
-				game.loseAsync({
-					gain_list: map,
-					player: player,
-					cards: cards,
-					giver: player,
-					animate: "giveAuto",
-				}).setContent("gaincardMultiple");
 			},
-			group: ["old_luochong_round"],
 			subSkill: {
 				round: {
 					charlotte: true,
-					direct: true,
-					trigger: { global: "roundStart" },
-					content() {
-						player.storage.old_luochong_round = [false, false, false, false];
-					},
-				},
-			},
-			mark: true,
-			intro: {
-				onunmark: true,
-				content(storage, player) {
-					var str1 = "本轮已发动过选项：";
-					var str2 = "已移除选项：";
-					var bool1 = false;
-					var bool2 = false;
-					var list = ["回血 ", "崩血 ", "弃牌 ", "摸牌 "];
-					for (var i = 0; i < 4; i++) {
-						if (player.storage.old_luochong_round[i]) {
-							str1 += list[i];
-							bool1 = true;
-						}
-						if (player.storage.old_luochong[i]) {
-							str2 += list[i];
-							bool2 = true;
-						}
-					}
-					if (!bool1) str1 += "暂无";
-					if (!bool2) str2 += "暂无";
-					var str = str1 + "<br>" + str2;
-					return str;
+					onremove: true,
 				},
 			},
 		},
 		old_aichen: {
 			audio: "aichen",
-			trigger: {
-				player: "dying",
-			},
+			trigger: { player: "dying" },
 			forced: true,
 			filter(event, player) {
-				if (!player.hasSkill("old_luochong", null, null, false) || !player.storage.old_luochong) return false;
-				var count = 0;
-				for (var i of player.storage.old_luochong) {
-					if (!i) count++;
-				}
-				return count > 1;
+				return player.hasSkill("old_luochong", null, null, false) && player.getStorage("old_luochong").length < 3;
 			},
-			content() {
-				"step 0";
-				var num = 1 - player.hp;
-				if (num > 0) player.recover(num);
-				var list = [];
-				var choiceList = ["令一名角色回复1点体力。", "令一名角色失去1点体力。", "弃置至多两名角色场上的各一张牌。", "摸两张牌，并可以将其分配给任意角色。"];
-				for (var i = 0; i < 4; i++) {
-					if (player.storage.old_luochong[i]) choiceList[i] += "（已移除）";
-					else {
-						if (i == 0) list.push("选项一");
-						if (i == 1) list.push("选项二");
-						if (i == 2) list.push("选项三");
-						if (i == 3) list.push("选项四");
+			async content(event, trigger, player) {
+				// 1. 回复体力至1点
+				await player.recoverTo(1);
+
+				// 2. 准备可选选项列表
+				let list = [];
+				let choiceList = ["令一名角色回复1点体力。", "令一名角色失去1点体力。", "令一名角色弃置两张牌。", "令一名角色摸两张牌并可以将这些牌分配任意名角色。"];
+				let storage2 = player.getStorage("old_luochong");
+				for (let i = 0; i < 4; i++) {
+					if (storage2.includes(i)) {
+						choiceList[i] = `<span style="text-decoration: line-through; opacity:0.5;">${choiceList[i]}</span>`;
+					} else {
+						list.push("选项" + get.cnNumber(i + 1, true));
 					}
 				}
-				player
-					.chooseControl(list)
-					.set("prompt", "哀尘：选择移去并执行一个【落宠】的选项")
+				if (list.length === 0) return;
+
+				// 3. 选择一个未移除的选项
+				const result = await player.chooseControl(list)
+					.set("prompt", "哀尘：选择一个〖落宠〗的选项并执行")
 					.set("choiceList", choiceList)
 					.set("ai", function () {
-						var controls = _status.event.controls.slice(0);
-						var list = ["选项三", "选项四", "选项二", "选项一"];
-						for (var i of list) {
-							if (controls.contains(i)) return i;
+						let controls = _status.event.controls.slice(0);
+						let priority = ["选项三", "选项四", "选项二", "选项一"];
+						for (let opt of priority) {
+							if (controls.includes(opt)) return opt;
 						}
 						return 0;
-					});
-				("step 1");
-				var index = ["选项一", "选项二", "选项三", "选项四"].indexOf(result.control);
-				event.index = index;
-				game.log(player, "移去了", "#g【落宠】", "的", "#y" + ["回血", "崩血", "弃牌", "摸牌"][index], "选项");
-				player.storage.old_luochong[index] = true;
+					})
+					.forResult();
+
+				let index = ["选项一", "选项二", "选项三", "选项四"].indexOf(result.control);
+				if (index === -1) return;
+
+				// 4. 根据选项选择目标（完全参考落宠的 filterx）
+				let target = null;
 				switch (index) {
-					case 0:
-						player
-							.chooseTarget("选择一名角色，令其回复1点体力", true, function (card, player, target) {
-								return target.isDamaged();
-							})
-							.set("ai", function (target) {
-								return get.attitude(_status.event.player, target);
-							});
+					case 0: // 回复
+						const targets0 = await player.chooseTarget(
+							"选择一名受伤的角色",
+							(card, player, target) => target.isDamaged()
+						).set("ai", target => get.recoverEffect(target, player, player)).forResult();
+						target = targets0.targets[0];
 						break;
-					case 1:
-						player.chooseTarget("选择一名角色，令其失去1点体力", true).set("ai", function (target) {
-							return -get.attitude(_status.event.player, target);
-						});
+					case 1: // 失去体力
+						const targets1 = await player.chooseTarget(
+							"选择一名角色",
+							() => true
+						).set("ai", target => get.effect(target, { name: "losehp" }, player, player)).forResult();
+						target = targets1.targets[0];
 						break;
-					case 2:
-						player
-							.chooseTarget("选择至多两名角色，弃置其场上各一张牌", true, [1, 2], function (card, player, target) {
-								return target.countDiscardableCards(player, "ej") > 0;
-							})
-							.set("ai", function (target) {
-								var player = _status.event.player;
-								var sign = get.sgnAttitude(_status.event.player, target);
-								return (
-									6 -
-									target
-										.getCards("ej")
-										.map(i => {
-											var val = 0;
-											if (get.position(i) == "e") val = get.value(i, target);
-											else {
-												val = get.effect(player, { name: i.viewAs || i.name, cards: [i] }, target, target);
-											}
-											return sign * val;
-										})
-										.sort((a, b) => a - b)[0]
-								);
-							});
+					case 2: // 弃牌
+						const targets2 = await player.chooseTarget(
+							"选择一名有手牌或装备的角色",
+							(card, player, target) => target.countCards("he") > 0
+						).set("ai", target => get.effect(target, { name: "guohe_copy2" }, player, player) * Math.sqrt(Math.min(2, target.countCards("he")))).forResult();
+						target = targets2.targets[0];
 						break;
-					case 3:
-						player.draw(2);
+					case 3: // 摸牌分配（目标可以是任意角色）
+						const targets3 = await player.chooseTarget(
+							"选择一名角色",
+							() => true
+						).set("ai", target => 2 * get.effect(target, { name: "draw" }, player, player)).forResult();
+						target = targets3.targets[0];
+						break;
 				}
-				("step 2");
-				switch (event.index) {
-					case 0:
-						var target = result.targets[0];
-						target.recover();
-						break;
-					case 1:
-						var target = result.targets[0];
-						target.loseHp();
-						break;
-					case 2:
-						for (var target of result.targets) {
-							player.discardPlayerCard(target, "ej", true);
+				if (!target) return;
+
+				// 5. 执行选中的选项（完全复制落宠 content 中的逻辑）
+				if (index === 0) {
+					await target.recover();
+				} else if (index === 1) {
+					await target.loseHp();
+				} else if (index === 2) {
+					await target.chooseToDiscard(true, "he", 2);
+				} else if (index === 3) {
+					await target.draw(2);
+					let evt = target.getHistory("gain", evt => evt.getParent(2) == event)[0];
+					if (evt && evt.cards && evt.cards.length) {
+						let cardsToGive = evt.cards.slice();
+						if (game.hasPlayer(p => p != target)) {
+							let given_map = [];
+							let remaining = cardsToGive.length;
+							target.addGaintag(cardsToGive, "old_aichen_given");
+							while (remaining > 0 && target.hasCard(card => card.hasGaintag && card.hasGaintag("old_aichen_given"), "h")) {
+								const giveResult = await target
+									.chooseCardTarget({
+										filterCard(card) {
+											return card.hasGaintag && card.hasGaintag("old_aichen_given");
+										},
+										selectCard: [1, remaining],
+										filterTarget: lib.filter.notMe,
+										prompt: "哀尘：请选择要分配的卡牌和目标",
+										prompt2: `（还可分配 ${remaining} 张）`,
+										ai1(card) { return card.name == "du" ? 1 : 0; },
+										ai2(target) {
+											const player = get.event().player;
+											const card = ui.selected.cards[0];
+											if (card) return get.value(card, target) * get.attitude(player, target);
+											return 0;
+										},
+									})
+									.forResult();
+								if (giveResult?.bool && giveResult?.cards?.length && giveResult?.targets?.length) {
+									const { cards } = giveResult;
+									remaining -= cards.length;
+									const targetPlayer = giveResult.targets[0];
+									if (given_map.some(i => i[0] == targetPlayer)) {
+										given_map[given_map.indexOf(given_map.find(i => i[0] == targetPlayer))][1].addArray(cards);
+									} else {
+										given_map.push([targetPlayer, cards]);
+									}
+									cards.forEach(c => { if (c && c.removeGaintag) c.removeGaintag("old_aichen_given"); });
+								} else {
+									break;
+								}
+							}
+							cardsToGive.forEach(c => { if (c && c.removeGaintag) c.removeGaintag("old_aichen_given"); });
+							if (given_map.length) {
+								await game.loseAsync({
+									gain_list: given_map,
+									player: target,
+									cards: given_map.slice().flatMap(list => list[1]),
+									giver: target,
+									animate: "giveAuto",
+								}).setContent("gaincardMultiple");
+							}
 						}
-						break;
+					}
 				}
-				("step 3");
-				if (event.index == 3) {
-					var e1 = player.getHistory("gain", function (evt) {
-						return evt.getParent(2) == event;
-					})[0];
-					event.cardsL = e1.cards;
-					event.given_map = {};
-					event.num = 2;
-				} else event.finish();
-				("step 4");
-				player.chooseCardTarget({
-					filterCard(card) {
-						return get.itemtype(card) == "card" && !card.hasGaintag("old_luochong") && event.cardsL.contains(card);
-					},
-					filterTarget: lib.filter.notMe,
-					selectCard: [1, event.num],
-					prompt: "请选择要分配的卡牌和目标",
-					ai1(card) {
-						if (!ui.selected.cards.length) return 1;
-						return 0;
-					},
-					ai2(target) {
-						var player = _status.event.player,
-							card = ui.selected.cards[0];
-						var val = target.getUseValue(card);
-						if (val > 0) return val * get.attitude(player, target) * 2;
-						return get.value(card, target) * get.attitude(player, target);
-					},
-				});
-				("step 5");
-				if (result.bool) {
-					var res = result.cards,
-						target = result.targets[0].playerid;
-					player.addGaintag(res, "old_luochong");
-					event.num -= res.length;
-					if (!event.given_map[target]) event.given_map[target] = [];
-					event.given_map[target].addArray(res);
-					if (event.num > 0) event.goto(4);
-				} else if (event.num == 2) {
-					event.finish();
-				}
-				("step 6");
-				var map = [],
-					cards = [];
-				for (var i in event.given_map) {
-					var source = (_status.connectMode ? lib.playerOL : game.playerMap)[i];
-					player.line(source, "green");
-					if (player !== source && (get.mode() !== "identity" || player.identity !== "nei")) player.addExpose(0.18);
-					map.push([source, event.given_map[i]]);
-					cards.addArray(event.given_map[i]);
-				}
-				game.loseAsync({
-					gain_list: map,
-					player: player,
-					cards: cards,
-					giver: player,
-					animate: "giveAuto",
-				}).setContent("gaincardMultiple");
+
+				// 6. 移去该选项
+				player.markAuto("old_luochong", [index]);
+				game.log(player, "移去了", "#g【落宠】", "的", "#y" + ["令一名角色回复1点体力", "令一名角色失去1点体力", "令一名角色弃置两张牌", "令一名角色摸两张牌并可以将这些牌分配任意名角色"][index], "的选项");
+			},
+			ai: {
+				combo: "old_luochong",
+				neg: true,
 			},
 		},
 		//邓忠
