@@ -15819,101 +15819,116 @@ const lmCharacter = {
 		old_qingliang: {
 			audio: "qingliang",
 			trigger: {
-				target: "useCardToTarget",
+				target: "useCardToTarget"
 			},
 			filter(event, player) {
-				var bool1 = get.type(event.card) == "basic";
-				var bool2 = get.type(event.card) == "trick";
-				if (!bool1 && !bool2) return false;
+				var bool1 = get.type2(event.card) == "basic";
+				var bool2 = get.type2(event.card) == "trick";
+				if (!bool1 && !bool2) {
+					return false;
+				}
 				return player != event.player && player.countCards("h") > 0;
 			},
 			usable: 1,
 			logTarget: "player",
 			check(event, player) {
-				if (get.attitude(player, event.player) > 0 || event.player.hasSkillTag("nogain")) return true;
-				var eff = get.effect(player, event.card, event.player, player);
-				if (eff >= 0) return false;
-				var suits = [],
+				if (get.attitude(player, event.player) > 0 || event.player.hasSkillTag("nogain")) {
+					return true;
+				}
+				const eff = get.effect(player, event.card, event.player, player);
+				if (eff >= 0) {
+					return false;
+				}
+				const suits = [],
 					banned = [],
 					hs = player.getCards("h");
-				for (var i of hs) {
-					var suit = get.suit(i, player);
+				for (const i of hs) {
+					const suit = get.suit(i, player);
 					suits.add(suit);
-					if (!lib.filter.cardDiscardable(i, player, "old_qingliang")) banned.add(suit);
+					if (!lib.filter.cardDiscardable(i, player, "old_qingliang")) {
+						banned.add(suit);
+					}
 				}
 				suits.removeArray(banned);
-				for (var i of suits) {
-					var cards = player.getCards("h", function (card) {
+				for (const i of suits) {
+					const cards = player.getCards("h", function (card) {
 						return get.suit(card, player) == i;
 					});
-					if (-eff / 2 - get.value(cards, player) > 0) return true;
+					if (-eff / 2 - get.value(cards, player) > 0) {
+						return true;
+					}
 				}
 				return false;
 			},
-			content() {
-				"step 0";
-				player.showHandcards(get.translation(player) + "发动了【清靓】");
-				("step 1");
-				var suits = [],
+			async content(event, trigger, player) {
+				await player.showHandcards(get.translation(player) + "发动了【清靓】");
+				const suits = [],
 					banned = [],
 					hs = player.getCards("h");
-				for (var i of hs) {
-					var suit = get.suit(i, player);
+				for (const i of hs) {
+					const suit = get.suit(i, player);
 					suits.add(suit);
-					if (!lib.filter.cardDiscardable(i, player, "old_qingliang")) banned.add(suit);
+					if (!lib.filter.cardDiscardable(i, player, "old_qingliang")) {
+						banned.add(suit);
+					}
 				}
+				let result;
 				if (suits.length > banned.length) {
-					player
-						.chooseControl()
-						.set("choiceList", ["和" + get.translation(trigger.player) + "各摸一张牌", "弃置一种花色的所有手牌，令" + get.translation(trigger.card) + "对自己无效"])
-						.set("ai", function () {
-							var player = _status.event.player,
-								event = _status.event.getTrigger();
-							if (get.attitude(player, event.player) > 0 || event.player.hasSkillTag("nogain")) return 0;
-							return 1;
-						});
-					event.suits = suits;
+					result = await player
+						.chooseControl({
+							choiceList: ["和" + get.translation(trigger.player) + "各摸一张牌", "弃置一种花色的所有手牌，令" + get.translation(trigger.card) + "对自己无效"],
+							ai() {
+								const player = _status.event.player,
+									event = _status.event.getTrigger();
+								if (get.attitude(player, event.player) > 0 || event.player.hasSkillTag("nogain")) {
+									return 0;
+								}
+								return 1;
+							},
+						})
+						.forResult();
 					suits.removeArray(banned);
 					suits.sort();
 				} else {
-					event._result = { index: 0 };
+					result = { index: 0 };
 				}
-				("step 2");
 				if (result.index == 0) {
-					var list = [player, trigger.player].sortBySeat();
-					list[0].draw("nodelay");
-					list[1].draw();
-					event.finish();
+					await game.asyncDraw([player, trigger.player]);
 				} else {
-					if (event.suits.length == 1) event._result = { control: event.suits[0] };
-					else
-						player
-							.chooseControl(event.suits)
-							.set("prompt", "选择弃置一种花色的所有牌")
-							.set("ai", function () {
-								var player = _status.event.player,
-									list = _status.event.controls.slice(0);
-								var gett = function (suit) {
-									var cards = player.getCards("h", function (card) {
-										return get.suit(card, player) == suit;
-									});
-									return get.value(cards);
-								};
-								return list.sort(function (b, a) {
-									return gett(b) - gett(a);
-								})[0];
-							});
+					if (suits.length == 1) {
+						result = { control: suits[0] };
+					} else {
+						result = await player
+							.chooseControl({
+								controls: suits,
+								prompt: "清靓：选择弃置一种花色的所有牌",
+								ai() {
+									const player = _status.event.player,
+										list = _status.event.controls.slice(0);
+									const gett = function (suit) {
+										const cards = player.getCards("h", function (card) {
+											return get.suit(card, player) == suit;
+										});
+										return get.value(cards);
+									};
+									return list.sort(function (b, a) {
+										return gett(b) - gett(a);
+									})[0];
+								},
+							})
+							.forResult();
+					}
+					const cards = player.getCards("h", function (card) {
+						return get.suit(card) == result.control;
+					});
+					if (cards.length) {
+						await player.modedDiscard(cards);
+					}
+					trigger.targets.remove(player);
+					trigger.getParent().triggeredTargets2.remove(player);
+					trigger.untrigger();
 				}
-				("step 3");
-				var cards = player.getCards("h", function (card) {
-					return get.suit(card) == result.control;
-				});
-				if (cards.length) player.discard(cards);
-				trigger.targets.remove(player);
-				trigger.getParent().triggeredTargets2.remove(player);
-				trigger.untrigger();
 			},
-			_priority: 0,
 		},
 		//徐荣
 		old_xionghuo: {
@@ -29333,7 +29348,7 @@ const lmCharacter = {
 		old_qiaoli_info: "出牌阶段，你可以将一张装备牌当作【决斗】使用。若此牌：为武器，此牌结算后你摸等同于其攻击范围的牌，并可以将这些牌分配给任意角色；不为武器，此【决斗】不可被响应。",
 		old_qiaoli_given: "已分配",
 		old_qingliang: "清靓",
-		old_qingliang_info: "每回合限一次，当你成为其他角色使用的基本牌或普通锦囊牌的目标时，你可以展示所有手牌，然后选择一项：1，与其各摸一张牌；2，弃置一种花色的所有手牌，令此牌对你无效。",
+		old_qingliang_info: "每回合限一次，当你成为其他角色使用的基本牌或普通锦囊牌的目标时，你可展示所有手牌，然后选择一项：⒈你与其各摸一张牌，⒉取消此目标，然后弃置你手牌中一种花色的所有牌。",
 		old_xurong: "旧徐荣",
 		old_xurong_prefix: "旧",
 		old_xionghuo: "凶镬",
