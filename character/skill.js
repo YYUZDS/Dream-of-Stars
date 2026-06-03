@@ -29212,7 +29212,7 @@ const lmCharacter = {
 		old_hefeichonglei: "冲垒",
 		old_hefeichonglei_info: "锁定技，你的出牌阶段内：①你响应其他角色使用的牌后，或你使用的牌被其他角色响应后，获得其一张牌。②其他角色不处于濒死状态时，所有非【杀】手牌只能当作【闪】使用或打出。",
 		old_hefeidangshi: "荡势",
-		old_hefeidangshi_info: "你使用伤害牌结算结束后，可选择一名此牌目标，令其选择一项执行：1.对你使用一张同名牌；2.弃置X张牌（X为其选择此项的次数+1）；3.受到1点伤害。若为本阶段首次执行此项，你摸一张牌且本阶段出杀次数+1。",
+		old_hefeidangshi_info: "你使用伤害牌结算结束后，你可令一名是此牌目标的其他角色选择一项：1.对你使用一张非转化，非虚拟且牌名相同的伤害牌；2.弃置X张牌（X为所有角色本轮选择此项的次数且至少为1）；3.受到你造成1点伤害。若其选择了本阶段未被执行过的选项，你摸一张牌且本阶段出【杀】次数+1。",
 		old_hefeiheyuzhangliao: "合御",
 		old_hefeiheyuzhangliao_info: `锁定技，①若${get.poptip({
 			id: "characterx_hefei_yuejin",
