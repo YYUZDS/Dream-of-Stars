@@ -13320,7 +13320,7 @@ const lmCharacter = {
 			},
 		},
 		//族荀采
-				oldx_clanlieshi: {
+		oldx_clanlieshi: {
 			audio: "clanlieshi",
 			enable: "phaseUse",
 			filter(event, player) {
