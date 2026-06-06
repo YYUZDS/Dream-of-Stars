@@ -13086,7 +13086,7 @@ const lmCharacter = {
 						1,
 						game.players.reduce((sum, target) => sum + target.countMark(`old_hefeidangshi_count`), 0)
 					);
-					if (player.hasSkill("hefeiheyuzhangliao") && get.info("friendgongli").isFriendOf(player, "hefei_lidian")) {
+					if (player.hasSkill("old_hefeiheyuzhangliao") && get.info("friendgongli").isFriendOf(player, "hefei_lidian")) {
 						num = 3;
 					}
 					return num;
@@ -13106,7 +13106,6 @@ const lmCharacter = {
 										if (get.name(card) != trigger.card.name) {
 											return false;
 										}
-										if (card.transform || card.virtual) return false;
 										return target.canUse(card, player);
 									}) > 0
 								);
@@ -13130,12 +13129,14 @@ const lmCharacter = {
 									return get.event().canChoose?.includes(button.link);
 								},
 								ai(button) {
-									const { player, getNum } = get.event(),
-										trigger = get.event().getTrigger();
+									const { player } = get.event();
+									const getNum = get.event().getNum;
+									const trigger = get.event().getTrigger();
 									if (button.link == "useCard") {
 										const cards = player.getCards("hs", card => {
-											if (get.name(card) != trigger.card.name) return false;
-											if (card.transform || card.virtual) return false;
+											if (get.name(card) != trigger.card.name) {
+												return false;
+											}
 											return player.canUse(card, trigger.player);
 										});
 										const check = card => get.effect(trigger.player, card, player, player);
@@ -13150,30 +13151,22 @@ const lmCharacter = {
 							.set("getNum", getNum(player, target))
 							.set("canChoose", canChoose)
 							.forResult()
-						: {
-							bool: true,
-							links: canChoose,
-						};
+						: { bool: true, links: canChoose };
 				if (!result?.bool || !result.links?.length) {
 					return;
 				}
 				const type = result.links[0];
-				let next = { skill: name, type: type, event: event };
 				game.log(target, "选择了", `#y${list.find(info => info[0] == type)?.[1]}`);
-				player.getHistory("custom").push(next);
-				if (
-					!player.hasHistory("custom", evt => {
-						if (evt.skill != name || evt.type != type) {
-							return false;
-						}
-						return evt.event != event;
-					})
-				) {
+				if (!player.storage.old_hefeidangshi_phaseChoices) {
+					player.storage.old_hefeidangshi_phaseChoices = [];
+				}
+				const isNewThisPhase = !player.storage.old_hefeidangshi_phaseChoices.includes(type);
+				if (isNewThisPhase) {
+					player.storage.old_hefeidangshi_phaseChoices.push(type);
 					await player.draw();
-					// 增加本阶段出杀次数+1
 					player.addMark("old_hefeidangshi_effect", 1, false);
 					if (!player.hasSkill("old_hefeidangshi_effect")) {
-						player.addTempSkill("old_hefeidangshi_effect", { player: "phaseAfter" });
+						player.addTempSkill("old_hefeidangshi_effect", ["phaseChange", "phaseAfter"]);
 					}
 				}
 				switch (type) {
@@ -13184,7 +13177,9 @@ const lmCharacter = {
 									if (get.itemtype(card) != "card" || get.name(card) != get.event().cardx) {
 										return false;
 									}
-									if (card.transform || card.virtual) return false;
+									if (card.transform || card.virtual) {
+										return false;
+									}
 									return lib.filter.filterCard.apply(this, arguments);
 								},
 								prompt: `荡势：对${get.translation(player)}使用一张${get.translation(trigger.card.name)}`,
@@ -13218,6 +13213,7 @@ const lmCharacter = {
 					}
 				}
 			},
+			group: ["old_hefeidangshi_clear"],
 			subSkill: {
 				count: {
 					charlotte: true,
@@ -13225,13 +13221,7 @@ const lmCharacter = {
 				},
 				effect: {
 					charlotte: true,
-					// 修复：增加安全判断，避免 player.getMark 不存在时报错
-					onremove: function (player) {
-						if (player && typeof player.getMark === 'function') {
-							var mark = player.getMark("old_hefeidangshi_effect");
-							if (mark) player.removeMark("old_hefeidangshi_effect", mark);
-						}
-					},
+					onremove: true,
 					intro: {
 						content: "出杀次数+#",
 					},
@@ -13241,6 +13231,14 @@ const lmCharacter = {
 								return num + player.countMark("old_hefeidangshi_effect");
 							}
 						},
+					},
+				},
+				clear: {
+					charlotte: true,
+					direct: true,
+					trigger: { player: ["phaseChange", "phaseAfter"] },
+					content() {
+						player.storage.old_hefeidangshi_phaseChoices = [];
 					},
 				},
 			},
