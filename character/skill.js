@@ -25055,14 +25055,14 @@ const lmCharacter = {
 			},
 			async content(event, trigger, player) {
 				player.awakenSkill(event.name);
-				const num = player.getDamagedHp();
+				const num = player.maxHp - player.hp;
 				await player.recover(num);
 				await player.draw(num);
 				await player.removeSkills("old_dcyizheng");
 				if (player.hasSkill("dcboxuan")) {
 					player.storage.dcboxuan = true;
 				}
-				game.log(player, `修改了〖博玄〗`);
+				game.log(player, "修改了", "#g【博玄】");
 			},
 			ai: {
 				order: 5,
@@ -29596,7 +29596,7 @@ const lmCharacter = {
 		old_dcyizheng: "议政",
 		old_dcyizheng_info: "你的回合开始和结束时，你可与任意名其他角色各展示一张手牌，若展示的牌类型均相同，你可将这些牌交给一名角色，否则，你弃置这些牌。",
 		old_dcguilin: "归林",
-		old_dcguilin_info: "限定技，出牌阶段或你进入濒死状态时，你可以回满体力并摸回复值张牌，然后失去〖议政〗并修改〖博玄〗。",
+		old_dcguilin_info: `限定技，出牌阶段或你进入濒死状态时，你可以将体力回复至体力上限，然后失去${get.poptip("old_dcyizheng")}并修改${get.poptip("dcboxuan")}。`,
 		old_dc_zhugejun: "旧新杀诸葛均",
 		old_dc_zhugejun_prefix: "旧|新杀",
 		old_dcgumai: "孤脉",
