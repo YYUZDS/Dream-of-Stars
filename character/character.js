@@ -673,7 +673,7 @@ const characters = {
         sex: "female",
         group: "qun",
         hp: 3,
-        skills: ["oldx_clanlieshi", "clandianzhan", "clanhuanyin", "clandaojie"],
+        skills: ["oldx_clanlieshi", "oldx_clandianzhan", "clanhuanyin", "clandaojie"],
         img: "image/character/clan_xuncai.jpg",
         dieAudios: ["clan_xuncai"],
         clans: ["颍川荀氏"],
