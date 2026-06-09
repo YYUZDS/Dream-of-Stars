@@ -24356,7 +24356,7 @@ const lmCharacter = {
 			usable: 1,
 			zhuanhuanji(player, skill) {
 				player.storage[skill] = !player.storage[skill];
-				player.changeSkin({ characterName: "old_dc_sb_xunyu" }, "old_dc_sb_xunyu" + (player.storage[skill] ? "_shadow" : ""));
+				player.changeSkin({ characterName: "old_dc_sb_xunyu" }, "dc_sb_xunyu" + (player.storage[skill] ? "_shadow" : ""));
 			},
 			marktext: "☯",
 			mark: true,
