@@ -22924,39 +22924,56 @@ const lmCharacter = {
 			audio: "stardangchen",
 			trigger: { player: "phaseUseBegin" },
 			async cost(event, trigger, player) {
-				const result = await player
-					.chooseTarget()
-					.set("filterTarget", function (card, player, target) {
+				event.result = await player
+					.chooseTarget(get.prompt2(event.skill), (card, player, target) => {
 						return player != target && target.countCards("he");
 					})
-					.set("prompt", get.prompt2("old_stardangchen"))
-					.set("ai", function (card, player, target) {
+					.set("ai", target => {
+						const player = get.player();
 						return -get.attitude(player, target);
 					})
 					.forResult();
-				event.result = result;
 			},
 			async content(event, trigger, player) {
 				const target = event.targets[0];
-				const result = await target.chooseToGive(player).set("selectCard", [1, Infinity]).set("forced", true).set("position", "he").forResult();
+				let result = await target
+					.chooseToGive(player, "he", true, [1, Infinity], "allowChooseAll")
+					.set("ai", card => {
+						const { player, target } = get.event();
+						const att = get.attitude(player, target);
+						if (att <= 0) {
+							if (ui.selected.cards.length > 1) {
+								return 0;
+							}
+							return 6 - get.value(card);
+						}
+						if (ui.selected.cards.length) {
+							return 0;
+						}
+						return 7 - get.value(card);
+					})
+					.forResult();
 				if (result?.bool && result.cards?.length) {
+					const num = result.cards.length;
 					player.addTempSkill("old_stardangchen_buff");
-					player.addMark("old_stardangchen_buff", result.cards.length, false);
+					player.addMark("old_stardangchen_buff", num, false);
 				}
 			},
 			subSkill: {
 				buff: {
-					audio: "stardangchen",
 					charlotte: true,
 					onremove: true,
+					audio: "stardangchen",
+					trigger: { player: "useCard" },
 					filter(event, player) {
-						if (!lib.skill.dcshixian.filterx(event) || !player.hasMark("old_stardangchen_buff")) return false;
-						return typeof get.number(event.card) === "number";
+						if (!lib.skill.dcshixian.filterx(event) || !player.hasMark("old_stardangchen_buff")) {
+							return false;
+						}
+						return true;
 					},
 					check(event, player) {
-						return !get.tag(event.card, "norepeat") ^ (event.targets?.reduce((sum, i) => sum + get.effect(event.card, i, player, player), 0) < 0);
+						return !get.tag(event.card, "norepeat") ^ (event.targets?.reduce((sum, i) => sum + get.effect(i, event.card, player, player), 0) < 0);
 					},
-					trigger: { player: "useCard" },
 					prompt2(event, player) {
 						return "进行一次判定，若判定结果为" + player.countMark("old_stardangchen_buff") + "的倍数，则" + get.translation(event.card) + "额外结算一次";
 					},
@@ -22974,6 +22991,7 @@ const lmCharacter = {
 							game.log(trigger.card, "额外结算一次");
 						}
 					},
+					intro: { content: "使用基本牌或普通锦囊牌时可以进行一次判定，若判定的点数为#的倍数，则此牌额外结算一次" },
 				},
 			},
 		},
