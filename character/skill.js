@@ -24939,7 +24939,7 @@ const lmCharacter = {
 			},
 			async cost(event, trigger, player) {
 				event.result = await player
-					.chooseTarget(get.prompt2(event.skill), [1, player.maxHp], (card, player, target) => {
+					.chooseTarget(get.prompt2(event.skill), [1, Infinity], (card, player, target) => {
 						return target != player && target.countCards("h");
 					})
 					.set("ai", target => {
