@@ -24356,18 +24356,22 @@ const lmCharacter = {
 			usable: 1,
 			zhuanhuanji(player, skill) {
 				player.storage[skill] = !player.storage[skill];
-				player.changeSkin({ characterName: "old_dc_sb_xunyu" }, "dc_sb_xunyu" + (player.storage[skill] ? "_shadow" : ""));
+				player.changeSkin({ characterName: "old_dc_sb_xunyu" }, "old_dc_sb_xunyu" + (player.storage[skill] ? "_shadow" : ""));
 			},
 			marktext: "☯",
 			mark: true,
 			intro: {
 				content(storage) {
-					if (!storage) return "转换技，出牌阶段限一次，你可令一名手牌数全场最低的角色将手牌调整至体力上限（至多摸五张）并视为使用一张仅指定单目标的普通锦囊牌（此牌牌名与目标由你指定）。若以此法摸牌，此牌可额外增加一个目标；若以此法弃牌，此牌额外结算一次。";
+					if (!storage) {
+						return "转换技，出牌阶段限一次，你可令一名手牌数全场最低的角色将手牌调整至体力上限（至多摸五张）并视为使用一张仅指定单目标的普通锦囊牌（此牌牌名与目标由你指定）。若以此法摸牌，此牌可额外增加一个目标；若以此法弃牌，此牌额外结算一次。";
+					}
 					return "转换技，出牌阶段限一次，你可令一名手牌数全场最高的角色将手牌调整至体力上限（至多摸五张）并视为使用一张仅指定单目标的普通锦囊牌（此牌牌名与目标由你指定）。若以此法摸牌，此牌可额外增加一个目标；若以此法弃牌，此牌额外结算一次。";
 				},
 			},
 			filterTarget(card, player, target) {
-				if (!player.storage.old_dcsbshimou) return target.isMinHandcard();
+				if (!player.storage.old_dcsbshimou) {
+					return target.isMinHandcard();
+				}
 				return target.isMaxHandcard();
 			},
 			selectTarget: 1,
@@ -24379,11 +24383,18 @@ const lmCharacter = {
 				player.changeZhuanhuanji(event.name);
 				const target = event.targets[0];
 				let num = target.maxHp - target.countCards("h");
-				if (num > 0) await target.draw(Math.min(5, num));
-				else if (num < 0 && target.countDiscardableCards(target, "h") > 0) await target.chooseToDiscard(-num, "h", true);
-				if (!target.isIn()) return;
+				if (num > 0) {
+					await target.draw(Math.min(5, num));
+				} else if (num < 0 && target.countDiscardableCards(target, "h") > 0) {
+					await target.chooseToDiscard(-num, "h", true, "allowChooseAll");
+				}
+				if (!target.isIn()) {
+					return;
+				}
 				let list = get.inpileVCardList(info => {
-					if (info[0] != "trick") return false;
+					if (info[0] != "trick") {
+						return false;
+					}
 					return true;
 				});
 				if (
@@ -24392,8 +24403,9 @@ const lmCharacter = {
 							return lib.filter.targetEnabled2({ name: info[2], isCard: true }, target, targetx);
 						});
 					}).length
-				)
+				) {
 					return;
+				}
 				//判断是否因此摸牌弃牌
 				const bool1 = target.hasHistory("gain", evt => {
 					return evt.getParent().name == "draw" && evt.getParent(2) == event;
@@ -24402,8 +24414,12 @@ const lmCharacter = {
 					return evt.type == "discard" && evt.getParent(3) == event;
 				});
 				let str = `势谋：请选择${get.translation(target)}要使用的牌名`;
-				if (bool1) str += "（可额外增加1个目标）";
-				if (bool2) str += "（可额外结算一次）";
+				if (bool1) {
+					str += "（可额外增加1个目标）";
+				}
+				if (bool2) {
+					str += "（可额外结算一次）";
+				}
 				const result = await player
 					.chooseButton([str, [list, "vcard"]], true)
 					.set("filterButton", button => {
@@ -24420,7 +24436,9 @@ const lmCharacter = {
 					.forResult();
 				const card = get.autoViewAs({ name: result.links[0][2], isCard: true, storage: { old_dcsbshimou: [num, target] } });
 				let range = [1, 1];
-				if (bool1) range[1]++;
+				if (bool1) {
+					range[1]++;
+				}
 				const result2 = await player
 					.chooseTarget(
 						`势谋：请为${get.translation(target)}选择${get.translation(card)}的目标`,
@@ -24458,7 +24476,9 @@ const lmCharacter = {
 							return num;
 						} else if (num < 0) {
 							if (-num < 2) {
-								if (att > 0) return 1.5;
+								if (att > 0) {
+									return 1.5;
+								}
 								return -2;
 							}
 							return num;
