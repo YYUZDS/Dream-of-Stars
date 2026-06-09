@@ -24939,7 +24939,7 @@ const lmCharacter = {
 			},
 			async cost(event, trigger, player) {
 				event.result = await player
-					.chooseTarget(get.prompt2(event.skill), [1, Infinity], (card, player, target) => {
+					.chooseTarget(get.prompt2(event.skill), [1, player.maxHp], (card, player, target) => {
 						return target != player && target.countCards("h");
 					})
 					.set("ai", target => {
@@ -24969,53 +24969,16 @@ const lmCharacter = {
 				for (var i = 0; i < targets.length; i++) {
 					cards.push(result[i].cards[0]);
 				}
-				//新建showCards事件，不然没法兼容庞宏、OL罗宪这些角色的技能
-				let next = game.createEvent("showCards");
-				next.set("player", player);
-				next.set("targets", targets);
-				next.set("cards", cards);
-				next.set("skill", event.name);
-				next.setContent(() => {
-					//照搬showCards的事件然后改动了一下dialog
-					"step 0";
-					event.dialog = ui.create.dialog(`${get.translation(player)} 发动了〖${get.translation(event.skill)}〗`, cards);
-					event.dialogid = lib.status.videoId++;
-					event.dialog.videoId = event.dialogid;
-					game.broadcastAll(
-						function (skill, targets, cards, id, player) {
-							let dialog = ui.create.dialog(`${get.translation(player)} 发动了〖${get.translation(skill)}〗`, cards);
-							dialog.videoId = id;
-							const getName = function (target) {
-								if (target._tempTranslate) {
-									return target._tempTranslate;
-								}
-								const name = target.name;
-								if (lib.translate[name + "_ab"]) {
-									return lib.translate[name + "_ab"];
-								}
-								return get.translation(name);
-							};
-							for (let i = 0; i < targets.length; i++) {
-								dialog.buttons[i].querySelector(".info").innerHTML = getName(targets[i]) + get.translation(cards[i].suit) + cards[i].number;
-							}
-						},
-						event.skill,
-						targets,
-						cards,
-						event.dialogid,
-						player
-					);
-					for (let i = 0; i < targets.length; i++) {
-						game.log(targets[i], "展示了", cards[i]);
-					}
-					game.addCardKnower(cards, "everyone");
-					game.delay(4);
-					game.addVideo("showCards", player, [get.translation(player) + "发动了〖议政〗", get.cardsInfo(cards)]);
-					"step 1";
-					game.broadcastAll("closeDialog", event.dialogid);
-					event.dialog.close();
-				});
-				await next;
+				await player
+					.showCards(cards, `${get.translation(player)} 发动了【${get.translation(event.name)}】`, false)
+					.set("multipleShow", true)
+					.set("customButton", button => {
+						const target = get.owner(button.link);
+						if (target) {
+							button.node.gaintag.innerHTML = target.getName();
+						}
+					})
+					.set("delay_time", targets.length * 1.5);
 				if (cards.map(card => get.type2(card)).unique().length == 1) {
 					player.popup("洗具");
 					const result = await player
