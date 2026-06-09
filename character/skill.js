@@ -11874,7 +11874,7 @@ const lmCharacter = {
 								.reduce((arr, evt) => arr.addArray(evt?.suits || []), []);
 						const num = getSuits(player).length;
 						if (!game.hasPlayer(current => current != player && getSuits(current).length >= num)) {
-							await target.useSkill("old_potqingshi", [player]);
+							await target.useSkill("potqingshi", [player]);
 						}
 					},
 					ai: {
@@ -11909,45 +11909,6 @@ const lmCharacter = {
 						},
 					},
 				},
-			},
-		},
-		old_potqingshi: {
-			audio: "potqingshi",
-			logAudio(event, player, triggername, _, costResult) {
-				let target;
-				if (event.name == "useSkill") {
-					target = event.targets[0];
-				} else {
-					target = costResult.targets[0];
-				}
-				if (player.getFriends(true).includes(target)) {
-					return ["potqingshi1.mp3", "potqingshi2.mp3"];
-				}
-				return ["potqingshi3.mp3", "potqingshi4.mp3"];
-			},
-			trigger: {
-				player: "damageEnd",
-			},
-			async cost(event, trigger, player) {
-				event.result = await player
-					.chooseTarget(get.prompt2(event.skill))
-					.set("ai", target => {
-						const player = get.player();
-						if (player.getFriends(true).includes(target)) {
-							return get.effect(player, { name: "draw" }, player, player) + get.effect(target, { name: "draw" }, player, player) > 0;
-						}
-						return get.effect(target, { name: "guohe_copy2" }, target, player) + get.effect(player, { name: "guohe_copy2" }, player, player) > 0;
-					})
-					.forResult();
-			},
-			async content(event, trigger, player) {
-				const target = event.targets[0];
-				if (player.getFriends(true).includes(target)) {
-					await game.asyncDraw([player, target]);
-				} else {
-					await player.chooseToDiscard(true, "he");
-					await player.discardPlayerCard(target, "he", true);
-				}
 			},
 		},
 		//手杀崔令仪
@@ -29208,9 +29169,7 @@ const lmCharacter = {
 		old_pot_xinxianying: "旧势辛宪英",
 		old_pot_xinxianying_prefix: "旧|势",
 		old_potjiejie: "诫节",
-		old_potjiejie_info: `每名角色的出牌阶段限一次，当前回合角色可以令你观看其手牌，然后你可以选择一种花色，若其手牌：1.包含此花色，其本回合使用此花色的牌无次数限制，然后弃置其余花色的手牌；2.不包含此花色，其获得此花色的一张牌。若其本轮以此法向你展示牌所包含的花色为唯一最多，你对其发动一次${get.poptip("old_potqingshi")}。`,
-		old_potqingshi: "清识",
-		old_potqingshi_info: "当你受到伤害后，你可选择一名角色，然后若你与其阵营：相同，你与其各摸一张牌；不同，你弃置你与其各一张牌。",
+		old_potjiejie_info: `每名角色的出牌阶段限一次，当前回合角色可以令你观看其手牌，然后你可以选择一种花色，若其手牌：1.包含此花色，其本回合使用此花色的牌无次数限制，然后弃置其余花色的手牌；2.不包含此花色，其获得此花色的一张牌。若其本轮以此法向你展示牌所包含的花色为唯一最多，你对其发动一次${get.poptip("potqingshi")}。`,
 		old_mb_mengda: "旧手杀孟达",
 		old_mb_mengda_prefix: "旧|手杀",
 		old_mbjili: "积戾",

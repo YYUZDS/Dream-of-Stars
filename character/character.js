@@ -586,7 +586,7 @@ const characters = {
 		sex: "female",
 		group: "wei",
 		hp: 3,
-		skills: ["old_potjiejie", "old_potqingshi"],
+		skills: ["old_potjiejie", "potqingshi"],
 		img: "image/character/pot_xinxianying.jpg",
 		dieAudios: ["pot_xinxianying"],
 	},
