@@ -25045,9 +25045,9 @@ const lmCharacter = {
 				game.log(player, "修改了", "#g【博玄】");
 			},
 			ai: {
-				order: 5,
+				order: 10,
 				result: {
-					player: 1,
+					player: player => get.recoverEffect(player, player, player),
 				},
 			},
 		},
