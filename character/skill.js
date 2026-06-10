@@ -19399,43 +19399,61 @@ const lmCharacter = {
 		//族荀莳 by--星语
 		old_clanxsyingxiang: {
 			audio: "clanxsyingxiang",
-			forced: true,
 			trigger: {
-				global: ["loseAfter", "loseAsyncAfter", "gainAfter", "equipAfter", "addJudgeAfter", "addToExpansionAfter"],
+				global: ["useCardAfter", "loseAfter", "loseAsyncAfter", "gainAfter", "equipAfter", "addJudgeAfter", "addToExpansionAfter"],
 			},
-			getIndex(event, player) {
+			filter(event, player) {
+				if (event.name === "useCard") {
+					return event.player.hasHistory("lose", evt => {
+						if ((evt.relatedEvent || evt.getParent()) != event) {
+							return false;
+						}
+						return Object.values(evt.gaintag_map).flat().includes("old_clanxsyingxiang");
+					});
+				}
+				if (event.name === "lose" && event.getParent().name === "useCard") {
+					return false;
+				}
+				return game.hasPlayer(target => {
+					const evt = event.getl?.(target);
+					return evt?.hs?.some(card => evt.gaintag_map?.[card.cardid]?.includes("old_clanxsyingxiang"));
+				});
+			},
+			logTarget(event, player) {
 				return game
-					.filterPlayer(target => {
-						const evt = event.getl?.(target);
-						return evt?.hs?.length && evt.hs.some(card => evt.gaintag_map?.[card.cardid]?.includes("old_clanxsyingxiang"));
+					.filterPlayer(i => {
+						if (i === event.player) {
+							return true;
+						}
+						return i.hasCard(card => card.hasGaintag("old_clanxsyingxiang"), "h");
 					})
 					.sortBySeat();
 			},
-			filter(event, player, name, target) {
-				return true;
-			},
-			logTarget(event, player, name, target) {
-				return target;
-			},
+			forced: true,
 			async content(event, trigger, player) {
 				const drawer = [player, ...game.filterPlayer(i => i.hasCard(card => card.hasGaintag(event.name), "h")).sortBySeat()];
 				await game.asyncDraw(drawer);
-				if ((trigger.relatedEvent || trigger.getParent()).name !== "useCard") {
+				await game.delayx();
+				if (trigger.name !== "useCard" && !player.hasSkill("old_clanxsyingxiang_used")) {
 					const skill = "clanqingjue";
-					if (!player.hasSkill("old_clanxsyingxiang_used") && player.countDiscardableCards(player, "h", card => !get.info(skill).isOnlySuit(card, player)) > 0) {
-						player.logSkill(skill);
-						player.addTempSkill(`${event.name}_used`, "roundStart");
-						const next = game.createEvent(skill);
-						next.player = player;
-						next.setContent(get.info(skill).content);
-						await next;
-					}
+					player.logSkill(skill);
+					player.addTempSkill(`${event.name}_used`, "roundStart");
+					const next = game.createEvent(skill);
+					next.player = player;
+					next.setContent(get.info(skill).content);
+					await next;
 				}
 			},
-			group: ["old_clanxsyingxiang_mark"],
+			group: "old_clanxsyingxiang_mark",
 			subSkill: {
 				used: {
 					charlotte: true,
+					init(player, skill) {
+						player.addTip(skill, `${get.translation(skill)} 已${get.translation("clanqingjue")}`);
+					},
+					onremove(player, skill) {
+						player.removeTip(skill);
+					},
 				},
 				mark: {
 					audio: "clanxsyingxiang",
@@ -19449,9 +19467,9 @@ const lmCharacter = {
 								if (target == player) {
 									return false;
 								}
-								const gain = event.getg?.(target);
-								const lose = event.getl?.(player)?.cards2;
-								return (event.giver == player && gain.length) || gain.some(i => lose.includes(i));
+								const gain = event.getg?.(target) ?? [];
+								const lose = event.getl?.(player)?.cards2 ?? [];
+								return gain.length > 0 && (event.giver === player || lose.some(i => gain.includes(i)));
 							})
 							.sortBySeat();
 					},
@@ -19465,8 +19483,10 @@ const lmCharacter = {
 						const target = event.indexedData;
 						const gain = trigger.getg?.(target);
 						const lose = trigger.getl?.(player)?.cards2;
-						const cards = lose.length ? gain.filter(i => lose.includes(i)) : gain;
-						target.addGaintag(cards, "old_clanxsyingxiang");
+						target.addGaintag(
+							gain.filter(i => trigger.giver === player || lose.includes(i)),
+							"old_clanxsyingxiang"
+						);
 					},
 				},
 			},
