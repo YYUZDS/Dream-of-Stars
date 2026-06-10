@@ -21340,88 +21340,6 @@ const lmCharacter = {
 				},
 			},
 		},
-		old_dcdehua: {
-			audio: "dcdehua",
-			trigger: {
-				global: "roundStart",
-			},
-			forced: true,
-			async content(event, trigger, player) {
-				const list = lib.inpile.filter(name => {
-					if (get.type(name) === "delay" || player.getStorage("old_dcdehua").includes(name)) return false;
-					const card = new lib.element.VCard({ name: name });
-					return get.tag(card, "damage") && player.hasUseTarget(card);
-				});
-				if (list.length) {
-					const { bool, links } = await player
-						.chooseButton(['###德化###<div class="text center">视为使用一张未以此法选择过且可以使用的伤害类卡牌</div>', [list, "vcard"]], true)
-						.set("ai", button => {
-							const name = button.link[2],
-								player = get.player();
-							let value = player.getUseValue({ name, isCard: true }, null, true);
-							if (player.countCards("h", card => get.name(card) === name && player.hasUseTarget(card))) value /= 3;
-							if (name === "sha") value /= 2;
-							return value;
-						})
-						.forResult();
-					if (bool) {
-						const name = links[0][2],
-							card = new lib.element.VCard({ name: name });
-						await player.chooseUseTarget(card, true);
-						player.markAuto("old_dcdehua", [name]);
-					}
-				}
-				if (
-					!lib.inpile.some(name => {
-						if (get.type(name) === "delay") return false;
-						const card = new lib.element.VCard({ name: name });
-						return get.tag(card, "damage") && !player.getStorage("old_dcdehua").includes(name);
-					})
-				) {
-					await player.removeSkills("old_dcdehua");
-					player.addSkill("old_dcdehua_hand");
-				}
-			},
-			mod: {
-				maxHandcard(player, num) {
-					return num + player.getStorage("old_dcdehua").length;
-				},
-				cardEnabled(card, player) {
-					if (player.getStorage("old_dcdehua").includes(card.name) && (get.position(card) == "h" || (card.cards && card.cards.some(i => get.position(i) == "h")))) return false;
-				},
-				cardSavable(card, player) {
-					if (player.getStorage("old_dcdehua").includes(card.name) && (get.position(card) == "h" || (card.cards && card.cards.some(i => get.position(i) == "h")))) return false;
-				},
-				aiValue(player, card) {
-					if (player.getStorage("old_dcdehua").includes(get.name(card))) return 0;
-				},
-				aiUseful() {
-					return lib.skill.old_dcdehua.mod.aiValue.apply(this, arguments);
-				},
-			},
-			intro: {
-				content(storage) {
-					return "<li>手牌上限+" + storage.length + "<br><li>不能使用手牌中的" + get.translation(storage);
-				},
-			},
-			subSkill: {
-				hand: {
-					charlotte: true,
-					mark: true,
-					intro: {
-						content: "伤害牌不计入手牌数",
-					},
-					mod: {
-						ignoredHandcard(card) {
-							if (get.tag(card, "damage")) return true;
-						},
-						cardDiscardable(card, _, name) {
-							if (name == "phaseDiscard" && get.tag(card, "damage")) return false;
-						},
-					},
-				},
-			},
-		},
 		//乐祢衡
 		old_dcjigu: {
 			audio: "dcjigu",
@@ -28436,161 +28354,6 @@ const lmCharacter = {
 			},
 		},
 		//张昭
-		old_twlijian: {
-			getCards(event) {
-				var cards = [];
-				game.countPlayer2(function (current) {
-					current.checkHistory("lose", function (evt) {
-						if (evt.position == ui.discardPile && evt.getParent("phaseDiscard") == event) {
-							cards.addArray(evt.cards);
-						}
-					});
-				});
-				game.checkGlobalHistory("cardMove", function (evt) {
-					if (evt.name == "cardsDiscard" && evt.getParent("phaseDiscard") == event) {
-						cards.addArray(evt.cards);
-					}
-				});
-				return cards.filterInD("d");
-			},
-			audio: "twlijian",
-			sunbenSkill: true,
-			trigger: { global: "phaseDiscardEnd" },
-			filter(event, player) {
-				if (player.hasSkill("old_twlijian_sunben")) {
-					return false;
-				}
-				if (event.player != player && event.player.isIn()) {
-					return lib.skill.old_twlijian.getCards(event).length;
-				}
-				return false;
-			},
-			prompt2: () => "选择任意张本阶段进入弃牌堆的牌令其获得，然后你获得剩余的牌，若其获得的牌数大于你，则你可以对其造成1点伤害",
-			logTarget: "player",
-			content() {
-				"step 0";
-				player.addSkill("old_twlijian_sunben");
-				var cards = lib.skill.old_twlijian.getCards(trigger),
-					target = trigger.player;
-				event.cards = cards;
-				event.target = target;
-				player
-					.chooseToMove("力谏：请分配" + get.translation(target) + "和你获得的牌", true)
-					.set("list", [[get.translation(target) + "获得的牌", cards], ["你获得的牌"]])
-					.set("processAI", function (list) {
-						var player = _status.event.player;
-						var target = _status.event.getTrigger().player;
-						var att = get.attitude(player, target);
-						var cards = _status.event.cards;
-						var cardx = cards.filter(card => card.name == "du");
-						var cardy = cards.removeArray(cardx);
-						switch (get.sgn(att)) {
-							case 1:
-								return [cards, []];
-							case 0:
-								return [cardx, cardy];
-							case -1:
-								var num = Math.ceil(cards.length / 2) + (cards.length % 2 == 0 ? 1 : 0);
-								if (num > 1 && player.hasSkill("old_twchungang")) {
-									num--;
-								}
-								if (get.damageEffect(target, player, player) <= 0 || num > 2 || cardx.length > cardy.length) {
-									return [cardx, cardy];
-								}
-								var num2 = cardy.length - cardx.length;
-								num2 = Math.ceil(num2 / 2) + (num2 % 2 == 0 ? 1 : 0);
-								cardy.sort((a, b) => get.value(b) - get.value(a));
-								cardx.addArray(cardy.slice(num, cardy.length));
-								return [cardx, cardy.slice(0, num)];
-						}
-					})
-					.set("cards", cards);
-				"step 1";
-				if (result.bool) {
-					target.gain(result.moved[0], "gain2");
-					player.gain(result.moved[1], "gain2");
-					if (result.moved[0].length > result.moved[1].length) {
-						player.chooseBool("是否对" + get.translation(target) + "造成1点伤害？").set("choice", get.damageEffect(target, player, player) > 0);
-					} else {
-						event.finish();
-					}
-				} else {
-					event.finish();
-				}
-				"step 2";
-				if (result.bool) {
-					player.line(target);
-					target.damage();
-				}
-			},
-			subSkill: {
-				sunben: {
-					charlotte: true,
-					init(player) {
-						player.storage.old_twlijian_sunben = 0;
-					},
-					onremove: true,
-					mark: true,
-					intro: {
-						markcount(num) {
-							return (num || 0).toString();
-						},
-						content: "弃牌堆进入牌进度：#/8",
-					},
-					trigger: {
-						global: ["loseAfter", "cardsDiscardAfter", "loseAsyncAfter", "equipAfter"],
-					},
-					filter(event, player) {
-						var cards = event.getd();
-						if (!cards.length) {
-							return false;
-						}
-						var list = cards.slice();
-						game.checkGlobalHistory(
-							"cardMove",
-							function (evt) {
-								if (evt == event || evt.getParent() == event || (evt.name != "lose" && evt.name != "cardsDiscard")) {
-									return false;
-								}
-								if (evt.name == "lose" && evt.position != ui.discardPile) {
-									return false;
-								}
-								list.removeArray(evt.cards);
-							},
-							event
-						);
-						return list.length > 0;
-					},
-					forced: true,
-					popup: false,
-					firstDo: true,
-					content() {
-						"step 0";
-						var cards = trigger.getd().slice();
-						game.checkGlobalHistory(
-							"cardMove",
-							function (evt) {
-								if (evt == trigger || evt.getParent() == trigger || (evt.name != "lose" && evt.name != "cardsDiscard")) {
-									return false;
-								}
-								if (evt.name == "lose" && evt.position != ui.discardPile) {
-									return false;
-								}
-								cards.removeArray(evt.cards);
-							},
-							trigger
-						);
-						player.addMark("old_twlijian_sunben", cards.length, false);
-						"step 1";
-						if (player.countMark("old_twlijian_sunben") >= 8) {
-							player.removeSkill("old_twlijian_sunben");
-							player.popup("力谏");
-							game.log(player, "恢复了技能", "#g【力谏】");
-						}
-					},
-				},
-			},
-		},
 		old_twchungang: {
 			audio: "twchungang",
 			init: () => {
@@ -29497,8 +29260,6 @@ const lmCharacter = {
 		old_dc_liuli_prefix: "旧",
 		old_dcfuli: "抚黎",
 		old_dcfuli_info: "出牌阶段，你可以展示手牌并弃置一种类别的所有手牌（每种类别每回合限一次），然后摸X张牌（X为这些牌的牌名字数和且X至多为场上手牌数最多的角色的手牌数）。若你因此弃置了伤害类卡牌，则你可以选择一名角色，令其攻击范围-1直到你的下个回合开始。",
-		old_dcdehua: "德化",
-		old_dcdehua_info: "锁定技。①一轮游戏开始时，若有你可以使用的非延时类伤害类牌的牌名，你选择其中一个并视为使用之，然后你不能从手牌中使用此牌名的牌，然后若你已选择过所有的伤害类牌牌名，你失去〖德化〗。②你的手牌上限+Y（Y为你〖德化①〗选择过的牌名数）。",
 		old_yue_miheng: "旧乐祢衡",
 		old_yue_miheng_prefix: "旧|乐",
 		old_dcjigu: "激鼓",
@@ -29788,8 +29549,6 @@ const lmCharacter = {
 		old_twjilun_info: "当你受到伤害后，你可以摸X张牌（X为【急筹】已记录牌名的数量且X至少为1），或视为使用一张〖急筹①〗记录过且未被〖机论〗记录过的普通锦囊牌并记录此牌。",
 		old_tw_zhangzhao: "旧张昭",
 		old_tw_zhangzhao_prefix: "旧",
-		old_twlijian: "力谏",
-		old_twlijian_info: `昂扬技。其他角色的弃牌阶段结束时，你可以令其获得任意本阶段进入弃牌堆的牌（可不选），然后你获得其余的牌，若其得到的牌数大于你，你可以对其造成1点伤害。<br>${get.poptip("rule_jiang")}：八张牌进入弃牌堆。`,
 		old_twchungang: "纯刚",
 		old_twchungang_info: "锁定技。一名其他角色于摸牌阶段外得到超过一张牌时，你令其弃置一张牌。",
 		old_tw_zhanghong: "旧张纮",
