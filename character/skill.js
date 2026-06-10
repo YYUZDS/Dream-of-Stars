@@ -19397,135 +19397,6 @@ const lmCharacter = {
 			},
 		},
 		//族荀莳 by--星语
-		old_clanqingjue: {
-			audio: "clanqingjue",
-			forced: true,
-			trigger: {
-				player: "changeHpAfter",
-			},
-			isOnlySuit(card, player) {
-				return !player.hasCard(cardx => cardx != card && get.suit(cardx) == get.suit(card), "h");
-			},
-			init(player, skill) {
-				player.addSkill(`${skill}_mark`);
-			},
-			onremove(player, skill) {
-				player.removeSkill(`${skill}_mark`);
-			},
-			filter(event, player) {
-				const hs = player.getCards("h");
-				return game.getGlobalHistory("changeHp", evt => evt.player == player).indexOf(event) == 0 && player.countDiscardableCards(player, "h", card => !get.info("old_clanqingjue").isOnlySuit(card, player)) > 0;
-			},
-			async content(event, trigger, player) {
-				const result = await player
-					.chooseToDiscard(`###${get.translation(event.name)}###弃置手牌中任意张花色数量不为一的牌，并执行等量项`, "h", [1, Infinity], true, "allowChooseAll")
-					.set("filterCard", (card, player) => !get.info("old_clanqingjue").isOnlySuit(card, player))
-					.forResult();
-				const { cards } = result;
-				const resultx =
-					cards.length > 1
-						? { bool: true, links: ["give", "gain"] }
-						: await player
-								.chooseButton(
-									[
-										`清绝：执行${get.cnNumber(Math.min(cards.length, 2))}项`,
-										[
-											[
-												["give", `将${get.translation(cards)}交给其他角色`],
-												["gain", `获得未拥有花色的牌各一张（${get.translation(lib.suit.filter(suit => !player.hasCard({ suit: suit }, "h")))}）`],
-											],
-											"textbutton",
-										],
-									],
-									true
-								)
-								.set("ai", button => {
-									if (button.link == "give") {
-										if (game.hasPlayer(target => target != get.player() && get.attitude(get.player(), target) > 0)) {
-											return 2;
-										}
-										return 0.5;
-									}
-									return 1;
-								})
-								.forResult();
-				const { links } = resultx;
-				if (links?.includes("give") && game.hasPlayer(target => target != player) && cards?.someInD("d")) {
-					const toGive = cards?.filterInD("d");
-					const result = await player
-						.chooseTarget(true, lib.filter.notMe)
-						.set("createDialog", [`清绝：将这些牌交给一名其他角色`, toGive, [dialog => dialog.buttons.forEach(button => button.style.setProperty("opacity", "1", "important")), "handle"]])
-						.set("toGive", toGive)
-						.set("ai", target => get.attitude(get.player(), target) * get.value(get.event().toGive, target))
-						.forResult();
-					const {
-						targets: [target],
-					} = result;
-					player.line(target);
-					await target.gain(toGive, "gain2").set("giver", player);
-				}
-				if (links?.includes("gain")) {
-					const hs = player.getCards("h").map(i => get.suit(i));
-					const suits = lib.suit.slice().removeArray(hs);
-					if (suits?.length) {
-						const cards = [];
-						for (const suit of suits) {
-							const card = get.cardPile(i => get.suit(i) == suit);
-							if (card) {
-								cards.push(card);
-							}
-						}
-						if (cards.length) {
-							await player.gain(cards, "gain2");
-						}
-					}
-				}
-			},
-			mod: {
-				ignoredHandcard(card, player) {
-					if (get.info("old_clanqingjue").isOnlySuit(card, player)) {
-						return true;
-					}
-				},
-				cardDiscardable(card, player, name) {
-					if (name == "phaseDiscard") {
-						if (get.info("old_clanqingjue").isOnlySuit(card, player)) {
-							return false;
-						}
-					}
-				},
-			},
-			subSkill: {
-				mark: {
-					//太棒了，是宝宝标记，我们有救了！
-					charlotte: true,
-					init(player, skill) {
-						player.removeGaintag(skill);
-						player.addGaintag(
-							player.getCards("h", card => get.info("old_clanqingjue").isOnlySuit(card, player)),
-							skill
-						);
-					},
-					onremove(player, skill) {
-						player.removeGaintag(skill);
-					},
-					trigger: {
-						player: ["loseEnd", "enterGame"],
-						global: ["gainEnd", "equipEnd", "addJudgeEnd", "loseAsyncEnd", "addToExpansionEnd", "phaseBefore"],
-					},
-					silent: true,
-					filter(event, player, name) {
-						if (event.name == "phase") {
-							return game.phaseNumber == 0;
-						}
-						return name == "enterGame" || event.getg?.(player)?.length || event.getl?.(player)?.hs?.length;
-					},
-					async content(event, trigger, player) {
-						get.info(event.name).init(player, event.name);
-					},
-				},
-			},
-		},
 		old_clanxsyingxiang: {
 			audio: "clanxsyingxiang",
 			forced: true,
@@ -19550,7 +19421,7 @@ const lmCharacter = {
 				const drawer = [player, ...game.filterPlayer(i => i.hasCard(card => card.hasGaintag(event.name), "h")).sortBySeat()];
 				await game.asyncDraw(drawer);
 				if ((trigger.relatedEvent || trigger.getParent()).name !== "useCard") {
-					const skill = "old_clanqingjue";
+					const skill = "clanqingjue";
 					if (!player.hasSkill("old_clanxsyingxiang_used") && player.countDiscardableCards(player, "h", card => !get.info(skill).isOnlySuit(card, player)) > 0) {
 						player.logSkill(skill);
 						player.addTempSkill(`${event.name}_used`, "roundStart");
@@ -29068,8 +28939,6 @@ const lmCharacter = {
 		old_clanfuning_info: "每回合你的体力值首次变化后，可以将至少X张牌交给一名其他角色（X为你已损失体力值且至少为1），若你交出的牌：颜色均相同，你回复1点体力；数量大于本回合受到过伤害的角色数，你将手牌调整至体力上限。",
 		old_clan_xunshi: "旧族荀莳",
 		old_clan_xunshi_prefix: "旧|族",
-		old_clanqingjue: "清绝",
-		old_clanqingjue_info: "锁定技，你手牌中每个花色仅一张的牌不计入手牌上限。当你每回合体力值首次变化后，你弃置手牌中任意张花色数量不为一的牌，并执行以下等量项：1.将这些牌交给一名其他角色；2.获得手牌中未拥有花色的牌各一张。",
 		old_clanxsyingxiang: "萦香",
 		old_clanxsyingxiang_info: "锁定技，当其他角色获得你的牌后，将此牌称为“萦香”牌。当有角色失去“萦香”牌后，你和手牌中有“萦香”牌的角色各摸一张牌。若不因使用而失去，你发动一次〖清绝〗（每轮限一次）。",
 		old_zhanghua: "旧张华",
