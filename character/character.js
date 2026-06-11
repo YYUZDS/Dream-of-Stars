@@ -1058,7 +1058,7 @@ const characters = {
 		sex: "female",
 		group: "wei",
 		hp: 3,
-		skills: ["oldx_dclinghui", "dcxiace", "dcyuxin"],
+		skills: ["old_dclinghui", "dcxiace", "dcyuxin"],
 		img: "image/character/bailingyun.jpg",
 		dieAudios: ["bailingyun"],
 	},

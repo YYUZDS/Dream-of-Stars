@@ -20972,60 +20972,9 @@ const lmCharacter = {
 				global: "phaseJieshuBegin",
 			},
 			filter(event, player) {
-				return game.filterPlayer(play => play.getHistory("damage").length).length > 1;
-			},
-			check(event, player) {
-				return true;
-			},
-			content() {
-				"step 0";
-				var cards = get.cards(3);
-				event.cards = cards;
-				game.cardsGotoOrdering(cards);
-				player.chooseButton(["是否使用其中一张牌", cards], false).set("filterButton", button => {
-					var player = _status.event.player;
-					var card = button.link;
-					var cardx = {
-						name: get.name(card, get.owner(card)),
-						nature: get.nature(card, get.owner(card)),
-						cards: [card],
-					};
-					return player.hasUseTarget(cardx, null, false);
-				});
-				"step 1";
-				if (result.bool) {
-					var card = result.links[0];
-					cards.remove(card);
-					var cardx = {
-						name: get.name(card, get.owner(card)),
-						nature: get.nature(card, get.owner(card)),
-						cards: [card],
-					};
-					var next = player.chooseUseTarget(cardx, [card], true, false).set("oncard", card => {
-						var owner = _status.event.getParent().owner;
-						if (owner) owner.$throw(card.cards);
-					});
-					if (card.name != cardx.name || !get.is.sameNature(card, cardx)) next.viewAs = true;
-				} else {
-					while (cards.length) {
-						var card = cards.pop();
-						card.fix();
-						ui.cardPile.insertBefore(card, ui.cardPile.firstChild);
-					}
-					game.updateRoundNumber();
-					event.finish();
+				if (_status.currentPhase === player) {
+					return true;
 				}
-				"step 2";
-				player.gain(event.cards, "gain2");
-			},
-		},
-		oldx_dclinghui: {
-			audio: "dclinghui",
-			trigger: {
-				global: "phaseJieshuBegin",
-			},
-			filter(event, player) {
-				if (_status.currentPhase === player) return true;
 				return game.getGlobalHistory("everything", evt => evt.name == "dying").length;
 			},
 			frequent: true,
@@ -21052,43 +21001,6 @@ const lmCharacter = {
 						await player.gain(cards, "gain2");
 					}
 				}
-			},
-		},
-		old_dcyuxin: {
-			audio: "dcyuxin",
-			trigger: { global: "dying" },
-			check(event, player) {
-				return get.attitude(event.player, player) > 0;
-			},
-			limited: true,
-			unique: true,
-			filter(event, player) {
-				return event.player.hp <= 0;
-			},
-			skillAnimation: true,
-			animationColor: "thunder",
-			logTarget: "player",
-			content() {
-				"step 0";
-				player.awakenSkill("oldyuxin");
-				var num = 1 - trigger.player.hp;
-				if (num) trigger.player.recover(num);
-				"step 1";
-				if (trigger.player != player && trigger.player.hp != player.hp) {
-					event.num1 = player.hp;
-					event.num2 = trigger.player.hp;
-					event.num3 = event.num1 - event.num2;
-				} else event.finish();
-				"step 2";
-				player.hp = event.num2;
-				player.update();
-				if (trigger.player.isIn()) {
-					trigger.player.hp = event.num1;
-					trigger.player.update();
-				}
-				game.log(player, "和", trigger.player, "交换了体力值");
-				"step 3";
-				if (event.num3 > 0) player.draw(event.num3);
 			},
 		},
 		//刘理
@@ -29161,12 +29073,8 @@ const lmCharacter = {
 		old_miaoxian_info: "若你的手牌中仅有一张黑色牌，你可将此牌当作任意一张普通锦囊牌使用（每种牌名每回合限一次）；若你的手牌中仅有一张红色牌，你使用此牌时摸一张牌。",
 		old_bailingyun: "旧柏灵筠",
 		old_bailingyun_prefix: "旧",
-		old_dclinghui: "灵慧",
-		old_dclinghui_info: "每名角色的结束阶段，若本回合有至少两名角色受到过伤害，你可以观看的牌堆顶的三张牌：你可以使用其中一张牌，然后获得其余的牌。",
 		oldx_dclinghui: "灵慧",
 		oldx_dclinghui_info: "一名角色的结束阶段，若当前回合角色为你或本回合有角色进入过濒死状态，则你可以观看牌堆顶的三张牌并使用其中一张牌，然后获得剩余的牌。",
-		old_dcyuxin: "御心",
-		old_dcyuxin_info: "限定技，一名角色进入濒死状态时，你可以令其回复体力至1点。若以此法回复体力的是其他角色，你与其体力值互换且你摸等同于你以此法失去的体力值张牌。",
 		old_dc_liuli: "旧刘理",
 		old_dc_liuli_prefix: "旧",
 		old_dcfuli: "抚黎",
