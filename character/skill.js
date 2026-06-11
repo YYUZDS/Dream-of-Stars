@@ -13547,24 +13547,6 @@ const lmCharacter = {
 				},
 			},
 		},
-		oldx_clandianzhan: {
-			audio: "clandianzhan",
-			trigger: { player: "useCardAfter" },
-			filter(event, player) {
-				return get.info("clandianzhan").filter(event, player);
-			},
-			forced: true,
-			content() {
-				"step 0";
-				if (trigger.targets && trigger.targets.length == 1) {
-					player.line(trigger.targets[0]);
-					if (!trigger.targets[0].isLinked()) trigger.targets[0].link();
-				}
-				"step 1";
-				var cards = player.getCards("h", card => get.suit(card) == get.suit(trigger.card) && player.canRecast(card));
-				if (cards.length) player.recast(cards);
-			},
-		},
 		//族荀彧
 		old_clandingan: {
 			audio: "clandingan",
@@ -28759,8 +28741,6 @@ const lmCharacter = {
 		oldx_clan_xuncai_prefix: "旧|族",
 		oldx_clanlieshi: "烈誓",
 		oldx_clanlieshi_info: "出牌阶段，你可以执行其中一项：『受到1点火焰伤害并废除判定区；弃置手牌中的所有【闪】；弃置手牌中的所有【杀】』，然后你令一名其他角色选择执行另一项（不能选择无法执行的选项）。",
-		oldx_clandianzhan: "点盏",
-		oldx_clandianzhan_info: "锁定技，当你于每轮第一次使用一种花色的牌后，你横置此牌的唯一目标并重铸手牌中所有与此牌花色相同的牌。",
 		old_clan_zhonghui: "旧族钟会",
 		old_clan_zhonghui_prefix: "旧|族",
 		old_clanyuzhi: "迂志",
