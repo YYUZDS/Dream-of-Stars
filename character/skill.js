@@ -25029,7 +25029,9 @@ const lmCharacter = {
 		},
 		old_zhongzhuang: {
 			audio: "lkzhongzhuang",
-			trigger: { source: ["damageBegin1", "damageBegin4"] },
+			trigger: {
+				source: ["damageBegin1", "damageBegin4"],
+			},
 			forced: true,
 			filter(event, player, name) {
 				const range = player.getAttackRange();
