@@ -24821,45 +24821,57 @@ const lmCharacter = {
 			filter(event, player) {
 				return player.countCards("h");
 			},
+			check(event, player, name) {
+				const { card } = event;
+				if (name == "damageBegin3") {
+					const effect = get.damageEffect(player, event.source, player, event.nature);
+					const canFilterDamage = player.hasSkillTag("filterDamage", null, {
+						player: event.source,
+						card: event.card,
+					});
+					if (canFilterDamage) return false;
+					return effect < 0;
+				}
+				const effect = get.damageEffect(event.player, player, player, event.nature);
+				const canFilterDamage = event.player.hasSkillTag("filterDamage", null, {
+					player,
+					card,
+				});
+				if (canFilterDamage) return false;
+				return effect > 0;
+			},
+			prompt2(event, player, name) {
+				const target = event.player;
+				const { source } = event;
+				return `${player == target ? "你" : get.translation(target)}即将受到${source ? `来自${player == source ? "你" : get.translation(source)}` : "无来源"}的${event.num}点伤害，你可以展示所有手牌，令此伤害${name == "damageBegin1" ? "+" : "-"}1`;
+			},
 			async content(event, trigger, player) {
 				const suit = get.suit(player.getCards("h")[0], player),
-					bool = player.getCards("h").every(i => get.suit(i, player) == suit);
+					bool = player.getCards("h").every(card => get.suit(card, player) == suit);
 				await player.showHandcards(`${get.translation(player)}发动了【孤脉】`);
-				const result = await player
-					.chooseControl("+1", "-1")
-					.set("prompt", "令此伤害+1或-1")
-					.set("ai", () => {
-						if (_status.event.eff < 0) {
-							return 1;
-						}
-						return 0;
-					})
-					.set("eff", get.damageEffect(trigger.player, trigger.source, player))
-					.forResult();
-				if (result.index == 0) {
+				if (event.triggername == "damageBegin1") {
 					trigger.num++;
 					player.popup(" +1 ", "fire");
 					game.log(player, "令此伤害+1");
-				}
-				if (result.index == 1) {
+				} else {
 					trigger.num--;
 					player.popup(" -1 ", "water");
 					game.log(player, "令此伤害-1");
 				}
 				if (bool) {
-					const result2 = await player
-						.chooseToDiscard("h", "是否弃置一张手牌并重置【孤脉】？")
+					const result = await player
+						.chooseToDiscard("h", "孤脉：你可以弃置一张手牌并重置【孤脉】")
 						.set("ai", card => {
-							const { player, eff } = get.event();
-							if (eff) {
-								return 7 - get.value(card);
+							const { goon } = get.event();
+							if (!goon) {
+								return 0;
 							}
-							return 0;
+							return 7 - get.value(card);
 						})
-						.set("eff", player.countCards("hs", card => player.hasValueTarget(card) && get.tag(card, "damage")) > 0)
+						.set("goon", player.storage[`${event.name}_roundcount`])
 						.forResult();
-					if (result2.bool) {
-						player.storage.counttrigger.old_dcgumai--;
+					if (result?.bool) {
+						player.refreshSkill(event.name);
 					}
 				}
 			},
