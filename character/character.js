@@ -429,7 +429,7 @@ const characters = {
 		sex: "male",
 		group: "qun",
 		hp: 3,
-		skills: ["old_sbwansha", "old_sbluanwu", "old_sbweimu"],
+		skills: ["old_sbwansha", "old_sbluanwu", "sbweimu"],
 		img: "image/character/sb_jiaxu.jpg",
 		dieAudios: ["sb_jiaxu"],
 	},
