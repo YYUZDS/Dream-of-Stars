@@ -5586,6 +5586,108 @@ const lmCharacter = {
 				},
 			},
 		},
+		//谋黄盖
+		old_sbzhaxiang: {
+			audio: "sbzhaxiang",
+			trigger: { player: "useCard1" },
+			forced: true,
+			group: ["old_sbzhaxiang_draw", "old_sbzhaxiang_mark"],
+			filter(event, player) {
+				return player.getHistory("useCard").length <= player.getDamagedHp();
+			},
+			content() {
+				trigger.directHit.addArray(game.filterPlayer());
+				game.log(trigger.card, "不可被响应");
+			},
+			ai: {
+				threaten: 1.5,
+				directHit_ai: true,
+				skillTagFilter(player, tag, arg) {
+					return player.countUsed() < player.getDamagedHp();
+				},
+			},
+			mod: {
+				targetInRange(card, player) {
+					if (player.countUsed() < player.getDamagedHp()) {
+						return true;
+					}
+				},
+				cardUsable(card, player) {
+					if (player.countUsed() < player.getDamagedHp()) {
+						return Infinity;
+					}
+				},
+				aiOrder(player, card, num) {
+					if (player.countUsed() >= player.getDamagedHp()) {
+						return;
+					}
+					var numx = get.info(card).usable;
+					if (typeof numx == "function") {
+						return numx(card, player) + 10;
+					}
+					if (typeof numx == "number") {
+						return num + 10;
+					}
+				},
+			},
+			subSkill: {
+				mark: {
+					charlotte: true,
+					silent: true,
+					firstDo: true,
+					trigger: {
+						player: ["changeHp", "useCard"],
+						global: ["phaseBegin", "phaseAfter"],
+					},
+					filter(event, player) {
+						return true;
+					},
+					content() {
+						const skill = event.name;
+						if (event.triggername != "phaseAfter") {
+							const num = Math.max(0, player.getDamagedHp() - player.getHistory("useCard").length);
+							if (player.countMark(skill) != num) {
+								player.setMark(skill, num, false);
+							}
+							player.addTip(skill, `${get.translation(skill)}剩余${num}`);
+						} else {
+							player.clearMark(skill, false);
+							player.removeTip(skill);
+						}
+					},
+					intro: {
+						content: "还剩 # 张牌无距离次数限制且不可被响应",
+					},
+				},
+				draw: {
+					audio: "sbzhaxiang",
+					mod: {
+						aiOrder(player, card, num) {
+							if (num > 0 && _status.event && _status.event.type == "phase" && get.tag(card, "recover")) {
+								return num / 5;
+							}
+						},
+					},
+					trigger: { player: "phaseDrawBegin2" },
+					forced: true,
+					filter(event, player) {
+						return !event.numFixed && player.getDamagedHp() > 0;
+					},
+					content() {
+						trigger.num += player.getDamagedHp();
+					},
+					ai: {
+						effect: {
+							target(card, player, target) {
+								if (get.tag(card, "recover") && target.hp > 0 && target.needsToDiscard() < 1) {
+									return [0, 0];
+								}
+							},
+						},
+					},
+				},
+			},
+		},
 		//谋甘宁
 		old_sbqixi: {
 			init() {
@@ -28628,6 +28730,8 @@ const lmCharacter = {
 		old_sbtongye_info: "锁定技。结束阶段，你猜测场上装备牌数与你下一个准备阶段的场上装备牌数是否相等，并获得以下效果：你下一个准备阶段，若你猜对且“业”数小于4，你获得1枚“业”；若你猜错，你弃1枚“业”。",
 		old_sb_huanggai: "旧谋黄盖",
 		old_sb_huanggai_prefix: "旧|谋",
+		old_sbzhaxiang: "诈降",
+		old_sbzhaxiang_info: "锁定技。①摸牌阶段，你多摸X张牌。②你于每个回合使用的前X张牌无距离与次数限制且不能被响应（X为你已损失的体力值）。",
 		old_sb_ganning: "旧谋甘宁",
 		old_sb_ganning_prefix: "旧|谋",
 		old_sbqixi: "奇袭",
