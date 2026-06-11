@@ -15712,6 +15712,7 @@ const lmCharacter = {
 				},
 			},
 		},
+		//芮姬
 		old_qiaoli: {
 			audio: "qiaoli",
 			enable: "phaseUse",
@@ -15720,7 +15721,10 @@ const lmCharacter = {
 				old_qiaoli: true,
 			},
 			filterCard(card, player) {
-				if (get.type(card) != "equip") return false;
+				if (get.type(card) != "equip") {
+					return false;
+				}
+				const event = _status.event;
 				return true;
 			},
 			viewAsFilter(player) {
@@ -15732,11 +15736,14 @@ const lmCharacter = {
 				);
 			},
 			check(card) {
-				if (get.position(card) == "e") return 7.5 - get.value(card);
+				if (get.position(card) == "e") {
+					return 7.5 - get.value(card);
+				}
 				return 12 - _status.event.player.getUseValue(card);
 			},
 			position: "hes",
-			precontent() {
+			async precontent(event, trigger, player) {
+				const subtype = get.subtype(event.result.cards[0]) || "equip";
 				player.addTempSkill("old_qiaoli_norespond");
 				player.addTempSkill("old_qiaoli_effect");
 			},
@@ -15745,104 +15752,17 @@ const lmCharacter = {
 				skillTagFilter(player, tag, arg) {
 					return arg && arg.card && arg.card.name == "juedou" && _status.event.skill == "old_qiaoli";
 				},
-				wuxie(target, card, player, viewer, status) {
-					if (player === game.me && get.attitude(viewer, player._trueMe || player) > 0) return 0;
-					if (status * get.attitude(viewer, target) * get.effect(target, card, player, target) >= 0) return 0;
-				},
-				basic: {
-					order: 5,
-					useful: 1,
-					value: 5.5,
-				},
-				result: {
-					player(player, target, card) {
-						if (
-							player.hasSkillTag(
-								"directHit_ai",
-								true,
-								{
-									target: target,
-									card: card,
-								},
-								true
-							)
-						)
-							return 0;
-						if (get.damageEffect(target, player, target) >= 0) return 0;
-						let pd = get.damageEffect(player, target, player),
-							att = get.attitude(player, target);
-						if (att > 0 && get.damageEffect(target, player, player) > pd) return 0;
-						let ts = target.mayHaveSha(player, "respond", null, "count"),
-							ps = player.mayHaveSha(
-								player,
-								"respond",
-								player.getCards("h", i => {
-									return card === i || (card.cards && card.cards.includes(i)) || ui.selected.cards.includes(i);
-								}),
-								"count"
-							);
-						if (ts < 1 && ts << 3 < Math.pow(player.hp, 2)) return 0;
-						if (att > 0) {
-							if (ts < 1) return 0;
-							return -2;
-						}
-						if (ts - ps + Math.exp(0.8 - player.hp) < 1) return -ts;
-						if (pd >= 0) return pd / get.attitude(player, player);
-						return -2 - ts;
-					},
-					target(player, target, card) {
-						if (
-							player.hasSkillTag(
-								"directHit_ai",
-								true,
-								{
-									target: target,
-									card: card,
-								},
-								true
-							)
-						)
-							return -2;
-						let td = get.damageEffect(target, player, target);
-						if (td >= 0) return td / get.attitude(target, target);
-						let pd = get.damageEffect(player, target, player),
-							att = get.attitude(player, target);
-						if (att > 0 && get.damageEffect(target, player, player) > pd) return -2;
-						let ts = target.mayHaveSha(player, "respond", null, "count"),
-							ps = player.mayHaveSha(
-								player,
-								"respond",
-								player.getCards("h", i => {
-									return card === i || (card.cards && card.cards.includes(i)) || ui.selected.cards.includes(i);
-								}),
-								"count"
-							);
-						if (ts < 1) return -1.5;
-						if (att > 0) return -2;
-						if (ts - ps < 1) return -2 - ts;
-						if (pd >= 0) return -1;
-						return -ts;
-					},
-				},
-				tag: {
-					respond: 2,
-					respondSha: 2,
-					damage: 1,
-				},
 			},
 			subSkill: {
 				norespond: {
 					charlotte: true,
-					trigger: {
-						player: "useCard1",
-					},
+					trigger: { player: "useCard1" },
 					filter(event, player) {
 						return event.card.old_qiaoli && get.subtype(event.cards[0]) != "equip1";
 					},
 					forced: true,
 					popup: false,
-					content() {
-						// player.addTempSkill("old_qiaoli_gain");
+					async content(event, trigger, player) {
 						trigger.directHit.addArray(game.players);
 						game.log(trigger.card, "不可被响应");
 					},
@@ -15857,91 +15777,89 @@ const lmCharacter = {
 					},
 					forced: true,
 					popup: false,
-					content() {
-						"step 0";
-						var card = trigger.cards[0];
-						var num = 1;
-						var info = get.info(card, false);
-						if (info && info.distance && typeof info.distance.attackFrom == "number") num -= info.distance.attackFrom;
-						player.draw(num);
-						"step 1";
-						var cards = result;
+					async content(event, trigger, player) {
+						const card = trigger.cards[0];
+						let num = 1;
+						const info = get.info(card, false);
+						if (info && info.distance && typeof info.distance.attackFrom == "number") {
+							num -= info.distance.attackFrom;
+						}
+						const result = await player.draw({ num }).forResult();
+						let { cards } = result;
 						if (get.itemtype(cards) != "cards") {
-							event.finish(5);
 							return;
 						}
-						var hs = player.getCards("h");
+						const hs = player.getCards("h");
 						cards = cards.filter(function (card) {
 							return hs.includes(card);
 						});
 						if (!cards.length) {
-							event.finish(5);
 							return;
 						}
-						event.cards = cards;
-						if (_status.connectMode)
+						if (_status.connectMode) {
 							game.broadcastAll(function () {
 								_status.noclearcountdown = true;
 							});
-						event.given_map = {};
-						"step 2";
-						player.chooseCardTarget({
-							filterCard(card) {
-								return _status.event.cards.includes(card) && !card.hasGaintag("old_qiaoli_given");
-							},
-							cards: cards,
-							filterTarget: lib.filter.notMe,
-							selectCard: [1, cards.length],
-							prompt: "是否将获得的牌分配给其他角色？",
-							ai1(card) {
-								return -1;
-							},
-							ai2(target) {
-								return -1;
-							},
-						});
-						"step 3";
-						if (result.bool) {
-							var res = result.cards,
-								target = result.targets[0].playerid;
-							player.addGaintag(res, "old_qiaoli_given");
-							cards.removeArray(res);
-							if (!event.given_map[target]) event.given_map[target] = [];
-							event.given_map[target].addArray(res);
-							if (cards.length) event.goto(2);
 						}
-						"step 4";
+						const given_map = {};
+						while (cards.some(card => !card.hasGaintag("old_qiaoli_given"))) {
+							const result = await player
+								.chooseCardTarget({
+									filterCard(card) {
+										return get.event().cards.includes(card) && !card.hasGaintag("old_qiaoli_given");
+									},
+									cards,
+									filterTarget: lib.filter.notMe,
+									selectCard: [1, cards.length],
+									prompt: "巧力：是否将获得的牌分配给其他角色？",
+									ai1(card) {
+										return -1;
+									},
+									ai2(target) {
+										return -1;
+									},
+									allowChooseAll: true,
+								})
+								.forResult();
+							if (result.bool && result.cards?.length && result.targets?.length) {
+								const {
+									cards,
+									targets: [target],
+								} = result;
+								player.addGaintag(cards, "old_qiaoli_given");
+								const id = target.playerid;
+								given_map[id] ??= [];
+								given_map[id].addArray(cards);
+							} else {
+								break;
+							}
+						}
 						if (_status.connectMode) {
 							game.broadcastAll(function () {
 								delete _status.noclearcountdown;
 							});
 							game.stopCountChoose();
 						}
-						for (var i in event.given_map) {
-							var source = (_status.connectMode ? lib.playerOL : game.playerMap)[i];
+						const list = [];
+						const loseCards = [];
+						for (const i in given_map) {
+							const source = (_status.connectMode ? lib.playerOL : game.playerMap)[i];
+							const gain = given_map[source.playerid];
 							player.line(source, "green");
-							source.gain(event.given_map[i], player, "giveAuto");
+							list.push([source, gain]);
+							loseCards.push(...gain);
 						}
-						event.next.sort(function (a, b) {
-							return lib.sort.seat(a.player, b.player);
-						});
+						await game
+							.loseAsync({
+								gain_list: list,
+								player,
+								cards: loseCards,
+								giver: player,
+								animate: "giveAuto",
+							})
+							.setContent("gaincardMultiple");
 					},
 				},
-				// gain: {
-				// 	charlotte: true,
-				// 	audio: "qiaoli",
-				// 	trigger: {
-				// 		player: "phaseJieshuBegin",
-				// 	},
-				// 	forced: true,
-				// 	content() {
-				// 		var card = get.cardPile2(function (card) {
-				// 			return get.type(card) == "equip";
-				// 		});
-				// 		if (card) player.gain(card, "gain2");
-				// 	},
-				// 	sourceSkill: "old_qiaoli",
-				// },
 			},
 		},
 		old_qingliang: {
