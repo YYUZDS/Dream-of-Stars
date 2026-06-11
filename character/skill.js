@@ -24879,129 +24879,133 @@ const lmCharacter = {
 		//陆凯
 		old_bushi: {
 			audio: "lkbushi",
-			getBushi: function (player) {
-				if (!player.storage.old_bushi) return ["spade", "heart", "club", "diamond"];
+			getBushi(player) {
+				if (!player.storage.old_bushi) {
+					return ["spade", "heart", "club", "diamond"];
+				}
 				return player.storage.old_bushi;
 			},
-			onremove: true,
-			trigger: {
-				player: "phaseZhunbeiBegin",
+			init(player, skill) {
+				player.addTip(
+					skill,
+					`${get.translation(skill)}${lib.skill.old_bushi
+						.getBushi(player)
+						.map(i => get.translation(i))
+						.join("")}`
+				);
 			},
+			onremove(player, skill) {
+				delete player.storage[skill];
+				player.removeTip(skill);
+			},
+			trigger: { player: "phaseZhunbeiBegin" },
 			direct: true,
 			locked: false,
-			content() {
-				"step 0";
-				var list = lib.skill.old_bushi.getBushi(player);
-				list = list.map(function (i) {
-					return ["", "", "lukai_" + i];
-				});
-				var next = player.chooseToMove("卜筮：是否调整【卜筮】的花色顺序？");
-				next.set("list", [
-					[
-						"无次数限制/使用打出摸牌<br>成为目标拿牌/结束阶段或被指定时拿牌",
-						[list, "vcard"],
-						function (list) {
-							var list2 = list.map(function (i) {
-								return get.translation(i[2].slice(6));
-							});
-							return "你使用" + list2[0] + "牌无次数限制；使用或打出" + list2[1] + "时，摸两张牌；<br>结束阶段，或当你成为" + list2[2] + "牌目标后，获得一张" + list2[3] + "牌";
+			async content(event, trigger, player) {
+				const list = lib.skill.old_bushi.getBushi(player).map(i => ["", "", `lukai_${i}`]);
+				const result = await player
+					.chooseToMove({
+						prompt: "卜筮：是否调整〖卜筮〗的花色顺序？",
+						list: [
+							[
+								"无次数限制/使用打出摸牌<br>成为目标拿牌/结束阶段或被指定时拿牌",
+								[list, "vcard"],
+								list => {
+									const list2 = list.map(i => get.translation(i[2].slice(6)));
+									return `你使用${list2[0]}牌时无次数限制；使用或打出${list2[1]}时，摸两张牌；<br>结束阶段或当你成为${list2[2]}牌目标后，获得一张${list2[3]}牌`;
+								},
+							],
+						],
+						processAI() {
+							const player = _status.event.player;
+							const list = lib.skill.old_bushi.getBushi(player);
+							const list2 = [];
+							let hs = player.getCards("hs", card => player.hasValueTarget(card));
+							list.sort((a, b) => hs.filter(i => get.suit(i) === b).length - hs.filter(i => get.suit(i) === a).length);
+							list2.push(list.shift());
+							hs = player.getCards("hs", "sha");
+							list.sort((a, b) => hs.filter(i => get.suit(i) === b).length - hs.filter(i => get.suit(i) === a).length);
+							list2.unshift(list.shift());
+							list.randomSort();
+							list2.addArray(list);
+							return [list2.map(i => ["", "", `lukai_${i}`])];
 						},
-					],
-				]);
-				next.set("processAI", function () {
-					var player = _status.event.player;
-					var list = lib.skill.old_bushi.getBushi(player);
-					var list2 = [];
-					var hs = player.getCards("hs", function (card) {
-						return player.hasValueTarget(card);
-					});
-					list.sort(function (a, b) {
-						return hs.filter(i => get.suit(i) == b).length - hs.filter(i => get.suit(i) == a).length;
-					});
-					list2.push(list.shift());
-					hs = player.getCards("hs", "sha");
-					list.sort(function (a, b) {
-						return hs.filter(i => get.suit(i) == b).length - hs.filter(i => get.suit(i) == a).length;
-					});
-					list2.unshift(list.shift());
-					list.randomSort();
-					list2.addArray(list);
-					return [list2.map(i => ["", "", "lukai_" + i])];
-				});
-				"step 1";
-				if (result.bool) {
-					var list = lib.skill.old_bushi.getBushi(player),
-						list2 = result.moved[0].map(function (i) {
-							return i[2].slice(6);
-						});
-					for (var i = 0; i < 4; i++) {
-						if (list[i] != list2[i]) {
-							player.logSkill("old_bushi");
-							player.storage.old_bushi = list2;
-							var str = "#g";
-							for (var j = 0; j < 4; j++) {
-								str += get.translation(list2[j]);
-								if (j != 3) str += "/";
-							}
-							game.log(player, "将", "#g【卜筮】", "的花色序列改为", str);
-							game.delayx();
-							break;
-						}
-					}
+					})
+					.forResult();
+				if (!result.bool) {
+					return;
 				}
+				const oldList = lib.skill.old_bushi.getBushi(player);
+				const list2 = result.moved[0].map(i => i[2].slice(6));
+				if (oldList.every((suit, index) => suit === list2[index])) {
+					return;
+				}
+				player.logSkill("old_bushi");
+				player.storage.old_bushi = list2;
+				player.addTip(
+					"old_bushi",
+					`${get.translation("old_bushi")}${lib.skill.old_bushi
+						.getBushi(player)
+						.map(i => get.translation(i))
+						.join("")}`
+				);
+				const str = `#g${list2.map(i => get.translation(i)).join("/")}`;
+				game.log(player, "将", "#g【卜筮】", "的花色序列改为", str);
+				await game.delayx();
 			},
 			mark: true,
 			marktext: "筮",
 			intro: {
-				content: function (storage, player) {
-					var list = lib.skill.old_bushi.getBushi(player).map(i => get.translation(i));
-					return "①你使用" + list[0] + "牌无次数限制；当你使用或打出" + list[1] + "牌后，你摸两张牌；结束阶段，或当你成为" + list[2] + "牌的目标后，你从牌堆或弃牌堆获得一张" + list[3] + "牌。②准备阶段开始时，你可调整此技能中四种花色的对应顺序。";
+				content(storage, player) {
+					const list = lib.skill.old_bushi.getBushi(player).map(i => get.translation(i));
+					return `①你使用${list[0]}牌无次数限制。②当你使用或打出${list[1]}牌后，你摸两张牌。③结束阶段或当你成为${list[2]}牌的目标后，你从牌堆或弃牌堆获得一张${list[3]}牌。④准备阶段开始时，你可调整此技能中四种花色的对应顺序。`;
 				},
 			},
 			group: ["old_bushi_unlimit", "old_bushi_draw", "old_bushi_gain"],
 			subSkill: {
 				unlimit: {
 					mod: {
-						cardUsable: function (card, player) {
-							var list = lib.skill.old_bushi.getBushi(player);
-							if (list[0] == get.suit(card)) return Infinity;
+						cardUsable(card, player) {
+							const list = lib.skill.old_bushi.getBushi(player);
+							const suit = get.suit(card);
+							if (suit === "unsure" || list[0] === suit) {
+								return Infinity;
+							}
 						},
 					},
-					trigger: {
-						player: "useCard1",
-					},
+					trigger: { player: "useCard1" },
 					forced: true,
 					popup: false,
 					silent: true,
 					firstDo: true,
-					filter: function (event, player) {
-						if (event.addCount === false) return true;
-						var list = lib.skill.old_bushi.getBushi(player);
-						return list[0] == get.suit(event.card);
+					filter(event, player) {
+						if (event.addCount === false) {
+							return false;
+						}
+						const list = lib.skill.old_bushi.getBushi(player);
+						return list[0] === get.suit(event.card);
 					},
-					content() {
+					async content(event, trigger, player) {
 						trigger.addCount = false;
-						var stat = player.getStat().card,
-							name = trigger.card.name;
-						if (stat[name] && typeof stat[name] == "number") stat[name]--;
+						const stat = player.getStat().card;
+						const name = trigger.card.name;
+						if (stat[name] && typeof stat[name] === "number") {
+							stat[name]--;
+						}
 					},
-					sub: true,
 				},
 				draw: {
 					audio: "lkbushi",
-					trigger: {
-						player: ["useCard", "respond"],
-					},
+					trigger: { player: ["useCardAfter", "respondAfter"] },
 					forced: true,
 					locked: false,
-					filter: function (event, player) {
-						var list = lib.skill.old_bushi.getBushi(player);
-						return list[1] == get.suit(event.card);
+					filter(event, player) {
+						const list = lib.skill.old_bushi.getBushi(player);
+						return list[1] === get.suit(event.card);
 					},
-					content() {
-						player.draw(2);
+					async content(event, trigger, player) {
+						await player.draw(2);
 					},
-					sub: true,
 				},
 				gain: {
 					audio: "lkbushi",
@@ -25009,21 +25013,26 @@ const lmCharacter = {
 						player: "phaseJieshuBegin",
 						target: "useCardToTargeted",
 					},
-					filter: function (event, player) {
-						var list = lib.skill.old_bushi.getBushi(player);
-						if (event.name != "phaseJieshu") return list[2] == get.suit(event.card) && !event.excluded.contains(player);
-						else return true;
-					},
 					forced: true,
 					locked: false,
-					content() {
-						var list = lib.skill.old_bushi.getBushi(player);
-						var card = get.cardPile(function (card) {
-							return get.suit(card, false) == list[3];
-						});
-						if (card) player.gain(card, "gain2");
+					filter(event, player) {
+						const list = lib.skill.old_bushi.getBushi(player);
+						if (event.name != "phaseJieshu") {
+							return list[2] === get.suit(event.card) && !event.excluded.contains(player);
+						} else {
+							return true;
+						}
 					},
-					sub: true,
+					async content(event, trigger, player) {
+						const list = lib.skill.old_bushi.getBushi(player);
+						const card = get.cardPile(card => get.suit(card, false) === list[3]);
+						if (card) {
+							await player.gain({
+								cards: [card],
+								animate: "gain2",
+							});
+						}
+					},
 				},
 			},
 		},
@@ -29212,7 +29221,7 @@ const lmCharacter = {
 		old_lukai: "旧陆凯",
 		old_lukai_prefix: "旧",
 		old_bushi: "卜筮",
-		old_bushi_info: "①你使用♠牌无次数限制；当你使用或打出♥牌后，你摸两张牌；结束阶段，或当你成为♣牌的目标后，你从牌堆或弃牌堆获得一张♦牌。②准备阶段，你可调整此技能中四种花色的对应顺序。",
+		old_bushi_info: "①你使用♠牌无次数限制；②当你使用或打出♥牌后，你摸两张牌；③结束阶段或当你成为♣牌的目标后，你从牌堆或弃牌堆获得一张♦牌。④准备阶段，你可调整此技能中四种花色的对应顺序。",
 		old_zhongzhuang: "忠壮",
 		old_zhongzhuang_info: "锁定技，当你造成伤害时，若你的攻击范围：小于3，你令此伤害+1；大于3，你将此伤害值改为1",
 		oldx_zhangqiying: "旧张琪瑛",
