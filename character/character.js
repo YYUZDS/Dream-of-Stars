@@ -1312,6 +1312,12 @@ const characters = {
 		img: "image/character/dc_sb_xuyou.jpg",
 		dieAudios: ["dc_sb_xuyou"],
 	},
+	old_dc_weifeng: {
+		sex: "male",
+		group: "wei",
+		hp: 3,
+		skills: ["old_dchuozhong", "old_dczhuguo"],
+	},
 	old_v_sunce: {
 		sex: "male",
 		group: "wu",
