@@ -25029,32 +25029,34 @@ const lmCharacter = {
 		},
 		old_zhongzhuang: {
 			audio: "lkzhongzhuang",
-			trigger: {
-				source: ["damageBegin1", "damageBegin4"],
-			},
+			trigger: { source: ["damageBegin1", "damageBegin4"] },
 			forced: true,
-			filter: function (event, player, name) {
-				// if (!event.card || event.card.name != "sha" || event.getParent().type != "card") return false;
-				var range = player.getAttackRange();
-				if (name == "damageBegin1") return range < 3;
+			filter(event, player, name) {
+				const range = player.getAttackRange();
+				if (name === "damageBegin1") {
+					return range < 3;
+				}
 				return range > 3 && event.num > 1;
 			},
-			content() {
-				if (event.triggername == "damageBegin1") trigger.num++;
-				else trigger.num = 1;
+			async content(event, trigger) {
+				if (event.triggername === "damageBegin1") {
+					trigger.num++;
+				} else {
+					trigger.num = 1;
+				}
 			},
 			global: "old_zhongzhuang_ai",
 			subSkill: {
 				ai: {
-					ai: {
-						filterDamage: true,
-						skillTagFilter: function (player, tag, arg) {
-							// if (arg && arg.card && arg.card.name == "sha") {
-							if (arg) {
-								if (arg.player && arg.player.hasSkill("old_zhongzhuang") && arg.player.getAttackRange() > 3) return true;
-							}
-							return false;
-						},
+					filterDamage: true,
+					skillTagFilter: function (player, tag, arg) {
+						const source = arg.source || arg.from;
+						if (source && source.hasSkill("old_zhongzhuang")) {
+							const range = source.getAttackRange();
+							if (range < 3) return true;
+							if (range > 3) return false;
+						}
+						return false;
 					},
 				},
 			},
