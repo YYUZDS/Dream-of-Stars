@@ -11919,30 +11919,13 @@ const lmCharacter = {
 				}
 				return 2;
 			},
-			trigger: {
-				global: ["roundStart", "useCardAfter"],
-			},
+			trigger: { global: "roundStart" },
 			filter(event, player) {
-				if (event.name == "useCard") {
-					return (
-						event.player != player &&
-						player.getRoundHistory("gain", evt => {
-							if (evt.getParent().name != "old_mbcaiqiu") {
-								return false;
-							}
-							return evt.cards?.length && evt.cards.some(card => card.name == event.card.name);
-						}).length > 0
-					);
-				}
 				return game.countPlayer2(() => true, true) > 0;
 			},
 			forced: true,
 			locked: false,
 			async content(event, trigger, player) {
-				if (trigger?.name == "useCard") {
-					await player.loseHp();
-					return;
-				}
 				const cards = get.cards(
 					game.countPlayer2(() => true, true),
 					true
@@ -11952,7 +11935,7 @@ const lmCharacter = {
 					.set("ai", button => {
 						const player = get.player();
 						//只要贪不死就往死里贪
-						if (game.countPlayer(() => true) > player.hp && ["sha", "shan"].includes(button.link.name)) {
+						if (player.hp <= 1 && ["sha", "shan"].includes(button.link.name)) {
 							return 0;
 						}
 						return 1;
@@ -11961,6 +11944,31 @@ const lmCharacter = {
 				if (result?.bool && result.links?.length) {
 					await player.gain(result.links, "draw");
 				}
+			},
+			group: "old_mbcaiqiu_effect",
+			subSkill: {
+				effect: {
+					audio: "mbcaiqiu",
+					logAudio: () => ["mbcaiqiu3.mp3", "mbcaiqiu4.mp3"],
+					trigger: { global: "useCardAfter" },
+					filter(event, player) {
+						return (
+							event.player != player &&
+							player.hasRoundHistory("gain", evt => {
+								if (evt.getParent().name != "old_mbcaiqiu") {
+									return false;
+								}
+								return evt.cards?.length && evt.cards.some(card => card.name == event.card.name);
+							})
+						);
+					},
+					round: 1,
+					forced: true,
+					locked: false,
+					async content(event, trigger, player) {
+						await player.loseHp();
+					},
+				},
 			},
 		},
 		old_mbxishang: {
@@ -28687,7 +28695,7 @@ const lmCharacter = {
 		old_mb_cuilingyi_ab: "旧手杀崔芙",
 		old_mb_cuilingyi_prefix: "旧|手杀",
 		old_mbcaiqiu: "裁裘",
-		old_mbcaiqiu_info: "①每轮开始时，你观看牌堆顶X张牌（X为游戏人数），然后可以获得其中任意张牌。②其他角色使用牌结算结束后，若你本轮因〖裁裘〗获得过同名牌，你失去1点体力。",
+		old_mbcaiqiu_info: "①每轮开始时，你观看牌堆顶X张牌（X为游戏人数），然后可以获得其中任意张牌。②每轮限一次，其他角色使用牌结算结束后，若你本轮因〖裁裘〗获得过同名牌，你失去1点体力。",
 		old_mbxishang: "袭裳",
 		old_mbxishang_info: `锁定技，①游戏开始时，你选择本局形象并获得${get.poptip("old_mbweizhuang")}。②你不因摸牌而获得牌时，明置之。`,
 		old_mbxishang_append: `<span style="font-family:yuanli">明置牌：一名角色装备区和判定区的牌都是明置牌，但是一名角色的明置牌不包括其判定区的牌`,
