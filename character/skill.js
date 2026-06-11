@@ -25649,7 +25649,9 @@ const lmCharacter = {
 		},
 		old_twyimou: {
 			audio: "twyimou",
-			trigger: { global: "damageEnd" },
+			trigger: {
+				global: "damageEnd",
+			},
 			filter(event, player) {
 				return event.player.isIn() && get.distance(event.player, player) <= 1;
 			},
@@ -26141,113 +26143,6 @@ const lmCharacter = {
 					if (control != "回血") await player.draw(num);
 					if (control != "摸牌") await player.recover(num);
 				}
-			},
-		},
-		old_twchue: {
-			audio: "twchue",
-			trigger: { player: "useCardToPlayer" },
-			filter(event, player) {
-				return event.card.name == "sha" && event.isFirstTarget && event.targets.length == 1 && game.hasPlayer(target => !event.targets.includes(target) && player.canUse(event.card, target));
-			},
-			prompt2: "失去1点体力，额外指定至多等同于你体力值的目标",
-			check(event, player) {
-				return player.hp + player.countCards("hs", card => player.canSaveCard(card, player)) - 1 > 0;
-			},
-			async content(event, trigger, player) {
-				await player.loseHp();
-				const targetx = trigger.targets.slice(),
-					num = player.getHp();
-				if (!num) return;
-				const { bool, targets } = await player
-					.chooseTarget("额外指定至多" + get.cnNumber(num) + "名目标", [1, num], (card, player, target) => {
-						const trigger = _status.event.getTrigger();
-						return !trigger.targets.includes(target) && player.canUse(trigger.card, target);
-					})
-					.set("ai", target => {
-						const player = get.event().player,
-							trigger = _status.event.getTrigger();
-						return get.effect(target, trigger.card, player, player);
-					})
-					.forResult();
-				if (!bool) return;
-				player.line(targets);
-				trigger.targets.addArray(targets);
-			},
-			group: ["old_twchue_gain", "old_twchue_effect"],
-			marktext: "勇",
-			intro: {
-				name: "勇",
-				content: "mark",
-			},
-			subSkill: {
-				gain: {
-					audio: "twchue",
-					trigger: { player: ["damageEnd", "loseHpEnd"] },
-					forced: true,
-					locked: false,
-					async content(event, trigger, player) {
-						await player.draw();
-						player.addMark("old_twchue", 1);
-					},
-				},
-				effect: {
-					audio: "twchue",
-					trigger: { global: "phaseEnd" },
-					filter(event, player) {
-						const card = new lib.element.VCard({ name: "sha" });
-						return (
-							player.hasUseTarget(card) &&
-							/*player.getHistory('useSkill',evt=>{
-                                return evt.skill=='twchue_gain';
-                            }).length&&player.getHp()&&*/ player.countMark("old_twchue") >= player.getHp()
-						);
-					},
-					check(event, player) {
-						return player.hasValueTarget(new lib.element.VCard({ name: "sha" }));
-					},
-					prompt2(event, player) {
-						const num = player.getHp();
-						return "失去" + num + "个“勇”标记，视为使用一张造成的伤害+1且可以额外指定" + num + "个目标的【杀】";
-					},
-					async content(event, trigger, player) {
-						const num = player.getHp();
-						player.removeMark("old_twchue", num);
-						const card = new lib.element.VCard({ name: "sha" });
-						player
-							.when("useCard2", false)
-							.filter(evt => evt.getParent(2) == event)
-							.assign({
-								firstDo: true,
-							})
-							.step(async (event, trigger, player) => {
-								trigger.baseDamage++;
-								if (
-									!game.hasPlayer(target => {
-										return !trigger.targets.includes(target) && player.canUse(trigger.card, target);
-									})
-								)
-									return;
-								const result = await player
-									.chooseTarget("额外指定至多" + get.cnNumber(num) + "名目标", [1, num], (card, player, target) => {
-										const trigger = _status.event.getTrigger();
-										return !trigger.targets.includes(target) && player.canUse(trigger.card, target);
-									})
-									.set("ai", target => {
-										const player = get.event().player,
-											trigger = _status.event.getTrigger();
-										return get.effect(target, trigger.card, player, player);
-									})
-									.forResult();
-								if (result.bool) {
-									const targets = result.targets;
-									player.line(targets);
-									trigger.targets.addArray(targets);
-								}
-							})
-							.finish();
-						player.chooseUseTarget("视为使用造成的伤害+1且可以额外指定" + num + "个目标的【杀】", card, false, true);
-					},
-				},
 			},
 		},
 		//赵娥
@@ -29205,8 +29100,6 @@ const lmCharacter = {
 		old_xia_guanyu_prefix: "旧|侠",
 		old_twzhongyi: "忠义",
 		old_twzhongyi_info: `锁定技。①你使用【杀】无距离限制。②当你使用【杀】结算完毕后，你选择一项：⒈摸X张牌；⒉回复X点体力；⒊${get.poptip("rule_beishui")}：失去Y点体力，依次执行以上两项（X为此牌造成的伤害值，Y为你本局游戏此前选择此项的次数+1）。`,
-		old_twchue: "除恶",
-		old_twchue_info: "①当你使用【杀】指定唯一目标时，若场上存在可成为此【杀】目标的非目标角色，则你可以失去1点体力，为此牌额外指定Z个目标。②当你受到伤害或失去体力后，你摸一张牌并获得1个“勇”标记。③回合结束时，若你的“勇”标记数大于等于Z，则你可以失去Z个“勇”标记，视为使用一张伤害+1且可以额外指定Z个目标的【杀】。（Z为你的体力值）",
 		old_huan_zhugeliang: "旧幻诸葛亮",
 		old_huan_zhugeliang_prefix: "旧|幻",
 		old_twhunyou: "魂游",
