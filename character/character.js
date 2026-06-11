@@ -65,7 +65,7 @@ const characters = {
 		sex: "female",
 		group: "qun",
 		hp: 3,
-		skills: ["old_mbbojian", "old_mbjiwei"],
+		skills: ["old_mbbojian", "twmbjiwei"],
 		img: "image/character/mb_sp_zhenji.jpg",
 		dieAudios: ["mb_sp_zhenji"],
 	},
