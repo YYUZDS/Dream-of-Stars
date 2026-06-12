@@ -27640,10 +27640,14 @@ const lmCharacter = {
 					audio: "shelie",
 					trigger: { player: ["phaseJieshuBegin", "useCard1"] },
 					filter(event, player) {
-						if (player.hasSkill("old_twshelie_round") || player != _status.currentPhase) return false;
+						if (player.hasSkill("old_twshelie_round") || player != _status.currentPhase) {
+							return false;
+						}
 						var list = [];
 						player.getHistory("useCard", function (evt) {
-							if (lib.suit.includes(get.suit(evt.card)) && !list.includes(get.suit(evt.card))) list.push(get.suit(evt.card));
+							if (lib.suit.includes(get.suit(evt.card)) && !list.includes(get.suit(evt.card))) {
+								list.push(get.suit(evt.card));
+							}
 						});
 						if (list.length) {
 							player.addTempSkill("old_twshelie_count");
@@ -27660,11 +27664,7 @@ const lmCharacter = {
 					async content(event, trigger, player) {
 						player.addTempSkill("old_twshelie_round", "roundStart");
 						let result;
-						if (typeof player.storage.twshelie == "number") {
-							result = { index: player.storage.twshelie };
-						} else {
-							result = await player.chooseControl("摸牌阶段", "出牌阶段").set("prompt", "涉猎：请选择要执行的额外阶段").forResult();
-						}
+						result = await player.chooseControl("摸牌阶段", "出牌阶段").set("prompt", "涉猎：请选择要执行的额外阶段").forResult();
 						player.setStorage("old_twshelie", 1 - result.index);
 						const evt = trigger.getParent("phase", true, true);
 						if (result.index == 0) {
@@ -27693,63 +27693,54 @@ const lmCharacter = {
 				return target != player && target.countCards("h") > 0;
 			},
 			usable: 1,
-			content() {
-				"step 0";
-				event.num = target.getCards("h").reduce(function (arr, card) {
-					return (arr.add(get.suit(card, player)), arr);
+			async content(event, trigger, player) {
+				const { target } = event;
+				const cards = target.getCards("h");
+				const num = cards.reduce(function (arr, card) {
+					arr.add(get.suit(card, player));
+					return arr;
 				}, []).length;
-				"step 1";
-				var cards = target.getCards("h");
-				var next = player.chooseToMove_new("攻心");
-				next.set("list", [
-					[get.translation(target) + "的手牌", cards],
-					[["弃置"], ["置于牌堆顶"]],
-				]);
-				next.set("filterOk", moved => {
-					return moved[1].slice().concat(moved[2]).length == 1;
-				});
-				next.set("processAI", list => {
-					let card = list[0][1].slice().sort((a, b) => {
-						return get.value(b) - get.value(a);
-					})[0];
-					if (!card) return false;
-					return [list[0][1].slice().remove(card), [card], []];
-				});
-				"step 2";
+				const result = await player
+					.chooseToMove_new("攻心")
+					.set("list", [
+						[get.translation(target) + "的手牌", cards],
+						[["弃置"], ["置于牌堆顶"]],
+					])
+					.set("filterOk", moved => {
+						return moved[1].slice().concat(moved[2]).length == 1;
+					})
+					.set("processAI", list => {
+						let card = list[0][1].slice().sort((a, b) => {
+							return get.value(b) - get.value(a);
+						})[0];
+						if (!card) {
+							return false;
+						}
+						return [list[0][1].slice().remove(card), [card], []];
+					})
+					.forResult();
 				if (result.bool) {
-					if (result.moved[1].length) target.discard(result.moved[1]);
-					else {
-						player.showCards(result.moved[2], get.translation(player) + "对" + get.translation(target) + "发动了【攻心】");
-						target.lose(result.moved[2], ui.cardPile, "visible", "insert");
+					if (result.moved[1].length) {
+						await target.modedDiscard(result.moved[1]);
+					} else {
+						await player.showCards(result.moved[2], get.translation(player) + "对" + get.translation(target) + "发动了【攻心】");
+						await target.lose(result.moved[2], ui.cardPile, "visible", "insert");
 					}
-				}
-				"step 3";
-				if (
-					event.num ==
-					target.getCards("h").reduce(function (arr, card) {
-						return (arr.add(get.suit(card, player)), arr);
-					}, []).length
-				)
-					event.finish();
-				"step 4";
-				var num1 = 0;
-				for (var card of target.getCards("h")) {
-					if (get.color(card) == "red") num1++;
-				}
-				var num2 = target.countCards("h") - num1;
-				player
-					.chooseControl(["红色", "黑色", "cancel2"])
-					.set("prompt", "是否令" + get.translation(target) + "本回合无法使用一种颜色的牌？")
-					.set("ai", function () {
-						return num1 >= num2 ? "红色" : "黑色";
-					});
-				"step 5";
-				if (result.control != "cancel2") {
-					player.line(target);
-					target.addTempSkill("old_twgongxin2");
-					target.markAuto("old_twgongxin2", [result.control == "红色" ? "red" : "black"]);
-					game.log(target, "本回合无法使用" + result.control + "牌");
-					if (!event.isMine() && !event.isOnline()) game.delayx();
+					if (
+						num >
+						target.getCards("h").reduce(function (arr, card) {
+							arr.add(get.suit(card, target));
+							return arr;
+						}, []).length
+					) {
+						player.line(target);
+						target.addTempSkill("old_twgongxin2");
+						target.markAuto("old_twgongxin2", [result.control == "红色" ? "red" : "black"]);
+						game.log(target, "本回合无法使用" + result.control + "牌");
+						if (!event.isMine() && !event.isOnline()) {
+							game.delayx();
+						}
+					}
 				}
 			},
 			ai: {
@@ -29327,7 +29318,7 @@ const lmCharacter = {
 		old_tw_shen_lvmeng: "旧TW神吕蒙",
 		old_tw_shen_lvmeng_prefix: "旧|TW|神",
 		old_twshelie: "涉猎",
-		old_twshelie_info: "①摸牌阶段，你可放弃摸牌并亮出牌堆顶的五张牌，然后选择获得其中每种花色的牌各一张。②每轮限一次。结束阶段，若你本回合使用的花色数不小于你的体力值，你执行一个额外的摸牌阶段或出牌阶段。",
+		old_twshelie_info: "①摸牌阶段，你可以改为亮出牌堆顶的五张牌，然后选择获得其中花色不同的牌。②每轮限一次。结束阶段，若你本回合使用的花色数不小于你的体力值，你执行一个额外的摸牌阶段或出牌阶段。",
 		old_twgongxin: "攻心",
 		old_twgongxin2: "攻心",
 		old_twgongxin_info: "出牌阶段限一次。你可以观看一名其他角色的手牌，然后你可以展示其中一张牌并选择一项：1.弃置此牌；2.将此牌置于牌堆顶。若该角色手牌中的花色数因此减少，你选择一种颜色，其于本回合不能使用或打出该颜色的牌。",
