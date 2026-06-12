@@ -20869,7 +20869,7 @@ const lmCharacter = {
 				let cards = get.cards(3);
 				await game.cardsGotoOrdering(cards);
 				const { bool, links } = await player
-					.chooseButton(["灵慧：是否使用其中的一张牌并随机获得其中一张剩余牌？", cards])
+					.chooseButton(["灵慧：是否使用其中的一张牌并获得剩余牌？", cards])
 					.set("filterButton", button => {
 						return get.player().hasUseTarget(button.link);
 					})
