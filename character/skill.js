@@ -20885,8 +20885,7 @@ const lmCharacter = {
 					await player.chooseUseTarget(true, card, false);
 					cards = cards.filterInD();
 					if (cards.length) {
-						await player.gain(cardx, "gain2");
-						cards.length = 0;
+						await player.gain(cards, "gain2");
 					}
 				}
 				if (cards.length) {
