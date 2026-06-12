@@ -20869,7 +20869,7 @@ const lmCharacter = {
 				let cards = get.cards(3);
 				await game.cardsGotoOrdering(cards);
 				const { bool, links } = await player
-					.chooseButton(["灵慧：是否使用其中的一张牌并获得剩余牌？", cards])
+					.chooseButton(["灵慧：是否使用其中的一张牌并随机获得其中一张剩余牌？", cards])
 					.set("filterButton", button => {
 						return get.player().hasUseTarget(button.link);
 					})
@@ -20881,12 +20881,18 @@ const lmCharacter = {
 					const card = links[0];
 					cards.remove(card);
 					player.$gain2(card, false);
-					await game.asyncDelayx();
+					await game.delayx();
 					await player.chooseUseTarget(true, card, false);
 					cards = cards.filterInD();
 					if (cards.length) {
-						await player.gain(cards, "gain2");
+						await player.gain(cardx, "gain2");
+						cards.length = 0;
 					}
+				}
+				if (cards.length) {
+					cards.reverse();
+					game.cardsGotoPile(cards.filterInD(), "insert");
+					game.log(player, "将", get.cnNumber(cards.length), "张牌置于了牌堆顶");
 				}
 			},
 		},
