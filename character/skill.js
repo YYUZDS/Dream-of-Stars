@@ -29300,7 +29300,7 @@ const lmCharacter = {
 		old_tw_jiangji: "旧TW蒋济",
 		old_tw_jiangji_prefix: "旧|TW",
 		old_twjilun: "机论",
-		old_twjilun_info: "当你受到伤害后，你可以摸X张牌（X为【急筹】已记录牌名的数量且X至少为1），或视为使用一张〖急筹①〗记录过且未被〖机论〗记录过的普通锦囊牌并记录此牌。",
+		old_twjilun_info: "当你受到伤害后，你可以摸X张牌（X为【急筹①】已记录牌名的数量且X至少为1），或视为使用一张〖急筹①〗记录过且未被〖机论〗记录过的普通锦囊牌并记录此牌。",
 		old_tw_zhangzhao: "旧张昭",
 		old_tw_zhangzhao_prefix: "旧",
 		old_twchungang: "纯刚",
