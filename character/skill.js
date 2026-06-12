@@ -26650,47 +26650,6 @@ const lmCharacter = {
 				backup: {},
 			},
 		},
-		old_twsidao: {
-			audio: "twsidao",
-			trigger: {
-				global: "phaseBefore",
-				player: ["enterGame", "phaseZhunbei"],
-			},
-			filter(event, player) {
-				if (event.name == "phaseZhunbei") {
-					const card = player.storage.old_twsidao;
-					return card?.isInPile() && player.hasUseTarget(card);
-				}
-				return (event.name != "phase" || game.phaseNumber == 0) && !player.storage.old_twsidao;
-			},
-			async cost(event, trigger, player) {
-				if (trigger.name == "phaseZhunbei") {
-					event.result = { bool: true };
-				} else {
-					const result = await player
-						.chooseButton(["请选择你的初始法宝", [["gx_lingbaoxianhu", "gx_taijifuchen", "gx_chongyingshenfu"], "vcard"]], true)
-						.set("ai", button => {
-							return button.link[2] == "gx_chongyingshenfu" ? 2 : 1;
-						})
-						.forResult();
-					event.result = {
-						bool: result?.bool,
-						cost_data: result?.links,
-					};
-				}
-			},
-			async content(event, trigger, player) {
-				if (trigger.name == "phaseZhunbei") {
-					await player.chooseUseTarget(player.storage.old_twsidao, "nopopup", true);
-				} else {
-					const name = event.cost_data[0][2];
-					const card = game.createCard2(name, "heart", 1);
-					game.broadcastAll(name => lib.inpile.add(name), name);
-					player.storage.old_twsidao = card;
-					await player.chooseUseTarget(card, "nopopup", true);
-				}
-			},
-		},
 		//TW起皇甫嵩
 		old_twjuxia: {
 			audio: "jsrgjuxia",
@@ -29328,8 +29287,6 @@ const lmCharacter = {
 		old_twdanfa_info: "当你使用或打出的牌结算结束后，若此牌花色与你拥有的「丹」均不相同，你可以将此牌置于你的武将牌上，称为「丹」，然后摸一张牌。",
 		old_twlingbao: "灵宝",
 		old_twlingbao_info: "出牌阶段，你可以弃置两张花色不同的「丹」并摸两张牌，然后根据其情况执行如下效果：均为红色，你令一名角色从牌堆中获得两张基本牌；均为黑色，你弃置一名角色至多两个不同区域的共计至多两张牌；颜色不同，你令一名角色摸两张牌，另一名角色弃一张牌。然后若你于本回合弃置过两张相同花色的「丹」，则此技能失效直到回合结束。",
-		old_twsidao: "司道",
-		old_twsidao_info: "游戏开始时，你选择一张“法宝”置入装备区。准备阶段，若你以此法选择的法宝在牌堆/弃牌堆中，则你使用之。",
 		old_jsrg_huangfusong: "旧TW起皇甫嵩",
 		old_jsrg_huangfusong_prefix: "旧|TW|起",
 		old_twjuxia: "居下",

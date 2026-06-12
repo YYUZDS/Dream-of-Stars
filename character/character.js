@@ -1474,7 +1474,7 @@ const characters = {
 		sex: "male",
 		group: "qun",
 		hp: 3,
-		skills: ["old_twdanfa", "old_twlingbao", "old_twsidao"],
+		skills: ["old_twdanfa", "old_twlingbao", "twsidao"],
 		img: "image/character/tw_gexuan.jpg",
 		dieAudios: ["tw_gexuan"],
 	},
