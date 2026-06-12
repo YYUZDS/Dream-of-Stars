@@ -27528,8 +27528,9 @@ const lmCharacter = {
 					str = get.translation(target);
 				const num = target.countMark("old_rexianyuan");
 				let choice;
-				if (!target.countCards("h")) choice = 1;
-				else
+				if (!target.countCards("h")) {
+					choice = 1;
+				} else {
 					choice = (
 						await player
 							.chooseControl()
@@ -27537,7 +27538,10 @@ const lmCharacter = {
 							.set("ai", () => (get.attitude(get.player(), get.event().getTrigger().player) > 0 ? 1 : 0))
 							.forResult()
 					).index;
-				if (typeof choice != "number") return;
+				}
+				if (typeof choice != "number") {
+					return;
+				}
 				if (choice == 0) {
 					const result = await player.choosePlayerCard(target, "h", "visible", [1, num], true, '###仙援###<div class="text center">将其中至多' + get.cnNumber(num) + "张牌置于牌堆顶（先选择的在上）</div>").forResult();
 					if (result.bool && result.cards?.length) {
@@ -27545,8 +27549,12 @@ const lmCharacter = {
 						target.$throw(cards.length, 1000);
 						await target.lose(cards, ui.cardPile, "insert");
 					}
-				} else await target.draw(num);
-				if (_status.currentPhase !== player) target.clearMark("old_rexianyuan");
+				} else {
+					await target.draw(num);
+				}
+				if (_status.currentPhase !== player) {
+					target.clearMark("old_rexianyuan");
+				}
 			},
 			limit: 4,
 			intro: { content: "mark" },
@@ -27566,8 +27574,9 @@ const lmCharacter = {
 						const target = event.target;
 						const gives = Array.from({ length: player.countMark("old_rexianyuan") }).map((_, i) => get.cnNumber(i + 1) + "枚");
 						let give;
-						if (gives.length == 1) give = 0;
-						else
+						if (gives.length == 1) {
+							give = 0;
+						} else {
 							give = (
 								await player
 									.chooseControl(gives)
@@ -27575,7 +27584,10 @@ const lmCharacter = {
 									.set("prompt", "仙援：将任意枚“仙援”标记分配给" + get.translation(target))
 									.forResult()
 							).index;
-						if (typeof give != "number") return;
+						}
+						if (typeof give != "number") {
+							return;
+						}
 						give++;
 						player.removeMark("old_rexianyuan", give);
 						target.addMark("old_rexianyuan", give);
