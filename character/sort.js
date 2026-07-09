@@ -90,6 +90,7 @@ const characterSorts = {
 		lmCharacter_sw: ["sw_guanyu", "sw_lvmeng", "sw_zhugeliang", "sw_zhouyu", "sw_simayi", "sw_zhaoyun", "sw_caocao", "sw_lvbu", "sw_liubei", "sw_luxun", "sw_zhangliao", "sw_ganning", "sw_caopi", "sw_zhenji", "sw_zhangjiao", "sw_diaochan", "sw_tw_guanyu", "sw_tw_lvmeng", "sw_wechat_zhugeliang", "lm_xurong"],
 		lmCharacter_diy: ["wangtaowangyue", "lm_old_caocao"],
 		lmCharacter_other: ["unlock_dongzhao", "unlock_tianchuan", "zhangjian", "lm_jikang"],
+		hfdiy_Character: ["hfdiy_caopi", "hfdiy_sb_caopi", "hfdiy_yujin", "hfdiy_zhonghui", "hfdiy_renwan", "hfdiy_zhangchunhua", "hfdiy_guanyu", "hfdiy_zhangfei", "hfdiy_guansuo", "hfdiy_xiahouba", "hfdiy_re_zuoci", "hfdiy_jushou", "hfdiy_jsrg_xushao", "hfdiy_wu_huangfusong", "hfdiy_shen_caopi", "hfdiy_shen_zhangliao", "hfdiy_shen_zhaoyun", "hfdiy_mb_shen_jiangwei", "hfdiy_mb_shen_machao", "hfdiy_shen_sunquan"],
 	},
 };
 export default characterSorts;

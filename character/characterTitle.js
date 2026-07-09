@@ -231,5 +231,32 @@ const characterTitles = {
 	lm_duangui: "逐书交困",
 	lm_guosheng: "毋同岁凤",
 	lm_gaowang: "龙凤交欢",
+	//灰风-DIY
+	hfdiy_caopi: "魏文帝",
+	hfdiy_sb_caopi: "霸业的继承者",
+	hfdiy_zhonghui: "谋谟之勋",
+	hfdiy_yujin: "威严毅重",
+	
+	hfdiy_renwan: "孤贞不徙",
+	hfdiy_zhangchunhua: "翦草除根",
+
+	hfdiy_zhangfei: "当阳怒吼",
+	hfdiy_guanyu: "关圣帝君",
+	hfdiy_guansuo: "万花簇威",
+	hfdiy_xiahouba: "棘途壮志",
+
+	hfdiy_re_zuoci: "万象归一",
+	hfdiy_jushou: "徐图渐营",
+	hfdiy_wu_huangfusong: "襄武翼汉",
+	hfdiy_jsrg_xushao: "识人读心",
+
+	hfdiy_shen_caopi: "诰天仰颂",
+	hfdiy_shen_zhangliao: "雁门之刑天",
+
+	hfdiy_mb_shen_jiangwei: "万民承霖",
+	hfdiy_shen_zhaoyun: "神威如龙",
+	hfdiy_mb_shen_machao: "势震九天",
+
+	hfdiy_shen_sunquan: "东吴大帝",
 };
 export default characterTitles;
