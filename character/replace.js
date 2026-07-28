@@ -1,6 +1,6 @@
 import { lib, game, ui, get, ai, _status } from "../../../noname.js";
 const characterReplaces = {
-	//武将切换
+	//武将切换，大致按照OL，新杀，手杀，外服，线下，DIY，怀旧的顺序排列。（同服按标，界，谋，sp）
 	yj_jushou: ["hfdiy_jushou", "yj_jushou", "ol_sb_jushou", "re_jushou", "dc_sb_jushou", "xin_jushou", "std_jushou"],
 	zhuzhi: ["old_mb_zhuzhi", "zhuzhi", "re_zhuzhi", "xin_zhuzhi", "tw_zhuzhi", "old_zhuzhi"],
 	guozhao: ["old_mb_guozhao", "ol_guozhao", "guozhao", "xin_guozhao", "jsrg_guozhao", "std_guozhao", "pe_guozhao"],
