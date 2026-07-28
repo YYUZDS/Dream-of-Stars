@@ -6,7 +6,6 @@ const characterTitles = {
 	old_mb_shen_jiangwei: "烟雨济世",
 	oldx_mb_shen_jiangwei: "烟雨济世",
 	old_new_simayi: "权控三势",
-	old_mb_jushou: "监军谋国",
 	old_mb_zhuzhi: "功崇信重",
 	old_mb_sp_zhenji: "明珠锦玉",
 	old_fuqian: "危汉绝勇",
@@ -133,6 +132,7 @@ const characterTitles = {
 	old_wu_zhugeliang: "忠武良弼",
 	old_wu_guanyu: "义武千秋",
 	old_wu_huangfusong: "襄武翼汉",
+	old_wu_lukang: "桢武熙朝",
 	old_dc_shen_huatuo: "灵魂的医者",
 	old_xunyuxunyou: "谋定天下",
 	old_zhugejing: "武侯遗秀",
@@ -236,7 +236,7 @@ const characterTitles = {
 	hfdiy_sb_caopi: "霸业的继承者",
 	hfdiy_zhonghui: "谋谟之勋",
 	hfdiy_yujin: "威严毅重",
-	
+
 	hfdiy_renwan: "孤贞不徙",
 	hfdiy_zhangchunhua: "翦草除根",
 

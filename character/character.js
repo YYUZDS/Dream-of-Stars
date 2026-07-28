@@ -45,14 +45,6 @@ const characters = {
 		img: "image/character/mb_shen_jiangwei.jpg",
 		groupInGuozhan: "shu",
 	},
-	old_mb_jushou: {
-		sex: "male",
-		group: "qun",
-		hp: 3,
-		skills: ["old_xinjianying", "xinshibei"],
-		img: "image/character/xin_jushou.jpg",
-		dieAudios: ["xin_jushou"],
-	},
 	old_mb_zhuzhi: {
 		sex: "male",
 		group: "wu",
@@ -1105,6 +1097,15 @@ const characters = {
 		dieAudios: ["wu_huangfusong"],
 		names: "皇甫|嵩",
 	},
+	old_wu_lukang: {
+		sex: "male",
+		group: "wu",
+		hp: 4,
+		skills: ["old_dcshenduan", "old_dckegou", "dcdixian"],
+		img: "image/character/wu_lukang.jpg",
+		dieAudios: ["wu_lukang"],
+		clans: ["吴郡陆氏"],
+	},
 	old_dc_shen_huatuo: {
 		sex: "male",
 		group: "shen",
@@ -1996,7 +1997,7 @@ const characters = {
 		img: "image/character/ol_yujin.jpg",
 		dieAudios: ["ol_yujin"],
 	},
-	
+
 	hfdiy_renwan: {
 		sex: "female",
 		group: "wei",
@@ -2047,6 +2048,14 @@ const characters = {
 		img: "image/character/dc_xiahouba.jpg",
 		dieAudios: ["xiahouba"],
 		tempname: ["xiahouba"],
+	},
+	hfdiy_chenshou: {
+		sex: "male",
+		group: "shu",
+		hp: 3,
+		skills: ["hf_hschenzhi", "hf_hsdianmo", "hszaibi"],
+		img: "image/character/chenshou.jpg",
+		dieAudios: ["chenshou"],
 	},
 
 	hfdiy_re_zuoci: {
