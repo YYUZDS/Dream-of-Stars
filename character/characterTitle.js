@@ -38,9 +38,7 @@ const characterTitles = {
 	old_sb_daqiao: "清萧清丽",
 	old_sb_sunce: "江东的小霸王",
 	old_sb_sp_zhugeliang: "忠武侯",
-	old_sb_zhugeliang: "忠武侯",
 	oldx_sb_sp_zhugeliang: "忠武侯",
-	oldx_sb_zhugeliang: "忠武侯",
 	old_sb_menghuo: "何惧生死",
 	old_sb_zhurong: "野性的女王",
 	old_sb_guanyu: "关圣帝君",
@@ -81,7 +79,7 @@ const characterTitles = {
 	//hefei_zhangliao: "",
 	//OL
 	old_shen_caopi: "诰天仰颂",
-	oldx_clan_xuncai: "怀刃自誓",
+	old_clan_xuncai: "怀刃自誓",
 	old_clan_zhonghui: "百巧惎",
 	old_clan_hanrong: "虎口扳渡",
 	old_clan_hanshao: "分投急所",
@@ -151,7 +149,7 @@ const characterTitles = {
 	old_dc_sb_dengai: "奇锋厄川",
 	old_renwan: "孤贞不徙",
 	old_lukai: "节概梗梗",
-	oldx_zhangqiying: "禳祷西东",
+	old_zhangqiying: "禳祷西东",
 	old_v_machao: "雄烈盖世",
 	old_wufu: "忠虹贯日",
 	old_dc_sb_hulie: "暗舆平叛",
@@ -160,7 +158,7 @@ const characterTitles = {
 	old_v_sunce: "勇冠三江势",
 	old_dc_shen_sunquan: "瀚海碧君",
 	old_hansong: "楚国之望",
-	old_liuyijun: "恶嫉蔑死",
+	old_liufuren: "恶嫉蔑死",
 	old_dc_sb_xuyou: "智士濡足",
 	old_dc_weifeng: "趁浪逐波",
 	old_dc_sb_zhuran: "孤城镇岳",
@@ -168,7 +166,7 @@ const characterTitles = {
 	//海外
 	old_tw_huojun: "葭萌铁狮",
 	old_tw_guohuai: "屡破羌胡",
-	oldx_quancong: "拥立鲁王",
+	old_quancong: "拥立鲁王",
 	old_tw_baoxin: "坚朴的忠相",
 	old_tw_zhangmancheng: "南阳渠帅",
 	old_tw_guanqiujian: "威震四夷",
@@ -218,7 +216,6 @@ const characterTitles = {
 	//其他
 	unlock_dongzhao: "筹定魏勋",
 	unlock_tianchuan: "潜行之狐",
-	lm_jikang: "峻峰孤松",
 	//十常侍
 	lm_shichangshi: "祸乱纲常",
 	lm_zhangrang: "玉翎琢雉",
@@ -236,6 +233,7 @@ const characterTitles = {
 	hfdiy_sb_caopi: "霸业的继承者",
 	hfdiy_zhonghui: "谋谟之勋",
 	hfdiy_yujin: "威严毅重",
+	hfdiy_sb_guojia: "翼谋奇佐",
 
 	hfdiy_renwan: "孤贞不徙",
 	hfdiy_zhangchunhua: "翦草除根",
