@@ -262,18 +262,7 @@ const characterTitles = {
 	//lm-其他
 	unlock_dongzhao: "筹定魏勋",
 	unlock_tianchuan: "潜行之狐",
-	//十常侍
-	lm_shichangshi: "祸乱纲常",
-	lm_zhangrang: "玉翎琢雉",
-	lm_zhaozhong: "奉天司鸣",
-	lm_sunzhang: "半身执礼",
-	lm_bilan: "竭荒净尘",
-	lm_xiayun: "截谋囚鸟",
-	lm_hankui: "嘲嬉弄权",
-	lm_lisong: "令指天元",
-	lm_duangui: "逐书交困",
-	lm_guosheng: "毋同岁凤",
-	lm_gaowang: "龙凤交欢",
+
 	//灰风-DIY
 	hfdiy_caopi: "魏文帝",
 	hfdiy_sb_caopi: "霸业的继承者",
@@ -288,6 +277,7 @@ const characterTitles = {
 	hfdiy_guanyu: "关圣帝君",
 	hfdiy_guansuo: "万花簇威",
 	hfdiy_xiahouba: "棘途壮志",
+	hfdiy_chenshou: "史笔直书", 
 
 	hfdiy_re_zuoci: "万象归一",
 	hfdiy_jushou: "徐图渐营",
