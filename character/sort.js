@@ -8,7 +8,7 @@ const characterSorts = {
 		//门阀士族
 		clan_old: ["old_clan_xuncai", "old_clan_xunyu", "old_clan_xunshi", "old_clan_xunshuang", "old_clan_hanrong", "old_clan_hanshao", "old_clan_wangmingshan", "old_clan_zhonghui", "old_clan_yangxiu"],
 		//璀璨星河
-		sp_old: ["old_zhangqiying", "old_ol_yangfeng", "old_kongshu", "old_ol_xuelingyun", "old_ol_nanhualaoxian", "old_ol_qianzhao", "old_ruiji", "old_zhugejin", "old_sp_sunce", "old_ol_pengyang", "old_ol_feiyi", "old_ol_hujinding", "old_ol_luyusheng", "old_wangyan", "old_dengzhong", "old_zhanghua", "old_tengfanglan"],
+		sp_old: ["old_zhangqiying", "old_ol_peixiu", "old_ol_yangfeng", "old_kongshu", "old_ol_xuelingyun", "old_ol_nanhualaoxian", "old_ol_qianzhao", "old_ruiji", "old_zhugejin", "old_sp_sunce", "old_ol_pengyang", "old_ol_feiyi", "old_ol_hujinding", "old_ol_luyusheng", "old_wangyan", "old_dengzhong", "old_zhanghua", "old_tengfanglan"],
 
 		//新杀武将
 		//界限突破
@@ -49,7 +49,7 @@ const characterSorts = {
 		//lm-其他
 		lmCharacter_other: ["unlock_dongzhao", "unlock_tianchuan"],
 		//hf-diy
-		hfdiy_Character: ["hfdiy_caopi", "hfdiy_sb_caopi", "hfdiy_yujin", "hfdiy_sb_guojia", "hfdiy_zhonghui", "hfdiy_renwan", "hfdiy_zhangchunhua", "hfdiy_guanyu", "hfdiy_zhangfei", "hfdiy_guansuo", "hfdiy_xiahouba", "hfdiy_chenshou", "hfdiy_re_zuoci", "hfdiy_jushou", "hfdiy_jsrg_xushao", "hfdiy_wu_huangfusong", "hfdiy_shen_caopi", "hfdiy_shen_zhangliao", "hfdiy_shen_zhaoyun", "hfdiy_mb_shen_jiangwei", "hfdiy_mb_shen_machao", "hfdiy_shen_sunquan"],
+		hfdiy_Character: ["hfdiy_caopi", "hfdiy_sb_caopi", "hfdiy_yujin", "hfdiy_sb_guojia", "hfdiy_zhonghui", "hfdiy_renwan", "hfdiy_zhangchunhua", "hfdiy_guanyu", "hfdiy_zhangfei", "hfdiy_guansuo", "hfdiy_xiahouba", "hfdiy_chenshou", "hfdiy_re_zuoci", "hfdiy_jushou", "hfdiy_jsrg_xushao", "hfdiy_wu_huangfusong", "hfdiy_shen_caopi", "hfdiy_shen_zhangliao", "hfdiy_shen_zhaoyun", "hfdiy_mb_shen_jiangwei", "hfdiy_mb_shen_machao", "hfdiy_shen_guanyu", "hfdiy_shen_sunquan"],
 	},
 };
 export default characterSorts;

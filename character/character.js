@@ -210,6 +210,14 @@ const characters = {
 		img: "image/character/zhangqiying.jpg",
 		dieAudios: ["zhangqiying"],
 	},
+	old_ol_peixiu: {
+		sex: "male",
+		group: "qun",
+		hp: 3,
+		skills: ["oljinlan", "olmaozhu"],
+		img: "image/character/ol_peixiu.jpg",
+		dieAudios: ["ol_peixiu"],
+	},
 	old_ol_yangfeng: {
 		sex: "male",
 		group: "qun",
@@ -2036,7 +2044,7 @@ const characters = {
 	hfdiy_guanyu: {
 		sex: "male",
 		group: "shu",
-		hp: 4,
+		hp: 5,
 		skills: ["hf_wusheng", "pszhonghun", "new_yijue", "hf_dcdanji"],
 		img: "image/character/ps_guanyu.jpg",
 		dieAudios: ["ps_guanyu"],
@@ -2061,7 +2069,7 @@ const characters = {
 	hfdiy_xiahouba: {
 		sex: "male",
 		group: "shu",
-		hp: 4,
+		hp: 5,
 		skills: ["hf_baobian"],
 		img: "image/character/dc_xiahouba.jpg",
 		dieAudios: ["xiahouba"],
@@ -2105,7 +2113,7 @@ const characters = {
 	hfdiy_jsrg_xushao: {
 		sex: "male",
 		group: "qun",
-		hp: 3,
+		hp: 4,
 		skills: ["hf_sbyingmen", "hf_sbpingjian"],
 		img: "image/character/jsrg_xushao.jpg",
 	},
@@ -2156,6 +2164,15 @@ const characters = {
 		skills: ["hf_yuli", "hf_tingwei", "hf_jimie"],
 		img: "image/character/mb_shen_machao.jpg",
 		dieAudios: ["mb_shen_machao"],
+		groupInGuozhan: "shu",
+	},
+	hfdiy_shen_guanyu: {
+		sex: "male",
+		group: "shen",
+		hp: 5,
+		skills: ["hf_wushen", "twwuhun"],
+		img: "image/character/hl_shen_guanyu.jpg",
+		dieAudios: ["shen_guanyu"],
 		groupInGuozhan: "shu",
 	},
 
