@@ -189,7 +189,7 @@ const characterReplaces = {
 	shen_guanyu: ["hfdiy_shen_guanyu", "sw_guanyu", "sw_tw_guanyu"],
 	shen_zhugeliang: ["sw_zhugeliang", "sw_wechat_zhugeliang"],
 	shen_zhaoyun: ["hfdiy_shen_zhaoyun", "sw_zhaoyun"],
-	shen_liubei: ["sw_liubei"],
+	shen_liubei: ["hfdiy_shen_liubei", "sw_liubei"],
 	shen_machao: ["hfdiy_mb_shen_machao"],
 
 	shen_sunquan: ["hfdiy_shen_sunquan", "old_dc_shen_sunquan"],

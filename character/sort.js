@@ -49,7 +49,7 @@ const characterSorts = {
 		//lm-其他
 		lmCharacter_other: ["unlock_dongzhao", "unlock_tianchuan"],
 		//hf-diy
-		hfdiy_Character: ["hfdiy_caopi", "hfdiy_sb_caopi", "hfdiy_yujin", "hfdiy_sb_guojia", "hfdiy_zhonghui", "hfdiy_renwan", "hfdiy_zhangchunhua", "hfdiy_guanyu", "hfdiy_zhangfei", "hfdiy_guansuo", "hfdiy_xiahouba", "hfdiy_chenshou", "hfdiy_re_zuoci", "hfdiy_jushou", "hfdiy_jsrg_xushao", "hfdiy_wu_huangfusong", "hfdiy_shen_caopi", "hfdiy_shen_zhangliao", "hfdiy_shen_zhaoyun", "hfdiy_mb_shen_jiangwei", "hfdiy_mb_shen_machao", "hfdiy_shen_guanyu", "hfdiy_shen_sunquan"],
+		hfdiy_Character: ["hfdiy_caopi", "hfdiy_sb_caopi", "hfdiy_yujin", "hfdiy_sb_guojia", "hfdiy_zhonghui", "hfdiy_renwan", "hfdiy_zhangchunhua", "hfdiy_guanyu", "hfdiy_zhangfei", "hfdiy_guansuo", "hfdiy_xiahouba", "hfdiy_chenshou", "hfdiy_re_zuoci", "hfdiy_jushou", "hfdiy_jsrg_xushao", "hfdiy_wu_huangfusong", "hfdiy_shen_caopi", "hfdiy_shen_zhangliao", "hfdiy_shen_liubei", "hfdiy_shen_guanyu", "hfdiy_shen_zhaoyun", "hfdiy_mb_shen_jiangwei", "hfdiy_mb_shen_machao", "hfdiy_shen_sunquan"],
 	},
 };
 export default characterSorts;

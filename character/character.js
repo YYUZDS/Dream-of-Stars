@@ -2203,12 +2203,5 @@ const characters = {
 		img: "image/character/ol_yujin.jpg",
 		dieAudios: ["ol_yujin"],
 	},
-	pot_xiaoqiao: {
-		sex: "female",
-		group: "wu",
-		hp: 3,
-		skills: ["potheyun", "potyinhui"],
-		names: "桥|null",
-	},
 };
 export default characters;
