@@ -2139,6 +2139,24 @@ const characters = {
 		tempname: ["shen_zhangliao"],
 	},
 
+	hfdiy_shen_liubei: {
+		sex: "male",
+		group: "shen",
+		hp: 6,
+		skills: ["hf_longnu", "dcjieying", "tytaoyuan"],
+		img: "image/character/ty_shen_liubei.jpg",
+		dieAudios: ["shen_liubei"],
+		groupInGuozhan: "shu",
+	},
+	hfdiy_shen_guanyu: {
+		sex: "male",
+		group: "shen",
+		hp: 5,
+		skills: ["hf_wushen", "twwuhun"],
+		img: "image/character/hl_shen_guanyu.jpg",
+		dieAudios: ["shen_guanyu"],
+		groupInGuozhan: "shu",
+	},
 	hfdiy_shen_zhaoyun: {
 		sex: "male",
 		group: "shen",
@@ -2166,15 +2184,6 @@ const characters = {
 		dieAudios: ["mb_shen_machao"],
 		groupInGuozhan: "shu",
 	},
-	hfdiy_shen_guanyu: {
-		sex: "male",
-		group: "shen",
-		hp: 5,
-		skills: ["hf_wushen", "twwuhun"],
-		img: "image/character/hl_shen_guanyu.jpg",
-		dieAudios: ["shen_guanyu"],
-		groupInGuozhan: "shu",
-	},
 
 	hfdiy_shen_sunquan: {
 		sex: "male",
@@ -2193,6 +2202,13 @@ const characters = {
 		skills: ["hf_duorui"],
 		img: "image/character/ol_yujin.jpg",
 		dieAudios: ["ol_yujin"],
+	},
+	pot_xiaoqiao: {
+		sex: "female",
+		group: "wu",
+		hp: 3,
+		skills: ["potheyun", "potyinhui"],
+		names: "桥|null",
 	},
 };
 export default characters;

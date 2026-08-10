@@ -58,5 +58,19 @@ const dynamicTranslates = {
 		}
 		return "这衣服，岂是你配穿的？";
 	},
+	//hf
+	hf_longnu(player) {
+		const bool = player.storage.old_dcsbjunmou;
+		let yang = "失去1点体力并摸已损失体力值张牌，然后本阶段内你可以将红色手牌当作无距离限制的火杀使用或打出",
+			yin = "减少1点体力上限并摸体力值张牌，然后本阶段内你可以将锦囊牌当作无次数限制雷杀使用或打出";
+		if (bool) {
+			yin = `<span class="bluetext">${yin}</span>`;
+		} else {
+			yang = `<span class="firetext">${yang}</span>`;
+		}
+		const start = `转换技，游戏开始时，你可以改变此转换技的状态。出牌阶段开始时，你可以`,
+			end = "。";
+		return `${start}阳：${yang}；阴：${yin}${end}`;
+	},
 };
 export default dynamicTranslates;
