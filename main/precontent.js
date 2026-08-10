@@ -1140,7 +1140,9 @@ export async function precontent(config, pack) {
 			firstDo: true,
 			direct: true,
 			filter(event, player) {
-				if ((get.mode() != "doudizhu" && get.mode() != "versus" && get.mode() != "single") || get.config("versus_mode") === "four") return false;
+				if ((get.mode() != "doudizhu" && get.mode() != "versus" && get.mode() != "single") || get.config("versus_mode") === "four") {
+					return false;
+				}
 				if (lib.character[player.name1][1] == "shen" || lib.character[player.name1][1] == "devil") return true;
 				// for (var i of lib.character[player.name1][4]) {
 				//     return i.includes("doublegroup");
@@ -1157,7 +1159,7 @@ export async function precontent(config, pack) {
 					list.remove("devil");
 					player.chooseControl(list).set("prompt", "请选择武将的势力");
 				}
-				("step 1");
+				"step 1";
 				if (result.control) {
 					player.changeGroup(result.control);
 				}
@@ -1356,6 +1358,11 @@ export async function precontent(config, pack) {
 		locked: true,
 	};
 	//前缀Prefix添加
+	lib.namePrefix.set("风", {
+		color: "#0d33ff",
+		nature: "Celadon",
+		showName: "风",
+	});
 	lib.namePrefix.set("凌", {
 		color: "#8470FF",
 		nature: "LightSlateBlue",
@@ -1395,11 +1402,6 @@ export async function precontent(config, pack) {
 		color: "#a4a4a4",
 		nature: "black",
 		showName: "废",
-	});
-	lib.namePrefix.set("风", {
-		color: "#0d33ff",
-		nature: "Celadon",
-		showName: "风",
 	});
 	lib.namePrefix.set("ddd", {
 		getSpan: () => {
@@ -1469,6 +1471,11 @@ export async function precontent(config, pack) {
 		_status.postReconnect.lm_pack_namePrefix = [
 			function () {
 				//Prefix添加
+				lib.namePrefix.set("风", {
+					color: "#0d33ff",
+					nature: "Celadon",
+					showName: "风",
+				});
 				lib.namePrefix.set("凌", {
 					color: "#8470FF",
 					nature: "LightSlateBlue",
@@ -1509,11 +1516,6 @@ export async function precontent(config, pack) {
 					nature: "black",
 					showName: "废",
 				});
-				lib.namePrefix.set("风", {
-					color: "#0d33ff",
-					nature: "Celadon",
-					showName: "风",
-				});
 			},
 			[],
 		];
@@ -1547,7 +1549,7 @@ export async function precontent(config, pack) {
 			document.querySelector("#server_status").innerHTML = "等待中";
 		}
 		game.pause();
-		("step 1");
+		"step 1";
 		_status.waitingForPlayer = false;
 		lib.configOL.gameStarted = true;
 		if (window.isNonameServer) {
