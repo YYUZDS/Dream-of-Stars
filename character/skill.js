@@ -17577,132 +17577,102 @@ const lmCharacter = {
 		},
 
 		//张郃
-		old_sbqiaobian: {
-			audio: "sbqiaobian",
-			trigger: {
-				player: ["phaseJudgeBefore", "phaseDrawBefore", "phaseUseBefore"],
+		old_sbliaoshi: {
+			audio: "sbliaoshi",
+			enable: ["chooseToUse", "chooseToRespond"],
+			hiddenCard(player, name) {
+				// 任意基本牌（杀/闪/桃/酒，以及其他基本牌）
+				return get.type(name) === "basic" && lib.inpile.includes(name) && player.hasCards("he", card => card.hasGaintag("sbqiaobian")) && !player.getStat().skill.old_sbliaoshi;
+			},
+			getList(event, player) {
+				return get.inpileVCardList(info => {
+					// 任意基本牌（【杀】的各属性变体由 inpileVCardList 自动展开）
+					if (get.type(info[2]) !== "basic") {
+						return false;
+					}
+					const card = get.autoViewAs({ name: info[2], nature: info[3] }, "unsure");
+					return event.filterCard(card, player, event);
+				});
 			},
 			usable: 1,
-			async cost(event, trigger, player) {
-				const skillName = event.name.slice(0, -5);
-				switch (trigger.name) {
-					case "phaseJudge":
-						event.result = await player
-							.chooseTarget(get.prompt(skillName), "失去1点体力并跳过判定阶段，将判定区里的牌移动给一名其他角色", lib.filter.notMe)
-							.set("ai", target => {
-								const player = get.player();
-								if (
-									player.hp +
-										player.countCards("h", card => {
-											var mod2 = game.checkMod(card, player, "unchanged", "cardEnabled2", player);
-											if (mod2 != "unchanged") {
-												return mod2;
-											}
-											var mod = game.checkMod(card, player, player, "unchanged", "cardSavable", player);
-											if (mod != "unchanged") {
-												return mod;
-											}
-											var savable = get.info(card).savable;
-											if (typeof savable == "function") {
-												savable = savable(card, player, player);
-											}
-											return savable;
-										}) <=
-									1
-								) {
-									return 0;
-								}
-								var eff = 0;
-								for (var card of player.getCards("j")) {
-									var cardx;
-									if (card.viewAs) {
-										cardx = get.autoViewAs({ name: card.viewAs }, [card]);
-									} else {
-										cardx = card;
-									}
-									if (target.canAddJudge(cardx)) {
-										eff += get.effect(target, cardx, player, player);
-									} else {
-										eff -= get.attitude(player, target) / 114514;
-									}
-								}
-								return eff;
-							})
-							.setHiddenSkill(skillName)
-							.forResult();
-						break;
-					case "phaseDraw":
-						event.result = await player.chooseBool(get.prompt(skillName), "跳过摸牌阶段，于下个准备阶段摸五张牌并回复1点体力").setHiddenSkill(skillName).forResult();
-						break;
-					case "phaseUse": {
-						let next;
-						const num = player.countCards("h") - 6;
-						if (num <= 0) {
-							next = player.chooseBool(get.prompt(skillName), "跳过出牌阶段和弃牌阶段，然后移动场上的一张牌").set("choice", player.canMoveCard(true)).setHiddenSkill(skillName);
-						} else {
-							next = player
-								.chooseToDiscard(get.prompt(skillName), num, `弃置${get.cnNumber(num)}张手牌并跳过出牌阶段和弃牌阶段，然后移动场上的一张牌`, "allowChooseAll")
-								.set("ai", card => {
-									const player = get.player();
-									if (!player.canMoveCard(true) || player.countCards("hs", card => player.hasValueTarget(card)) >= 9) {
-										return 0;
-									}
-									return 7 - get.value(card);
-								})
-								.setHiddenSkill(skillName);
-						}
-						event.result = await next.forResult();
-						break;
-					}
-				}
+			filter(event, player) {
+				return get.info("old_sbliaoshi").getList(event, player).length && player.hasCards("he", card => card.hasGaintag("sbqiaobian"));
 			},
-			async content(event, trigger, player) {
-				trigger.cancel();
-				switch (trigger.name) {
-					case "phaseJudge": {
-						const {
-							targets: [target],
-						} = event;
-						await player.loseHp();
-						game.log(player, "跳过了判定阶段");
-						for (const card of player.getCards("j")) {
-							if (target.canAddJudge(card)) {
-								player.$give(card, target, false);
-								if (card.viewAs) {
-									await target.addJudge({ name: card.viewAs }, [card]);
-								} else {
-									await target.addJudge(card);
-								}
-							} else {
-								await player.discard(card);
-							}
-						}
-						break;
+			chooseButton: {
+				dialog(event, player) {
+					const list = get.info("old_sbliaoshi").getList(event, player);
+					const dialog = ui.create.dialog("料势", [list, "vcard"], "hidden");
+					dialog.direct = true;
+					return dialog;
+				},
+				check(button) {
+					if (_status.event.getParent().type !== "phase") {
+						return 1;
 					}
-					case "phaseDraw":
-						game.log(player, "跳过了摸牌阶段");
-						player.addSkill("old_sbqiaobian_draw");
-						break;
-					case "phaseUse":
-						player.skip("phaseDiscard");
-						game.log(player, "跳过了出牌阶段");
-						game.log(player, "跳过了弃牌阶段");
-						await player.moveCard();
-						break;
-				}
+					const player = get.player();
+					const name = button.link[2];
+					// 出牌阶段“使用”【闪】没有任何效果，不必为此消耗“巧变”牌
+					if (name === "shan") {
+						return 0;
+					}
+					// 【酒】：只有能配合【杀】或用于自救时才有价值
+					if (name === "jiu") {
+						const value = player.getUseValue({ name: "jiu" });
+						if (value <= 0) {
+							return 0;
+						}
+						if (player.countCards("h", "sha")) {
+							return value;
+						}
+					}
+					// 【桃】：回复收益较高，但毕竟要消耗“巧变”牌，按半数计
+					if (name === "tao") {
+						return player.getUseValue({ name: "tao" }) / 2;
+					}
+					return player.getUseValue({ name, nature: button.link[3] }) / 4;
+				},
+				backup(links, player) {
+					return {
+						audio: "sbliaoshi",
+						filterCard(card, player) {
+							return card.hasGaintag("sbqiaobian");
+						},
+						position: "he",
+						viewAs: {
+							name: links[0][2],
+							nature: links[0][3],
+						},
+						popname: true,
+					};
+				},
+				prompt(links, player) {
+					return `将一张“巧变”牌当作${get.translation(links[0][3]) || ""}【${get.translation(links[0][2])}】使用或打出`;
+				},
 			},
-			subSkill: {
-				draw: {
-					charlotte: true,
-					mark: true,
-					intro: { content: "准备阶段摸五张牌并回复1点体力" },
-					audio: "sbqiaobian",
-					trigger: { player: "phaseZhunbeiBegin" },
-					forced: true,
-					content() {
-						player.removeSkill(event.name);
-						player.draw(5);
-						player.recover();
+			ai: {
+				order: 6,
+				combo: "sbqiaobian",
+				respondShan: true,
+				respondSha: true,
+				respondTao: true,
+				save: true,
+				skillTagFilter(player) {
+					if (!player.hasCards("he", card => card.hasGaintag("sbqiaobian"))) {
+						return false;
+					}
+				},
+				/* tag 只对 get.tag（牌面标记）生效，hasSkillTag 读的是同级字段，
+			   所以“可救助/可救人”应由上面的 save、respondTao 表示
+			tag: {
+				recover: 1,
+				save: 1,
+			},*/
+				result: {
+					player(player) {
+						if (_status.event.dying) {
+							return get.attitude(player, _status.event.dying);
+						}
+						return 1;
 					},
 				},
 			},
@@ -28640,8 +28610,8 @@ const lmCharacter = {
 
 		old_sb_zhanghe: "旧谋张郃",
 		old_sb_zhanghe_prefix: "旧|谋",
-		old_sbqiaobian: "巧变",
-		old_sbqiaobian_info: "每回合限一次。①你可以失去1点体力并跳过判定阶段，将判定区的所有牌移动给一名其他角色（无法置入其判定区的牌改为弃置之）。②你可以跳过摸牌阶段，于下个准备阶段摸五张牌并回复1点体力。③你可以将手牌数弃置至六张（若手牌数少于六张则跳过之）并跳过出牌阶段和弃牌阶段，然后移动场上的一张牌。",
+		old_sbliaoshi: "料势",
+		old_sbliaoshi_info: `每回合限一次，你可以将一张“巧变”牌当任意基本牌使用或打出。`,
 
 		old_sb_guojia: "旧谋郭嘉",
 		old_sb_guojia_prefix: "旧|谋",

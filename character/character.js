@@ -1035,7 +1035,7 @@ const characters = {
 		sex: "male",
 		group: "wei",
 		hp: 4,
-		skills: ["old_sbqiaobian"],
+		skills: ["sbqiaobian", "old_sbliaoshi"],
 		img: "image/character/sb_zhanghe.jpg",
 		dieAudios: ["sb_zhanghe"],
 	},
