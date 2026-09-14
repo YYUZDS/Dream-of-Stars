@@ -5274,7 +5274,7 @@ const lmCharacter = {
 				if (player.countCards("h") != 1 || typeof get.number(player.getCards("h")[0], player) != "number") {
 					return false;
 				}
-				if (player.hasSkill("old_hezhong_0") && player.hasSkill("old_hezhong_1")) {
+				if (player.getStorage("old_hezhong_used").length > 1) {
 					return false;
 				}
 				let gain = 0,
@@ -5289,15 +5289,16 @@ const lmCharacter = {
 			},
 			prompt2(event, player) {
 				let str = "展示最后一张手牌并摸一张牌";
-				if (!player.hasSkill("old_hezhong_0") || !player.hasSkill("old_hezhong_0")) {
+				let list = player.getStorage("old_hezhong_used");
+				if (list.length < 2) {
 					str += "，然后令本回合使用点数";
-					if (!player.hasSkill("old_hezhong_0")) {
+					if (!list.includes("max")) {
 						str += "大于";
 					}
-					if (!player.hasSkill("old_hezhong_0") && !player.hasSkill("old_hezhong_0")) {
+					if (!list.length) {
 						str += "或";
 					}
-					if (!player.hasSkill("old_hezhong_1")) {
+					if (!list.includes("min")) {
 						str += "小于";
 					}
 					str += get.number(player.getCards("h")[0], player);
@@ -5306,21 +5307,21 @@ const lmCharacter = {
 				return str;
 			},
 			frequent: true,
-			content() {
-				"step 0";
-				player.showHandcards(get.translation(player) + "发动了【技能】");
+			async content(event, trigger, player) {
+				await player.showHandcards(get.translation(player) + "发动了【和衷】");
 				event.num = get.number(player.getCards("h")[0], player);
-				"step 1";
-				player.draw();
-				"step 2";
-				if (player.hasSkill("old_hezhong_0")) {
+				await player.draw();
+				let result;
+				if (player.getStorage("old_hezhong_used").includes("max")) {
 					event._result = { index: 1 };
-				} else if (player.hasSkill("old_hezhong_1")) {
+					result = event._result;
+				} else if (player.getStorage("old_hezhong_used").includes("min")) {
 					event._result = { index: 0 };
+					result = event._result;
 				} else {
-					player
+					result = await player
 						.chooseControl()
-						.set("choiceList", ["本回合使用点数大于" + num + "的普通锦囊牌额外结算一次", "本回合使用点数小于" + num + "的普通锦囊牌额外结算一次"])
+						.set("choiceList", ["本回合使用点数大于" + event.num + "的普通锦囊牌额外结算一次", "本回合使用点数小于" + event.num + "的普通锦囊牌额外结算一次"])
 						.set("ai", () => {
 							var player = _status.event.player;
 							var num = _status.event.num;
@@ -5334,14 +5335,20 @@ const lmCharacter = {
 							}
 							return 1;
 						})
-						.set("num", num);
+						.set("num", event.num)
+						.forResult();
 				}
-				"step 3";
-				var skill = "old_hezhong_" + result.index;
+				const skill = "old_hezhong_" + result.index;
 				player.addTempSkill(skill);
-				player.markAuto(skill, [num]);
+				player.addTempSkill("old_hezhong_used");
+				player.markAuto("old_hezhong_used", ["max", "min"][result.index]);
+				player.markAuto(skill, [event.num]);
 			},
 			subSkill: {
+				used: {
+					charlotte: true,
+					onremove: true,
+				},
 				0: {
 					charlotte: true,
 					onremove: true,
@@ -5352,7 +5359,7 @@ const lmCharacter = {
 								return str + get.strNumber(num);
 							}, "");
 						},
-						content: "本回合使用的点数大于$的普通锦囊牌额外结算一次",
+						content: "本回合使用点数大于$的普通锦囊牌额外结算一次",
 					},
 					audio: "hezhong",
 					trigger: { player: "useCard" },
@@ -5367,9 +5374,7 @@ const lmCharacter = {
 						return typeof num == "number" && player.getStorage("old_hezhong_0").some(numx => num > numx);
 					},
 					forced: true,
-					// usable: 1,
 					content() {
-						// player.unmarkSkill("old_hezhong_0");
 						trigger.effectCount++;
 						game.log(trigger.card, "额外结算一次");
 					},
@@ -5393,7 +5398,7 @@ const lmCharacter = {
 								return str + get.strNumber(num);
 							}, "");
 						},
-						content: "本回合使用的点数小于$的普通锦囊牌额外结算一次",
+						content: "本回合使用点数小于$的普通锦囊牌额外结算一次",
 					},
 					audio: "hezhong",
 					trigger: { player: "useCard" },
@@ -5408,9 +5413,7 @@ const lmCharacter = {
 						return typeof num == "number" && player.getStorage("old_hezhong_1").some(numx => num < numx);
 					},
 					forced: true,
-					// usable: 1,
 					content() {
-						// player.unmarkSkill("old_hezhong_1");
 						trigger.effectCount++;
 						game.log(trigger.card, "额外结算一次");
 					},
