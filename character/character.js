@@ -643,6 +643,14 @@ const characters = {
 		img: "image/character/dc_sb_dengai.jpg",
 		dieAudios: ["dc_sb_dengai"],
 	},
+	old_dc_sb_guanyu: {
+		sex: "male",
+		group: "shu",
+		hp: 4,
+		skills: ["old_dcsbguanwu", "old_dcsbweishi", "old_dcsbjuao"],
+		img: "image/character/dc_sb_guanyu.jpg",
+		dieAudios: ["dc_sb_guanyu"],
+	},
 	old_wu_huangfusong: {
 		sex: "male",
 		group: "qun",

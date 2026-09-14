@@ -89,6 +89,7 @@ const characterTitles = {
 	old_dc_sb_xuyou: "智士濡足",
 	old_dc_sb_zhuran: "孤城镇岳",
 	old_dc_sb_dengai: "奇锋厄川",
+	old_dc_sb_guanyu: "单刀赴会",
 	old_wu_zhugeliang: "忠武良弼",
 	old_wu_guanyu: "义武千秋",
 	old_wu_huangfusong: "襄武翼汉",

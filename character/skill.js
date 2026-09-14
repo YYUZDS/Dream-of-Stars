@@ -10262,6 +10262,346 @@ const lmCharacter = {
 			},
 		},
 
+		//新杀谋关羽
+		old_dcsbguanwu: {
+			audio: "dcsbguanwu",
+			forced: true,
+			init(player, skill) {
+				player.addSkill(skill + "_mark");
+			},
+			trigger: {
+				player: "phaseBegin",
+				source: "damageBegin1",
+			},
+			filter(event, player) {
+				if (event.name === "phase") {
+					return get.cardPile("qinglong", "field");
+				}
+				return player.hasMark("old_dcsbguanwu_effect") && event.card?.name === "sha";
+			},
+			async content(event, trigger, player) {
+				if (trigger.name === "phase") {
+					const card = get.cardPile("qinglong", "field");
+					if (card) {
+						await player.gain({ cards: [card], animate: "gain2" });
+					}
+				} else {
+					trigger.num += player.countMark("old_dcsbguanwu_effect");
+				}
+			},
+			subSkill: {
+				mark: {
+					charlotte: true,
+					silent: true,
+
+					trigger: { player: "useCard1" },
+					filter(event, player) {
+						// 改动：计数条件由“【杀】”改为“伤害牌”
+						return get.is.damageCard(event.card) && player.getRoundHistory("useCard", evt => get.is.damageCard(evt.card)).indexOf(event) % 2 == 1;
+					},
+					async content(event, trigger, player) {
+						player.addTempSkill("old_dcsbguanwu_effect", "roundStart");
+						player.addMark("old_dcsbguanwu_effect", 1, false);
+					},
+				},
+				effect: {
+					charlotte: true,
+					onremove: true,
+					intro: { content: "本轮使用【杀】造成伤害+#" },
+				},
+			},
+		},
+		old_dcsbweishi: {
+			audio: "dcsbweishi",
+			trigger: {
+				target: "useCardToTargeted",
+				global: "useCardAfter",
+			},
+			filter(event, player) {
+				if (player === event.player || player.getStorage("old_dcsbweishi_used").includes(event.name)) {
+					return false;
+				}
+				if (event.name == "useCard") {
+					return get.is.damageCard(event.card) && event.targets?.includes(player);
+				} else {
+					return !get.is.damageCard(event.card) && player.hasDiscardableCards(player, "h");
+				}
+			},
+			async cost(event, trigger, player) {
+				const target = trigger.player;
+				if (trigger.name === "useCard") {
+					event.result = await player
+						.chooseBool({
+							prompt: get.prompt(event.skill),
+							prompt2: `你可以摸两张伤害牌，然后你可以对${get.translation(target)}使用一张【杀】`,
+						})
+						.forResult();
+				} else {
+					const num = Math.ceil(player.countCards("h") / 2);
+					event.result = await player
+						.chooseToDiscard({
+							prompt: get.prompt(event.skill),
+							prompt2: `你可以弃置${get.cnNumber(num)}张手牌令${get.translation(trigger.card)}对你无效`,
+							filterCard: lib.filter.cardDiscardable,
+							selectCard: num,
+							position: "h",
+							chooseonly: true,
+							allowChooseAll: true,
+							ai(card) {
+								const { player, target, cardx } = get.event();
+								if (get.effect(player, cardx, target, player) < 0) {
+									return 8 - get.value(card);
+								}
+								return 0;
+							},
+						})
+						.set("target", target)
+						.set("cardx", trigger.card)
+						.forResult();
+				}
+			},
+			async content(event, trigger, player) {
+				player.addTempSkill(event.name + "_used");
+				player.markAuto(event.name + "_used", [trigger.name]);
+				if (trigger.name == "useCard") {
+					// 摸两张伤害牌（剑道同款写法：牌堆优先，弃牌堆兜底，摸牌动画）
+					const cards = [];
+					while (cards.length < 2) {
+						const card = get.cardPile(card => get.is.damageCard(card) && !cards.includes(card));
+						if (!card) {
+							break;
+						}
+						cards.push(card);
+					}
+					if (cards.length) {
+						await player.gain({ cards, animate: "draw" });
+					}
+					await player
+						.chooseToUse({
+							prompt: `威势：是否对${get.translation(trigger.player)}使用一张杀？`,
+							filterCard(card, player, event) {
+								if (get.name(card) != "sha") {
+									return false;
+								}
+								return lib.filter.filterCard(card, player);
+							},
+							filterTarget(card, player, target) {
+								const source = get.event().sourcex;
+								if (target != source && !ui.selected.targets.includes(source)) {
+									return false;
+								}
+								return lib.filter.targetEnabled(card, player, target);
+							},
+							ai1(card) {
+								return get.value(card);
+							},
+							ai2(target) {
+								const player = get.player();
+								return get.effect(target, { name: "sha" }, player, player);
+							},
+						})
+						.set("sourcex", trigger.player)
+						.set("targetRequired", true)
+						.set("complexTarget", true)
+						.set("complexSelect", true)
+						.set("addCount", false);
+				} else {
+					const { cards } = event;
+					await player.modedDiscard({ cards });
+					trigger.getParent().excluded.add(player);
+					game.log(trigger.card, "对", player, "无效");
+				}
+			},
+			subSkill: {
+				used: { charlotte: true, onremove: true },
+			},
+		},
+		old_dcsbjuao: {
+			audio: "dcsbjuao",
+			enable: "phaseUse",
+			usable: 1,
+			mod: {
+				cardUsable(card, player) {
+					if (card?.storage?.old_dcsbjuao) {
+						return Infinity;
+					}
+				},
+			},
+			locked: false,
+			filter(event, player) {
+				const targets = game.filterPlayer(current => player.inRange(current) && player !== current);
+				return (
+					get.inpileVCardList(info => {
+						if (info[2] != "sha" && info[0] != "trick") {
+							return false;
+						}
+						const card = get.autoViewAs(
+							{
+								name: info[2],
+								nature: info[3],
+								isCard: true,
+								storage: { old_dcsbjuao: true },
+							},
+							"unsure"
+						);
+						return targets.some(target => player.canUse(card, target, false, false));
+					}).length > 0
+				);
+			},
+			chooseButton: {
+				dialog(event, player) {
+					const targets = game.filterPlayer(current => player.inRange(current) && player !== current);
+					const list = get.inpileVCardList(info => {
+						if (info[2] != "sha" && info[0] != "trick") {
+							return false;
+						}
+						const card = get.autoViewAs(
+							{
+								name: info[2],
+								nature: info[3],
+								isCard: true,
+								storage: { old_dcsbjuao: true },
+							},
+							"unsure"
+						);
+						return targets.some(target => player.canUse(card, target, false, false));
+					});
+					return ui.create.dialog("倨傲", [list, "vcard"]);
+				},
+				check(button) {
+					const player = get.player();
+					return player.getUseValue({
+						name: button.link[2],
+						nature: button.link[3],
+						storage: { old_dcsbjuao: true },
+					});
+				},
+				backup(links, player) {
+					return {
+						audio: "dcsbjuao",
+						link: links[0],
+						filterCard: () => false,
+						selectCard: -1,
+						ignoreMod: true,
+						filterTarget(card, player, target) {
+							const link = get.info("old_dcsbjuao_backup").link,
+								cardx = get.autoViewAs(
+									{
+										name: link[2],
+										nature: link[3],
+										isCard: true,
+										storage: { old_dcsbjuao: true },
+									},
+									"unsure"
+								);
+							return player.inRange(target) && player.canUse(cardx, target, false, false);
+						},
+						selectTarget: [1, Infinity],
+						ai2(target) {
+							const player = get.player();
+							const link = get.info("old_dcsbjuao_backup").link,
+								card = get.autoViewAs({
+									name: link[2],
+									nature: link[3],
+								});
+							return get.effect(target, card, player, player);
+						},
+						viewAs: {
+							name: links[0][2],
+							nature: links[0][3],
+							suit: "none",
+							number: null,
+							isCard: true,
+							storage: { old_dcsbjuao: true },
+						},
+						multitarget: true,
+						multiline: true,
+						log: false,
+						async precontent(event, trigger, player) {
+							event.getParent().addCount = false;
+							const { targets } = event.result;
+							player.logSkill("old_dcsbjuao", targets);
+							player
+								.when({ player: "useCardAfter" })
+								.filter(evt => evt.getParent() === event.getParent() && evt.targets?.length > 0)
+								.step(async (event, trigger, player) => {
+									const targets = trigger.targets.sortBySeat();
+									player.line(targets);
+									for (const target of targets) {
+										target.addSkill("old_dcsbjuao_effect");
+										target.markAuto("old_dcsbjuao_effect", [player]);
+									}
+								});
+						},
+					};
+				},
+				prompt(links, player) {
+					return "###倨傲###你可以视为对攻击范围内任意名其他角色使用" + (get.translation(links[0][3]) || "") + "【" + get.translation(links[0][2]) + "】";
+				},
+			},
+			group: "old_dcsbjuao_clear",
+			subSkill: {
+				backup: {},
+				clear: {
+					silent: true,
+					trigger: { player: "dieEnd" },
+					forceDie: true,
+					async content(event, trigger, player) {
+						game.countPlayer(current => {
+							current.unmarkAuto("old_dcsbjuao_effect", [player]);
+							if (!current.getStorage("old_dcsbjuao_effect").length) {
+								current.removeSkill("old_dcsbjuao_effect");
+							}
+						});
+					},
+				},
+				effect: {
+					charlotte: true,
+					onremove: true,
+					forced: true,
+					intro: { content: "下次使用【杀】或普通锦囊牌必须指定$为目标（无次数与距离限制）" },
+					mod: {
+						cardUsable(card) {
+							if (card.name === "sha" || get.type(card) === "trick") {
+								return Infinity;
+							}
+						},
+						targetInRange(card) {
+							if (card.name === "sha" || get.type(card) === "trick") {
+								return true;
+							}
+						},
+						playerEnabled(card, player, target) {
+							if ((card.name === "sha" || get.type(card) === "trick") && !player.getStorage("old_dcsbjuao_effect").includes(target)) {
+								return false;
+							}
+						},
+					},
+					trigger: { player: "useCard" },
+					filter(event, player) {
+						return event.card.name === "sha" || get.type(event.card) === "trick";
+					},
+					async content(event, trigger, player) {
+						if (trigger.addCount !== false) {
+							trigger.addCount = false;
+							const stat = player.getStat("card"),
+								name = trigger.card.name;
+							if (typeof stat[name] === "number" && stat[name] > 0) {
+								stat[name]--;
+							}
+						}
+						player.removeSkill(event.name);
+					},
+				},
+			},
+			ai: {
+				order: 13,
+				result: {
+					player: 1,
+				},
+			},
+		},
+
 		//武皇甫嵩
 		old_dclianjie: {
 			audio: "dclianjie",
@@ -28294,6 +28634,15 @@ const lmCharacter = {
 		old_dc_sb_dengai_prefix: "旧|新杀谋",
 		old_dcsbshijin: "恃矜",
 		old_dcsbshijin_info: "限定技，出牌阶段，若你本回合造成过伤害，你可以获得每种类型的牌各一张，且直到你的下个回合开始前，你受到伤害时防止之并摸一张牌。你的下个回合开始时，弃置所有【杀】和锦囊牌并失去等量体力，若你未因此失去体力，此技能视为未发动过。",
+
+		old_dc_sb_guanyu: "旧新杀谋关羽",
+		old_dc_sb_guanyu_prefix: "旧|新杀谋",
+		old_dcsbguanwu: "冠武",
+		old_dcsbguanwu_info: "锁定技。①回合开始时，你从场上、牌堆或弃牌堆中获得【青龙偃月刀】。②当你于一轮内每使用两张伤害牌时，本轮你的【杀】伤害+1。",
+		old_dcsbweishi: "威势",
+		old_dcsbweishi_info: "每回合每项限一次，1.当你成为其他角色使用非伤害牌的目标后，你可以弃置半数手牌（向上取整），令此牌对你无效；2.当其他角色对你使用的伤害牌结算结束后，你可以摸两张伤害牌，然后可以对其使用一张【杀】。",
+		old_dcsbjuao: "倨傲",
+		old_dcsbjuao_info: "出牌阶段限一次，你可以视为对攻击范围内任意名其他角色使用一张【杀】或普通锦囊牌，若如此做，此牌目标下次使用【杀】或普通锦囊牌必须指定你为目标，且无距离次数限制。",
 
 		old_wu_huangfusong: "旧武皇甫嵩",
 		old_wu_huangfusong_prefix: "旧|武",
