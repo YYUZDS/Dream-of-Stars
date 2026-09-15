@@ -1157,7 +1157,7 @@ export async function precontent(config, pack) {
 					list.remove("devil");
 					player.chooseControl(list).set("prompt", "请选择武将的势力");
 				}
-				"step 1";
+				("step 1");
 				if (result.control) {
 					player.changeGroup(result.control);
 				}
@@ -1547,7 +1547,7 @@ export async function precontent(config, pack) {
 			document.querySelector("#server_status").innerHTML = "等待中";
 		}
 		game.pause();
-		"step 1";
+		("step 1");
 		_status.waitingForPlayer = false;
 		lib.configOL.gameStarted = true;
 		if (window.isNonameServer) {

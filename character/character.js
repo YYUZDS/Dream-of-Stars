@@ -577,6 +577,14 @@ const characters = {
 		dieAudios: ["yuanji"],
 		names: "袁|null",
 	},
+	old_dc_chenzhi: {
+		sex: "male",
+		group: "shu",
+		hp: 4,
+		skills: ["dcquanshi", "old_dcczchouxi"],
+		img: "image/character/dc_chenzhi.jpg",
+		dieAudios: ["dc_chenzhi"],
+	},
 	old_v_machao: {
 		sex: "male",
 		group: "qun",
@@ -642,6 +650,14 @@ const characters = {
 		skills: ["dcsbzhouxi", "old_dcsbshijin"],
 		img: "image/character/dc_sb_dengai.jpg",
 		dieAudios: ["dc_sb_dengai"],
+	},
+	old_dc_sb_guanyu: {
+		sex: "male",
+		group: "shu",
+		hp: 4,
+		skills: ["old_dcsbguanwu", "old_dcsbweishi", "old_dcsbjuao"],
+		img: "image/character/dc_sb_guanyu.jpg",
+		dieAudios: ["dc_sb_guanyu"],
 	},
 	old_wu_huangfusong: {
 		sex: "male",
@@ -1035,7 +1051,7 @@ const characters = {
 		sex: "male",
 		group: "wei",
 		hp: 4,
-		skills: ["old_sbqiaobian"],
+		skills: ["sbqiaobian", "old_sbliaoshi"],
 		img: "image/character/sb_zhanghe.jpg",
 		dieAudios: ["sb_zhanghe"],
 	},
@@ -2091,8 +2107,8 @@ const characters = {
 		group: "shu",
 		hp: 3,
 		skills: ["olqiangzhi", "rexiantu"],
-		img: "image/character/rezhangsong.jpg",
-		dieAudios: ["rezhangsong"],
+		img: "image/character/re_zhangsong.jpg",
+		dieAudios: ["re_zhangsong"],
 	},
 	hfdiy_madai: {
 		sex: "male",
@@ -2222,6 +2238,19 @@ const characters = {
 		img: "image/character/ol_yujin.jpg",
 		dieAudios: ["ol_yujin"],
 	},
-
+	pot_xiaoqiao: {
+		sex: "female",
+		group: "wu",
+		hp: 3,
+		skills: ["potheyun", "potyinhui"],
+		names: "桥|null",
+	},
+	v_mateng: {
+		sex: "male",
+		group: "qun",
+		hp: 4,
+		skills: ["dcheqi", "dchuirui", "dcxiaoben"],
+		dieAudios: ["ol_yujin"],
+	},
 };
 export default characters;
