@@ -289,7 +289,13 @@ const lmCharacter = {
 								}
 								return !player.getStorage("old_olsblucun_used").includes(name);
 							});
-						names = names.map(namex => new lib.element.VCard({ name: namex[2], nature: namex[3] }));
+						names = names.map(
+							namex =>
+								new lib.element.VCard({
+									name: namex[2],
+									nature: namex[3],
+								})
+						);
 						names.forEach(card => {
 							if (player.getUseValue(card) > 0) {
 								let temp = get.order(card);
@@ -7540,7 +7546,11 @@ const lmCharacter = {
 				await player.discard(cards);
 				const num = player.hp;
 				let count = num + 1;
-				const card = get.autoViewAs({ name: "sha", isCard: true, storage: { [event.name]: true } });
+				const card = get.autoViewAs({
+					name: "sha",
+					isCard: true,
+					storage: { [event.name]: true },
+				});
 				while (count-- && player.canUse(card, target, false) && target.isIn()) {
 					await player.useCard(card, target);
 				}
@@ -8373,7 +8383,10 @@ const lmCharacter = {
 				if (result?.bool) {
 					player.addTempSkill("oldx_dcrenshuang_used", "roundStart");
 					player.markAuto("oldx_dcrenshuang_used", result.links[0][2]);
-					const card = new lib.element.VCard({ name: result.links[0][2], isCard: true });
+					const card = new lib.element.VCard({
+						name: result.links[0][2],
+						isCard: true,
+					});
 					if (player.hasUseTarget(card)) {
 						await player.chooseUseTarget(card, true);
 					}
@@ -15668,7 +15681,12 @@ const lmCharacter = {
 						player.addMark(`${name}_count`, 1, false);
 						player.addTempSkill(`${name}_count`, "roundStart");
 						if (num > 0) {
-							await target.chooseToDiscard({ position: "he", forced: true, selectCard: num, allowChooseAll: true });
+							await target.chooseToDiscard({
+								position: "he",
+								forced: true,
+								selectCard: num,
+								allowChooseAll: true,
+							});
 						}
 						break;
 					}
@@ -28585,7 +28603,7 @@ const lmCharacter = {
 		old_ol_feiyi: "旧费祎",
 		old_ol_feiyi_prefix: "旧",
 		old_hezhong: "和衷",
-		old_hezhong_info: "每回合每项限一次，当你的手牌数变为1后，你可以展示此唯一手牌A并摸一张牌，然后你选择一项：①本回合使用点数大于A的点数的普通锦囊牌额外结算一次；②本回合使用点数小于A的点数的普通锦囊牌额外结算一次。",
+		old_hezhong_info: "每回合每项限一次，当你的手牌数变为1后，你可以展示此唯一手牌并摸一张牌，然后你选择一项：①本回合使用点数大于此牌的点数的普通锦囊牌额外结算一次；②本回合使用点数小于此牌的点数的普通锦囊牌额外结算一次。",
 
 		old_ol_hujinding: "旧胡金定",
 		old_ol_hujinding_prefix: "旧",
