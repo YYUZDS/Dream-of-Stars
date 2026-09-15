@@ -81,7 +81,7 @@ const characterTitles = {
 	old_ruanyu: "斐章雅律",
 	old_xurong: "玄菟战魔",
 	old_yuanji: "文明皇后",
-	old_mb_chenzhi: "朝野弄权",
+	old_dc_chenzhi: "朝野弄权",
 	old_v_machao: "雄烈盖世",
 	old_v_zhangxingcai: "帼姿凤舞",
 	old_dc_sb_xunyu: "贞谋弼汉",
