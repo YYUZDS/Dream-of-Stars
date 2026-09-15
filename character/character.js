@@ -577,6 +577,14 @@ const characters = {
 		dieAudios: ["yuanji"],
 		names: "袁|null",
 	},
+	old_dc_chenzhi: {
+		sex: "male",
+		group: "shu",
+		hp: 4,
+		skills: ["dcquanshi", "old_dcczchouxi"],
+		img: "image/character/dc_chenzhi.jpg",
+		dieAudios: ["dc_chenzhi"],
+	},
 	old_v_machao: {
 		sex: "male",
 		group: "qun",
