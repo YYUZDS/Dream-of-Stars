@@ -12,7 +12,7 @@ const characterReplaces = {
 	chengpu: ["old_ol_chengpu"],
 	chengui: ["old_chengui", "old_mb_chengui"],
 	chendao: ["old_pot_chendao"],
-	dc_chenzhi: ["old_dc_chenzhi","old_mb_chenzhi"],
+	dc_chenzhi: ["old_dc_chenzhi", "old_mb_chenzhi"],
 	cuilingyi: ["old_mb_cuilingyi"],
 	daqiao: ["old_sb_daqiao"],
 	dengai: ["old_ol_sb_dengai", "oldx_ol_sb_dengai", "old_dc_sb_dengai", "old_pot_dengai"],

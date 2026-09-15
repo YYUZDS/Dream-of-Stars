@@ -18,7 +18,7 @@ const characterTitles = {
 
 	//门阀士族
 	old_clan_xuncai: "怀刃自誓",
-	old_clan_xunyu: "宏汉公衡", 
+	old_clan_xunyu: "宏汉公衡",
 	old_clan_xunshi: "屏后点香谱",
 	old_clan_xunshuang: "大直若屈",
 	old_clan_hanrong: "虎口扳渡",
@@ -81,7 +81,7 @@ const characterTitles = {
 	old_ruanyu: "斐章雅律",
 	old_xurong: "玄菟战魔",
 	old_yuanji: "文明皇后",
-	old_mb_chenzhi:"朝野弄权",
+	old_mb_chenzhi: "朝野弄权",
 	old_v_machao: "雄烈盖世",
 	old_v_zhangxingcai: "帼姿凤舞",
 	old_dc_sb_xunyu: "贞谋弼汉",
