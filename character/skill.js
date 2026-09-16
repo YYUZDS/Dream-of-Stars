@@ -3037,6 +3037,53 @@ const lmCharacter = {
 		//璀璨星河
 		//张琪瑛
 		old_falu: {
+			audio: "xinfu_falu",
+			trigger: {
+				player: ["loseAfter", "enterGame"],
+				target: "useCardToTargeted",
+				global: ["loseAsyncAfter", "phaseBefore"],
+			},
+			forced: true,
+			filter(event, player, name) {
+				let suits = [];
+				if (name === "useCardToTargeted") {
+					// ②之一：你成为牌的目标后，按此牌的花色
+					suits.add(get.suit(event.card, event.player));
+				} else if (event.name.indexOf("lose") !== 0) {
+					// ①：游戏开始时补齐四种标记
+					if (event.name !== "phase" || game.phaseNumber === 0) {
+						suits.addArray(lib.suit);
+					}
+				} else if (event.type === "discard" && event.getlx !== false) {
+					// ②之二：你的牌因弃置而进入弃牌堆后，按这些牌的花色
+					suits.addArray((event.getl(player)?.cards2 || []).map(card => get.suit(card)));
+				}
+				suits = suits.filter(suit => lib.suit.includes(suit));
+				return suits.some(suit => !player.hasMark(`old_falu_${suit}`));
+			},
+			async content(event, trigger, player) {
+				let suits = [];
+				if (event.triggername === "useCardToTargeted") {
+					suits.add(get.suit(trigger.card, trigger.player));
+				} else if (trigger.name.indexOf("lose") !== 0) {
+					if (trigger.name !== "phase" || game.phaseNumber === 0) {
+						suits.addArray(lib.suit);
+					}
+				} else if (trigger.type === "discard" && trigger.getlx !== false) {
+					suits.addArray((trigger.getl(player)?.cards2 || []).map(card => get.suit(card)));
+				}
+				suits = suits.filter(suit => lib.suit.includes(suit) && !player.hasMark(`old_falu_${suit}`));
+				for (const suit of suits) {
+					player.addMark(`old_falu_${suit}`);
+				}
+			},
+			ai: {
+				// 同伴技能名请按实际改名（这里用的是“旧服”版的点化/真仪）
+				combo: ["old_dianhua", "old_zhenyi"],
+				threaten(player, target) {
+					return 1 + ["old_dianhua", "old_zhenyi"].filter(skill => target.hasSkill(skill)).length;
+				},
+			},
 			subSkill: {
 				spade: {
 					marktext: "♠︎️",
@@ -3067,293 +3114,249 @@ const lmCharacter = {
 					},
 				},
 			},
-			forced: true,
-			audio: "xinfu_falu",
-			trigger: {
-				player: ["loseAfter", "enterGame"],
-				global: ["loseAsyncAfter", "phaseBefore"],
-			},
-			filter(event, player) {
-				if (event.name.indexOf("lose") != 0) {
-					return event.name != "phase" || game.phaseNumber == 0;
-				}
-				if (event.type != "discard" || event.getlx === false) {
-					return false;
-				}
-				var evt = event.getl(player);
-				for (var i = 0; i < evt.cards2.length; i++) {
-					if (!player.hasMark("old_falu_" + get.suit(evt.cards2[i]))) {
-						return true;
-					}
-				}
-				return false;
-			},
-			content() {
-				if (trigger.name.indexOf("lose") !== 0) {
-					for (var i = 0; i < lib.suit.length; i++) {
-						if (!player.hasMark("old_falu_" + lib.suit[i])) {
-							player.addMark("old_falu_" + lib.suit[i]);
-						}
-					}
-					return;
-				}
-				var evt = trigger.getl(player);
-				for (var i = 0; i < evt.cards2.length; i++) {
-					var suit = get.suit(evt.cards2[i]);
-					if (!player.hasMark("old_falu_" + suit)) {
-						player.addMark("old_falu_" + suit);
-					}
-				}
-			},
-			ai: {
-				threaten: 1.4,
-				combo: "old_zhenyi",
-			},
 		},
 		old_dianhua: {
-			trigger: {
-				player: ["phaseZhunbeiBegin", "phaseJieshuBegin"],
-			},
-			frequent: true,
 			audio: "xinfu_dianhua",
-			filter(event, player) {
-				for (var i = 0; i < lib.suit.length; i++) {
-					if (player.hasMark("old_falu_" + lib.suit[i])) {
-						return true;
-					}
-				}
-				return false;
-			},
-			content() {
-				"step 0";
-				var num = 0;
-				for (var i = 0; i < lib.suit.length; i++) {
-					if (player.hasMark("old_falu_" + lib.suit[i])) {
-						num++;
-					}
-				}
-				var cards = get.cards(num);
-				game.cardsGotoOrdering(cards);
-				var next = player.chooseToMove();
-				next.set("list", [["牌堆顶", cards], ["牌堆底"]]);
-				next.set("prompt", "点化：点击或拖动将牌移动到牌堆顶或牌堆底");
-				next.processAI = function (list) {
-					var cards = list[0][1],
-						player = _status.event.player;
-					var target = _status.event.getTrigger().name == "phaseZhunbei" ? player : player.next;
-					var att = get.sgn(get.attitude(player, target));
-					var top = [];
-					var judges = target.getCards("j");
-					var stopped = false;
-					if (player != target || !target.hasWuxie()) {
-						for (var i = 0; i < judges.length; i++) {
-							var judge = get.judge(judges[i]);
-							cards.sort(function (a, b) {
-								return (judge(b) - judge(a)) * att;
-							});
-							if (judge(cards[0]) * att < 0) {
-								stopped = true;
-								break;
-							} else {
-								top.unshift(cards.shift());
-							}
-						}
-					}
-					var bottom;
-					if (!stopped) {
-						cards.sort(function (a, b) {
-							return (get.value(b, player) - get.value(a, player)) * att;
-						});
-						while (cards.length) {
-							if (get.value(cards[0], player) <= 5 == att > 0) {
-								break;
-							}
-							top.unshift(cards.shift());
-						}
-					}
-					bottom = cards;
-					return [top, bottom];
-				};
-				"step 1";
-				var top = result.moved[0];
-				var bottom = result.moved[1];
-				top.reverse();
-				for (var i = 0; i < top.length; i++) {
-					ui.cardPile.insertBefore(top[i], ui.cardPile.firstChild);
-				}
-				for (i = 0; i < bottom.length; i++) {
-					ui.cardPile.appendChild(bottom[i]);
-				}
-				player.popup(get.cnNumber(top.length) + "上" + get.cnNumber(bottom.length) + "下");
-				game.log(player, "将" + get.cnNumber(top.length) + "张牌置于牌堆顶");
-				game.updateRoundNumber();
-				game.delayx();
-			},
-			ai: {
-				combo: "old_falu",
-				threaten: 2.2,
-			},
-		},
-		old_zhenyi: {
-			group: ["old_zhenyi_spade", "old_zhenyi_club", "old_zhenyi_heart"],
-			trigger: {
-				player: "damageEnd",
-			},
-			audio: "xinfu_zhenyi",
-			filter(event, player) {
-				//if(!event.hasNature()) return false;
-				return player.hasMark("old_falu_diamond");
-			},
-			prompt2: "弃置「勾陈♦」标记，从牌堆中随机获得每种类型的牌各一张。",
-			content() {
-				"step 0";
-				player.removeMark("old_falu_diamond");
-				event.num = 0;
-				event.togain = [];
-				"step 1";
-				var card = get.cardPile2(function (card) {
-					for (var i = 0; i < event.togain.length; i++) {
-						if (get.type(card, "trick") == get.type(event.togain[i], "trick")) {
+			trigger: { player: ["phaseZhunbeiBegin", "phaseJieshuBegin"] },
+			frequent: true,
+			async content(event, trigger, player) {
+				const cards = get.cards(4, true);
+				await game.cardsGotoOrdering(cards);
+				const result = await player
+					.chooseToMove(true)
+					.set("list", [["牌堆顶", cards], ["牌堆底"], ["获得"]])
+					.set("prompt", "点化：获得一张已记录花色的牌，将其余牌以任意顺序放回牌堆顶或牌堆底")
+					// 花色是否已被〖法箓〗记录 = 是否有对应的法箓标记
+					.set("filterx", (card, player) => lib.suit.some(suit => player.hasMark(`old_falu_${suit}`) && get.suit(card) === suit))
+					.set("filterOk", moved => {
+						const { filterx: filter, player } = get.event();
+						if (moved[2].length > 1) {
 							return false;
 						}
+						if (moved[2].length === 1) {
+							return filter(moved[2][0], player);
+						}
+						// 四张里没有花色被记录的牌时，允许空手放回
+						return moved[0].concat(moved[1]).every(card => !filter(card, player));
+					})
+					.set("filterMove", (from, to, moved) => {
+						const { filterx: filter, player } = get.event();
+						const groupOf = card => moved.findIndex(cards => cards.includes(card));
+						// to 为数字：拖到某个分组的空白处
+						if (typeof to === "number") {
+							if (to !== 2) {
+								return true;
+							}
+							return !moved[2].length && filter(from.link, player);
+						}
+						// to 为牌：拖到某张牌上，目标分组即这张牌所在的分组
+						if (groupOf(from.link) !== 2) {
+							return true;
+						}
+						if (groupOf(to.link) === 2) {
+							return filter(to.link, player);
+						}
+						return !moved[2].length && filter(to.link, player);
+					})
+					.set("processAI", list => {
+						const { filterx: filter, player } = get.event();
+						const cards = list[0][1].slice(0);
+						const gains = cards.filter(card => filter(card, player));
+						if (!gains.length) {
+							return [[], cards, []];
+						}
+						const card = gains.maxBy(card => get.value(card, player));
+						const rest = cards.remove(card);
+						return [rest.filter(c => get.value(c, player) > 6), rest.filter(c => get.value(c, player) <= 6), [card]];
+					})
+					.forResult();
+				if (result.bool && result.moved) {
+					const top = result.moved[0].slice(0).reverse();
+					const bottom = result.moved[1].slice(0);
+					const gains = result.moved[2].slice(0);
+					if (top.length || bottom.length) {
+						await game.cardsGotoPile(top.concat(bottom), ["top_cards", top], (event, card) => {
+							if (event.top_cards.includes(card)) {
+								return ui.cardPile.firstChild;
+							}
+							return null;
+						});
+						game.addCardKnower(top, player);
+						game.addCardKnower(bottom, player);
 					}
-					return true;
-				}, "random");
-				if (card) {
-					event.togain.push(card);
-					event.num++;
-					if (event.num < 3) {
-						event.redo();
+					if (gains.length) {
+						await player.gain(gains, "gain2");
 					}
 				}
-				"step 2";
-				if (event.togain.length) {
-					player.gain(event.togain, "gain2");
+			},
+			ai: { combo: "old_falu" },
+		},
+		old_zhenyi: {
+			audio: "xinfu_zhenyi",
+			trigger: { player: "damageEnd" },
+			filter(event, player) {
+				// ④：受到伤害后即可发动，不限属性伤害
+				return player.hasMark("old_falu_diamond");
+			},
+			prompt2: "弃置一枚「勾陈♦」标记，从牌堆中随机获得每种类型的牌各一张",
+			async content(event, trigger, player) {
+				player.removeMark("old_falu_diamond", 1);
+				let [gains, types] = [[], []];
+				while (types.length < 3) {
+					let card = get.cardPile2(card => !types.includes(get.type2(card)));
+					if (card) {
+						gains.push(card);
+						types.push(get.type2(card));
+					} else {
+						break;
+					}
+				}
+				if (gains.length > 0) {
+					await player.gain(gains, "gain2");
 				}
 			},
 			ai: {
 				combo: "old_falu",
-			},
-		},
-		old_zhenyi_spade: {
-			trigger: {
-				global: "judge",
-			},
-			direct: true,
-			sourceSkill: "old_zhenyi",
-			filter(event, player) {
-				return player.hasMark("old_falu_spade");
-			},
-			content() {
-				"step 0";
-				var str = get.translation(trigger.player) + "的" + (trigger.judgestr || "") + "判定为" + get.translation(trigger.player.judging[0]) + "，是否发动【真仪】，弃置「紫薇♠」标记并修改判定结果？";
-				player
-					.chooseControl("spade", "heart", "diamond", "club", "cancel2")
-					.set("prompt", str)
-					.set("ai", function () {
-						//return '取消';
-						var judging = _status.event.judging;
-						var trigger = _status.event.getTrigger();
-						var res1 = trigger.judge(judging);
-						var list = lib.suit.slice(0);
-						var attitude = get.attitude(player, trigger.player);
-						if (attitude == 0) {
-							return 0;
+				maixie: true,
+				effect: {
+					target(card, player, target) {
+						// ④现在任何伤害都会触发，故判断条件由“属性伤害”改为“伤害牌”
+						if (get.tag(card, "damage")) {
+							if (!target.hasMark("old_falu_diamond") || player.hasSkillTag("jueqing", false, target)) {
+								return;
+							}
+							let num = 1;
+							if (get.attitude(player, target) > 0) {
+								if (player.needsToDiscard()) {
+									num = 0.7;
+								} else {
+									num = 0.5;
+								}
+							}
+							if (target.hp >= 4) {
+								return [1, num * 2];
+							}
+							if (target.hp == 3) {
+								return [1, num * 1.5];
+							}
+							if (target.hp == 2) {
+								return [1, num * 0.5];
+							}
 						}
-						var getj = function (suit) {
-							return trigger.judge({
-								name: get.name(judging),
-								nature: get.nature(judging),
-								suit: suit,
-								number: 5,
-							});
-						};
-						list.sort(function (a, b) {
-							return (getj(b) - getj(a)) * get.sgn(attitude);
-						});
-						if ((getj(list[0]) - res1) * attitude > 0) {
-							return list[0];
-						}
-						return "cancel2";
-					})
-					.set("judging", trigger.player.judging[0]);
-				"step 1";
-				if (result.control != "cancel2") {
-					player.addExpose(0.25);
-					player.removeMark("old_falu_spade");
-					player.logSkill("old_zhenyi", trigger.player);
-					//player.line(trigger.player);
-					player.popup(result.control);
-					game.log(player, "将判定结果改为了", "#y" + get.translation(result.control + 2) + 5);
-					trigger.fixedResult = {
-						suit: result.control,
-						color: get.color({ suit: result.control }),
-						number: 5,
-					};
-				}
-			},
-			ai: {
-				rejudge: true,
-				tag: {
-					rejudge: 1,
+					},
 				},
-				expose: 0.5,
 			},
-		},
-		old_zhenyi_club: {
-			audio: "xinfu_zhenyi",
-			enable: "chooseToUse",
-			sourceSkill: "old_zhenyi",
-			viewAsFilter(player) {
-				if (player == _status.currentPhase) {
-					return false;
-				}
-				return player.hasMark("old_falu_club") && player.countCards("hs") > 0;
-			},
-			filterCard: true,
-			position: "hs",
-			viewAs: {
-				name: "tao",
-			},
-			prompt: "弃置「后土♣」标记，将一张手牌当桃使用",
-			check(card) {
-				return 15 - get.value(card);
-			},
-			precontent() {
-				player.removeMark("old_falu_club");
-			},
-		},
-		old_zhenyi_heart: {
-			trigger: {
-				source: "damageBegin1",
-			},
-			audio: "xinfu_zhenyi",
-			sourceSkill: "old_zhenyi",
-			filter(event, player) {
-				return player.hasMark("old_falu_heart");
-			},
-			check(event, player) {
-				if (get.attitude(player, event.player) >= 0) {
-					return false;
-				}
-				if (
-					event.player.hasSkillTag("filterDamage", null, {
-						player: player,
-						card: event.card,
-					})
-				) {
-					return false;
-				}
-				return true;
-				//return player.hasMark('old_falu_spade')||get.color(ui.cardPile.firstChild)=='black';
-			},
-			prompt2(event) {
-				return "弃置「玉清♥」标记，令对" + get.translation(event.player) + "即将造成的伤害+1。";
-			},
-			logTarget: "player",
-			content() {
-				player.removeMark("old_falu_heart");
-				trigger.num++;
+			group: ["old_zhenyi_spade", "old_zhenyi_club", "old_zhenyi_heart"],
+			subSkill: {
+				spade: {
+					audio: "xinfu_zhenyi",
+					trigger: { global: "judge" },
+					filter(event, player) {
+						return player.hasMark("old_falu_spade");
+					},
+					async cost(event, trigger, player) {
+						const str = `${get.translation(trigger.player)}的${trigger.judgestr || ""}判定为${get.translation(trigger.player.judging[0])}，是否发动【真仪】，弃置一枚「紫薇♠」标记并修改判定结果？`;
+						const list = [
+							["黑桃5", "spade"],
+							["红桃5", "heart"],
+							["梅花5", "club"],
+							["方块5", "diamond"],
+						];
+						const { control } = await player
+							.chooseControl(...list.map(item => item[0]), "cancel2")
+							.set("prompt", get.prompt(event.skill))
+							.set("prompt2", str)
+							.set("judging", trigger.player.judging[0])
+							.set("ai", () => {
+								const { player, judging } = get.event();
+								const trigger = get.event().getTrigger();
+								const attitude = get.attitude(player, trigger.player);
+								if (attitude === 0) {
+									return "cancel2";
+								}
+								const list = [
+									["黑桃5", "spade"],
+									["红桃5", "heart"],
+									["梅花5", "club"],
+									["方块5", "diamond"],
+								].map(([control, suit]) => {
+									return {
+										control,
+										delta: trigger.judge({ name: judging.name, suit, number: 5 }) - trigger.judge(judging),
+									};
+								});
+								list.sort((a, b) => (attitude > 0 ? b.delta - a.delta : a.delta - b.delta));
+								const best = list[0];
+								if (attitude > 0 ? best.delta > 0 : best.delta < 0) {
+									return best.control;
+								}
+								return "cancel2";
+							})
+							.forResult();
+						event.result = {
+							bool: control && control !== "cancel2",
+							cost_data: control,
+						};
+					},
+					logTarget: "player",
+					async content(event, trigger, player) {
+						player.removeMark("old_falu_spade", 1);
+						player.popup(event.cost_data);
+						const map = { 黑桃: "spade", 红桃: "heart", 梅花: "club", 方块: "diamond" };
+						const suit = map[event.cost_data.slice(0, 2)];
+						game.log(player, "将判定结果改为了", `#y${event.cost_data}`);
+						trigger.fixedResult = {
+							suit,
+							color: get.color({ suit }),
+							number: 5,
+						};
+					},
+					ai: {
+						expose: 0.5,
+						rejudge: true,
+						tag: { rejudge: 1 },
+					},
+				},
+				club: {
+					audio: "xinfu_zhenyi",
+					enable: "chooseToUse",
+					viewAsFilter(player) {
+						return player.hasMark("old_falu_club");
+					},
+					filterCard: () => false,
+					selectCard: -1,
+					viewAs: { name: "tao", isCard: true },
+					prompt: "弃置一枚「后土♣」标记，视为使用一张【桃】",
+					log: false,
+					async precontent(event, trigger, player) {
+						player.logSkill("old_zhenyi_club");
+						player.removeMark("old_falu_club", 1);
+					},
+				},
+				heart: {
+					audio: "xinfu_zhenyi",
+					trigger: { source: "damageBegin1" },
+					filter(event, player) {
+						return player.hasMark("old_falu_heart");
+					},
+					check(event, player) {
+						if (get.attitude(player, event.player) >= 0) {
+							return false;
+						}
+						return !event.player.hasSkillTag("filterDamage", null, {
+							player: player,
+							card: event.card,
+						});
+					},
+					prompt2(event) {
+						return "弃置一枚「玉清♥」标记，令即将对" + get.translation(event.player) + "造成的伤害+1";
+					},
+					logTarget: "player",
+					async content(event, trigger, player) {
+						player.removeMark("old_falu_heart", 1);
+						trigger.num++;
+					},
+				},
 			},
 		},
 
@@ -34768,17 +34771,11 @@ const lmCharacter = {
 		old_zhangqiying: "旧张琪瑛",
 		old_zhangqiying_prefix: "旧",
 		old_falu: "法箓",
-		old_falu_info: "锁定技，游戏开始时，你获得「紫薇」「后土」「玉清」「勾陈」标记各一个。当你的牌因弃置而进入弃牌堆后，根据这些牌的花色，你获得对应的标记：黑桃，你获得1枚「紫薇」；梅花，你获得1枚「后土」；红桃，你获得1枚「玉清」；方块，你获得1枚「勾陈」。（每种标记限拥有1个）",
+		old_falu_info: "锁定技。①游戏开始时，你获得「紫薇」「后土」「玉清」「勾陈」标记。②你成为牌的目标或你的牌因弃置而进入弃牌堆后，你根据这些牌的花色获得对应的未拥有的标记：黑桃，「紫薇」；梅花，「后土」；红桃，「玉清」；方块，「勾陈」。",
 		old_dianhua: "点化",
-		old_dianhua_info: "准备阶段或结束阶段，你可以观看牌堆顶的X张牌（X为你的「紫薇」「后土」「玉清」「勾陈」标记数的总和）。若如此做，你将这些牌以任意顺序放回牌堆顶或牌堆底。",
+		old_dianhua_info: `准备阶段或结束阶段，你可以观看牌堆顶四张牌，然后获得其中一张花色已被${get.poptip("old_falu")}记录的牌，将其余牌以任意顺序放回牌堆顶或牌堆底。`,
 		old_zhenyi: "真仪",
-		old_zhenyi_info: "你可以在以下时机弃置相应的标记来发动以下效果：一名角色的判定牌生效前，你可以弃置一枚「紫薇」，然后将判定结果改为任意花色且点数为5；你的回合外，你可以弃置一枚「后土」，然后将你的一张手牌当【桃】使用；当你造成伤害时，你可以弃置一枚「玉清」，然后令此伤害+1；当你受到伤害后，你可以弃置一张「勾陈」，然后你从牌堆中随机获得三种类型的牌各一张。",
-		old_zhenyi_spade: "真仪",
-		old_zhenyi_spade_info: "",
-		old_zhenyi_club: "真仪",
-		old_zhenyi_club_info: "",
-		old_zhenyi_heart: "真仪",
-		old_zhenyi_heart_info: "",
+		old_zhenyi_info: "你可以在以下时机弃置相应的标记来发动以下效果：一名角色的判定牌生效前，你可以弃置一枚「紫薇」，然后将判定结果改为任意花色且点数为5；你可以弃置一枚「后土」，视为使用一张【桃】；当你造成伤害时，你可以弃置一枚「玉清」，然后令此伤害+1；当你受到伤害后，你可以弃置一枚「勾陈」，然后你从牌堆中随机获得三种类型的牌各一张。",
 
 		old_ol_peixiu: "旧裴秀",
 
