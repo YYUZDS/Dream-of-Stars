@@ -20634,47 +20634,53 @@ const lmCharacter = {
 			audio: "sbliegong",
 			mod: {
 				aiOrder(player, card, num) {
-					if (num > 0 && (card.name === "sha" || get.tag(card, "draw"))) return num + 6;
+					if (num > 0 && (card.name === "sha" || get.tag(card, "draw"))) {
+						return num + 6;
+					}
 				},
 				targetInRange(card, player, target) {
-					if (card.name == "sha" && typeof get.number(card) == "number") {
-						if (get.distance(player, target) <= get.number(card)) return true;
+					if (get.name(card, player) === "sha" && typeof get.number(card) === "number") {
+						if (get.distance(player, target) <= get.number(card)) {
+							return true;
+						}
 					}
 				},
 			},
 			trigger: { player: "useCardToPlayered" },
 			filter(event, player) {
-				return !event.getParent()._old_sbliegong_player && event.targets.length == 1 && event.card.name == "sha" && player.getStorage("old_sbliegong").length > 0;
+				return !event.getParent()._old_sbliegong_player && event.targets.length === 1 && event.card.name === "sha" && player.getStorage("old_sbliegong").length > 0;
 			},
 			prompt2(event, player) {
-				let str = "",
-					storage = player.getStorage("old_sbliegong");
-				if (storage.length > 1) {
-					str += "亮出牌堆顶的" + get.cnNumber(storage.length - 1) + "张牌并增加伤害；且";
-				}
-				str += "令" + get.translation(event.target) + "不能使用花色为";
-				for (let i = 0; i < storage.length; i++) {
-					str += get.translation(storage[i]);
-				}
-				str += "的牌响应" + get.translation(event.card);
-				return str;
+				const storage = player.getStorage("old_sbliegong");
+				const prefix = storage.length > 1 ? `亮出牌堆顶的${get.cnNumber(storage.length - 1)}张牌并增加伤害；且` : "";
+				const suits = storage.map(suit => get.translation(suit)).join("");
+				return `${prefix}令${get.translation(event.target)}不能使用花色为${suits}的牌响应${get.translation(event.card)}`;
 			},
 			logTarget: "target",
 			locked: false,
 			check(event, player) {
 				const target = event.target;
-				if (get.attitude(player, target) > 0) return false;
+				if (get.attitude(player, target) > 0) {
+					return false;
+				}
 				if (
 					target.hasSkillTag("filterDamage", null, {
 						player: player,
 						card: event.card,
 					})
-				)
+				) {
 					return false;
+				}
 				const storage = player.getStorage("old_sbliegong");
-				if (storage.length >= 4) return true;
-				if (storage.length < 3) return false;
-				if (target.hasShan()) return storage.includes("heart") && storage.includes("diamond");
+				if (storage.length >= 4) {
+					return true;
+				}
+				if (storage.length < 3) {
+					return false;
+				}
+				if (target.hasShan()) {
+					return storage.includes("heart") && storage.includes("diamond");
+				}
 				return true;
 			},
 			async content(event, trigger, player) {
@@ -20682,30 +20688,36 @@ const lmCharacter = {
 				const num = storage.length - 1;
 				const evt = trigger.getParent();
 				if (num > 0) {
-					if (typeof evt.baseDamage != "number") evt.baseDamage = 1;
+					if (typeof evt.baseDamage !== "number") {
+						evt.baseDamage = 1;
+					}
 					const cards = get.cards(num);
 					await game.cardsGotoOrdering(cards);
-					await player.showCards(cards.slice(0), get.translation(player) + "发动了【烈弓】");
+					await player.showCards(cards.slice(0), `${get.translation(player)}发动了【烈弓】`);
 					while (cards.length > 0) {
 						const card = cards.pop();
-						if (storage.includes(get.suit(card, false))) evt.baseDamage++;
-						//ui.cardPile.insertBefore(card,ui.cardPile.firstChild);
+						if (storage.includes(get.suit(card, false))) {
+							evt.baseDamage++;
+						}
 					}
-					//game.updateRoundNumber();
 				}
 				evt._old_sbliegong_player = player;
 				player.addTempSkill("old_sbliegong_clear");
 				const target = trigger.target;
 				target.addTempSkill("old_sbliegong_block");
-				if (!target.storage.old_sbliegong_block) target.storage.old_sbliegong_block = [];
+				if (!target.storage.old_sbliegong_block) {
+					target.storage.old_sbliegong_block = [];
+				}
 				target.storage.old_sbliegong_block.push([evt.card, storage]);
 				lib.skill.old_sbliegong.updateBlocker(target);
 			},
 			updateBlocker(player) {
-				const list = [],
-					storage = player.storage.old_sbliegong_block;
+				const list = [];
+				const storage = player.storage.old_sbliegong_block;
 				if (storage?.length) {
-					for (const i of storage) list.addArray(i[1]);
+					for (const i of storage) {
+						list.addArray(i[1]);
+					}
 				}
 				player.storage.old_sbliegong_blocker = list;
 			},
@@ -20713,11 +20725,15 @@ const lmCharacter = {
 				threaten: 3.5,
 				directHit_ai: true,
 				skillTagFilter(player, tag, arg) {
-					if (arg?.card?.name == "sha") {
+					if (arg?.card?.name === "sha") {
 						const storage = player.getStorage("old_sbliegong");
-						if (storage.length < 3 || !storage.includes("heart") || !storage.includes("diamond")) return false;
+						if (storage.length < 3 || !storage.includes("heart") || !storage.includes("diamond")) {
+							return false;
+						}
 						const target = arg.target;
-						if (target.hasSkill("bagua_skill") || target.hasSkill("bazhen") || target.hasSkill("rw_bagua_skill")) return false;
+						if (target.hasSkill("bagua_skill") || target.hasSkill("bazhen") || target.hasSkill("rw_bagua_skill")) {
+							return false;
+						}
 						return true;
 					}
 					return false;
@@ -20727,6 +20743,10 @@ const lmCharacter = {
 				content: "已记录花色：$",
 				onunmark: true,
 			},
+			onremove(player, skill) {
+				delete player.storage[skill];
+				player.removeTip(skill);
+			},
 			group: "old_sbliegong_count",
 			subSkill: {
 				clear: {
@@ -20735,9 +20755,9 @@ const lmCharacter = {
 					charlotte: true,
 					popup: false,
 					filter(event, player) {
-						return event._old_sbliegong_player == player;
+						return event._old_sbliegong_player === player;
 					},
-					content() {
+					async content(event, trigger, player) {
 						player.unmarkSkill("old_sbliegong");
 						player.removeTip("old_sbliegong");
 					},
@@ -20749,11 +20769,11 @@ const lmCharacter = {
 								return;
 							}
 							const suit = get.suit(card);
-							if (suit == "none") {
+							if (suit === "none") {
 								return;
 							}
 							let evt = _status.event;
-							if (evt.name != "chooseToUse") {
+							if (evt.name !== "chooseToUse") {
 								evt = evt.getParent("chooseToUse");
 							}
 							const cards = player.storage.old_sbliegong_block.map(i => i[0]);
@@ -20780,19 +20800,26 @@ const lmCharacter = {
 					},
 					filter(event, player) {
 						const evt = event.getParent("useCard", true, true);
-						if (evt && evt.effectedCount < evt.effectCount) return false;
-						if (!event.card || !player.storage.old_sbliegong_block) return false;
-						return player.storage.old_sbliegong_block.some(i => i[0] == event.card);
+						if (evt && evt.effectedCount < evt.effectCount) {
+							return false;
+						}
+						if (!event.card || !player.storage.old_sbliegong_block) {
+							return false;
+						}
+						return player.storage.old_sbliegong_block.some(i => i[0] === event.card);
 					},
-					content() {
+					async content(event, trigger, player) {
 						const storage = player.storage.old_sbliegong_block;
-						for (let i = 0; i < storage.length; i++) {
-							if (storage[i][0] == trigger.card) {
-								storage.splice(i--, 1);
+						for (const item of storage.slice()) {
+							if (item[0] === trigger.card) {
+								storage.remove(item);
 							}
 						}
-						if (!storage.length) player.removeSkill(event.name);
-						else lib.skill.old_sbliegong.updateBlocker(player);
+						if (!storage.length) {
+							player.removeSkill(event.name);
+						} else {
+							lib.skill.old_sbliegong.updateBlocker(player);
+						}
 					},
 				},
 				count: {
@@ -20804,16 +20831,26 @@ const lmCharacter = {
 					locked: false,
 					popup: false,
 					filter(event, player, name) {
-						if (name != "useCard" && player == event.player) return false;
+						if (name !== "useCard" && player === event.player) {
+							return false;
+						}
 						const suit = get.suit(event.card);
-						if (!lib.suit.includes(suit)) return false;
-						if (player.storage.old_sbliegong?.includes(suit)) return false;
+						if (!lib.suit.includes(suit)) {
+							return false;
+						}
+						if (player.storage.old_sbliegong?.includes(suit)) {
+							return false;
+						}
 						return true;
 					},
-					content() {
+					async content(event, trigger, player) {
 						player.markAuto("old_sbliegong", [get.suit(trigger.card)]);
 						player.storage.old_sbliegong.sort((a, b) => lib.suit.indexOf(b) - lib.suit.indexOf(a));
-						player.addTip("old_sbliegong", get.translation("old_sbliegong") + player.getStorage("old_sbliegong").reduce((str, suit) => str + get.translation(suit), ""));
+						const suits = player
+							.getStorage("old_sbliegong")
+							.map(suit => get.translation(suit))
+							.join("");
+						player.addTip("old_sbliegong", `${get.translation("old_sbliegong")}${suits}`);
 					},
 				},
 			},
