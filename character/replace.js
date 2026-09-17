@@ -63,6 +63,7 @@ const characterReplaces = {
 	menghuo: ["old_sb_menghuo"],
 	ol_mengda: ["old_mb_mengda"],
 	miheng: ["old_yue_miheng"],
+	muludawang: ["old_dc_muludawang"],
 	nanhualaoxian: ["old_ol_nanhualaoxian"],
 	peixiu: ["old_ol_peixiu"],
 	ol_pengyang: ["old_ol_pengyang"],

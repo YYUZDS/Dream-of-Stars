@@ -391,6 +391,14 @@ const characters = {
 	},
 
 	//群英荟萃
+	old_dc_muludawang: {
+		sex: "male",
+		group: "wei",
+		hp: 3,
+		skills: ["old_dczhoufa", "dcshouqun"],
+		img: "image/character/dc_muludawang.jpg",
+		dieAudios: ["dc_muludawang"],
+	},
 	old_dc_weifeng: {
 		sex: "male",
 		group: "wei",

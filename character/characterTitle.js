@@ -55,6 +55,7 @@ const characterTitles = {
 	old_re_zhangchunhua: "冷血皇后",
 
 	//群英荟萃
+	old_dc_muludawang: "八纳洞主",
 	old_dc_weifeng: "趁浪逐波",
 	old_chengui: "弄虎如婴",
 	old_dc_zhugejun: "三珠之隐根",

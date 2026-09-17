@@ -6697,6 +6697,88 @@ const lmCharacter = {
 			},
 		},
 
+		//群英荟萃
+		//新杀木鹿大王
+		old_dczhoufa: {
+			audio: "dczhoufa",
+			enable: "phaseUse",
+			usable: 1,
+			filter(event, player) {
+				if (!player.hasCards("hes", card => get.type(card) != "basic")) {
+					return false;
+				}
+				const list = get.inpileVCardList(([type, _, name, nature]) => get.is.damageCard(get.autoViewAs({ name, nature }, "unsure")));
+				return list.some(([type, _, name, nature]) => {
+					const vcard = get.autoViewAs({ name, nature }, "unsure");
+					return event.filterCard(vcard, player, event);
+				});
+			},
+			chooseButton: {
+				dialog(event, player) {
+					const list = get.inpileVCardList(([type, _, name, nature]) => {
+						let vcard = get.autoViewAs({ name, nature }, "unsure");
+						if (!get.is.damageCard(vcard)) {
+							return false;
+						}
+						return event.filterCard(vcard, player, event);
+					});
+					return ui.create.dialog("咒法", [list, "vcard"]);
+				},
+				check({ link: [type, _, name, nature] }) {
+					return get.player().getUseValue(get.autoViewAs({ name, nature }, "unsure"));
+				},
+				backup(links, player) {
+					return {
+						audio: "dczhoufa",
+						position: "hse",
+						filterCard: card => get.type(card) != "basic",
+						check(card) {
+							return 8 - get.value(card);
+						},
+						viewAs: { name: links[0][2], nature: links[0][3], storage: { old_dczhoufa: true } },
+						popname: true,
+						async precontent(event, trigger, player) {
+							event.getParent().addCount = false;
+						},
+					};
+				},
+				prompt(links, player) {
+					return "将一张非基本牌当做" + (get.translation(links[0][3]) || "") + get.translation(links[0][2]) + "使用";
+				},
+			},
+			mod: {
+				cardUsable(card, player, num) {
+					if (card?.storage?.old_dczhoufa) {
+						return Infinity;
+					}
+				},
+			},
+			group: "old_dczhoufa_thunder",
+			subSkill: {
+				thunder: {
+					charlotte: true,
+					trigger: {
+						source: "damageBegin1",
+					},
+					filter(event, player) {
+						return event.card?.storage?.old_dczhoufa && !event.hasNature("thunder");
+					},
+					forced: true,
+					popup: false,
+					async content(event, trigger, player) {
+						game.setNature(trigger, "thunder");
+					},
+				},
+				backup: {},
+			},
+			ai: {
+				order: 1,
+				result: {
+					player: 1,
+				},
+			},
+		},
+		
 		//新杀魏讽
 		old_dczhuguo: {
 			audio: "dczhuguo",
@@ -28698,6 +28780,11 @@ const lmCharacter = {
 		old_re_zhangchunhua_prefix: "旧|界",
 
 		//群英荟萃
+		old_dc_muludawang: "旧新杀木鹿大王",
+		old_dc_muludawang_prefix: "旧|新杀",
+		old_dczhoufa: "咒法",
+		old_dczhoufa_info: "出牌阶段限一次，你可以将一张非基本牌当无次数限制且不计入次数的伤害牌使用，此牌造成的伤害为雷电伤害。",
+
 		old_dc_weifeng: "旧新杀魏讽",
 		old_dc_weifeng_prefix: "旧|新杀",
 		old_dczhuguo: "蛀国",
