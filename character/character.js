@@ -391,6 +391,14 @@ const characters = {
 	},
 
 	//群英荟萃
+	old_dc_muludawang: {
+		sex: "male",
+		group: "wei",
+		hp: 3,
+		skills: ["old_dczhoufa", "dcshouqun"],
+		img: "image/character/dc_muludawang.jpg",
+		dieAudios: ["dc_muludawang"],
+	},
 	old_dc_weifeng: {
 		sex: "male",
 		group: "wei",
@@ -485,6 +493,14 @@ const characters = {
 	},
 
 	//限定专属
+	old_dc_zhushuo: {
+		sex: "male",
+		group: "wei",
+		hp: 4,
+		skills: ["dczsshuhe", "old_dcjilie"],
+		img: "image/character/dc_zhushuo.jpg",
+		dieAudios: ["dc_zhushuo"],
+	},
 	old_liufuren: {
 		sex: "female",
 		group: "qun",
@@ -577,6 +593,14 @@ const characters = {
 		dieAudios: ["yuanji"],
 		names: "袁|null",
 	},
+	old_dc_chenzhi: {
+		sex: "male",
+		group: "shu",
+		hp: 4,
+		skills: ["dcquanshi", "old_dcczchouxi"],
+		img: "image/character/dc_chenzhi.jpg",
+		dieAudios: ["dc_chenzhi"],
+	},
 	old_v_machao: {
 		sex: "male",
 		group: "qun",
@@ -642,6 +666,14 @@ const characters = {
 		skills: ["dcsbzhouxi", "old_dcsbshijin"],
 		img: "image/character/dc_sb_dengai.jpg",
 		dieAudios: ["dc_sb_dengai"],
+	},
+	old_dc_sb_guanyu: {
+		sex: "male",
+		group: "shu",
+		hp: 4,
+		skills: ["old_dcsbguanwu", "old_dcsbweishi", "old_dcsbjuao"],
+		img: "image/character/dc_sb_guanyu.jpg",
+		dieAudios: ["dc_sb_guanyu"],
 	},
 	old_wu_huangfusong: {
 		sex: "male",
@@ -1035,7 +1067,7 @@ const characters = {
 		sex: "male",
 		group: "wei",
 		hp: 4,
-		skills: ["old_sbqiaobian"],
+		skills: ["sbqiaobian", "old_sbliaoshi"],
 		img: "image/character/sb_zhanghe.jpg",
 		dieAudios: ["sb_zhanghe"],
 	},

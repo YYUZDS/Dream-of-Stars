@@ -18,7 +18,7 @@ const characterTitles = {
 
 	//门阀士族
 	old_clan_xuncai: "怀刃自誓",
-	old_clan_xunyu: "", // 未定义称号
+	old_clan_xunyu: "宏汉公衡",
 	old_clan_xunshi: "屏后点香谱",
 	old_clan_xunshuang: "大直若屈",
 	old_clan_hanrong: "虎口扳渡",
@@ -55,6 +55,7 @@ const characterTitles = {
 	old_re_zhangchunhua: "冷血皇后",
 
 	//群英荟萃
+	old_dc_muludawang: "八纳洞主",
 	old_dc_weifeng: "趁浪逐波",
 	old_chengui: "弄虎如婴",
 	old_dc_zhugejun: "三珠之隐根",
@@ -70,6 +71,7 @@ const characterTitles = {
 	old_star_fazheng: "定军佐功",
 
 	//限定专属
+	old_dc_zhushuo: "醇浆遏斗",
 	old_liufuren: "恶嫉蔑死",
 	old_renwan: "孤贞不徙",
 	oldx_renwan: "孤贞不徙",
@@ -81,6 +83,7 @@ const characterTitles = {
 	old_ruanyu: "斐章雅律",
 	old_xurong: "玄菟战魔",
 	old_yuanji: "文明皇后",
+	old_dc_chenzhi: "朝野弄权",
 	old_v_machao: "雄烈盖世",
 	old_v_zhangxingcai: "帼姿凤舞",
 	old_dc_sb_xunyu: "贞谋弼汉",
@@ -89,6 +92,7 @@ const characterTitles = {
 	old_dc_sb_xuyou: "智士濡足",
 	old_dc_sb_zhuran: "孤城镇岳",
 	old_dc_sb_dengai: "奇锋厄川",
+	old_dc_sb_guanyu: "单刀赴会",
 	old_wu_zhugeliang: "忠武良弼",
 	old_wu_guanyu: "义武千秋",
 	old_wu_huangfusong: "襄武翼汉",
@@ -110,7 +114,7 @@ const characterTitles = {
 	oldx_mb_shen_jiangwei: "烟雨济世",
 
 	//移动版
-	old_mb_liuhui: "", // 未定义称号
+	old_mb_liuhui: "数圣",
 	old_mb_sunquan: "", // 未定义称号
 	old_mb_caomao: "向死存魏",
 	old_mb_cuilingyi: "戴冠金尾",
