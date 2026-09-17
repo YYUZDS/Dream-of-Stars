@@ -71,6 +71,7 @@ const characterTitles = {
 	old_star_fazheng: "定军佐功",
 
 	//限定专属
+	old_dc_zhushuo: "醇浆遏斗",
 	old_liufuren: "恶嫉蔑死",
 	old_renwan: "孤贞不徙",
 	oldx_renwan: "孤贞不徙",

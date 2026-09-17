@@ -493,6 +493,14 @@ const characters = {
 	},
 
 	//限定专属
+	old_dc_zhushuo: {
+		sex: "male",
+		group: "wei",
+		hp: 4,
+		skills: ["dczsshuhe", "old_dcjilie"],
+		img: "image/character/dc_zhushuo.jpg",
+		dieAudios: ["dc_zhushuo"],
+	},
 	old_liufuren: {
 		sex: "female",
 		group: "qun",

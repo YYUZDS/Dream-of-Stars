@@ -6778,7 +6778,7 @@ const lmCharacter = {
 				},
 			},
 		},
-		
+
 		//新杀魏讽
 		old_dczhuguo: {
 			audio: "dczhuguo",
@@ -7995,6 +7995,60 @@ const lmCharacter = {
 		},
 
 		//限定专属
+		//新杀朱铄
+		old_dcjilie: {
+			audio: "dcjilie",
+			enable: "phaseUse",
+			filterCard(card, player) {
+				if (!lib.filter.cardDiscardable(card, player)) {
+					return false;
+				}
+				if (ui.selected.cards?.some(cardx => get.suit(cardx, player) === get.suit(card, player))) {
+					return false;
+				}
+				return true;
+			},
+			position: "he",
+			selectCard: [1, 4],
+			complexCard: true,
+			complexSelect: true,
+			usable: 1,
+			filter(event, player) {
+				return player.countCards("he", card => lib.filter.cardDiscardable(card, player)) > 0;
+			},
+			check(card) {
+				return 7 - get.value(card);
+			},
+			async content(event, trigger, player) {
+				let num = event.cards.map(card => get.suit(card, player)).toUniqued().length * 2;
+				while (num > 0) {
+					num--;
+					const judgeEvent = player.judge(card => (card.name === "sha" ? 10 : -1));
+					judgeEvent.set("callback", async event => {
+						if (event.card?.name === "sha" && player.hasUseTarget(event.card, false)) {
+							const next = player.chooseUseTarget(event.card, false, "nodistance");
+							next.set("oncard", () => {
+								_status.event.baseDamage += player.getHistory("useCard", evt => evt.card.name === "sha").length;
+							});
+							await next;
+						}
+					});
+					await judgeEvent;
+				}
+			},
+			ai: {
+				order: 9,
+				result: {
+					player(player, target) {
+						if (!player.hasUseTarget({ name: "sha" }, false, false)) {
+							return 0;
+						}
+						return 1;
+					},
+				},
+			},
+		},
+
 		//刘懿君
 		old_dcfuji: {
 			audio: "dcfuji",
@@ -28850,6 +28904,10 @@ const lmCharacter = {
 		old_staranji_info: "锁定技，一名角色使用牌时，若此花色的牌本轮游戏使用的最少，则你摸一张牌。",
 
 		//限定专属
+		old_dc_zhushuo: "旧朱铄",
+		old_dcjilie: "急烈",
+		old_dcjilie_info: "出牌阶段限一次，你可弃置任意张花色不同的牌，每弃置一种花色的牌便进行两次判定。若判定结果为【杀】，你可视为使用此牌（此【杀】无距离限制且伤害为本回合你使用【杀】的次数）。",
+
 		old_liufuren: "旧刘懿君",
 		old_liufuren_prefix: "旧",
 		old_dcfuji: "缚己",
