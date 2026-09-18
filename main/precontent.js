@@ -12,7 +12,7 @@ export async function precontent(config, pack) {
 			min = [0],
 			len = Math.min(noname.length, min.length),
 			status = false;
-		if (lib.version.slice(0, 5) === "1.15.")
+		if (lib.version.slice(0, 5) === "1.11.")
 			for (let i = 0; i < len; i++) {
 				if (Number(noname[i]) < min[i]) {
 					status = "您的无名杀版本太低";
@@ -1443,7 +1443,13 @@ export async function precontent(config, pack) {
 	delete character.name;
 	game.addCharacterPack(character);
 	lib.translate.星之梦_character_config = "星之梦";
-	lib.config.星之梦_characters_enable = true;
+	// 关包时把武将移出 lib.character：选将框取的是 lib.character，而 addCharacterPack 只认 extension_星之梦_characters_enable，不认「设置→武将」里那个开关
+	// 这里手动和包开关对齐；pack 数据本身保留，联机注入和武将包列表还要用
+	if (!lib.config.characters.includes("星之梦")) {
+		for (const name in character.character) {
+			delete lib.character[name];
+		}
+	}
 	lib.arenaReady.push(function () {
 		lib.connectCharacterPack.add("星之梦");
 	});
@@ -1453,9 +1459,7 @@ export async function precontent(config, pack) {
 				lib.translate.星之梦_character_config = "星之梦";
 				lib.characterPack["星之梦"] = pack;
 				for (let key in pack) lib.character[key] = pack[key];
-				lib.config.extension_星之梦_characters_enable = true;
 				lib.connectCharacterPack.add("星之梦");
-				lib.config.characters.add("星之梦");
 			},
 			lib.characterPack["星之梦"],
 		];

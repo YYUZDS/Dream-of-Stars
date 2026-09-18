@@ -13896,7 +13896,8 @@ const lmCharacter = {
 		old_mb_shehu: {
 			trigger: { player: "phaseZhunbeiBegin" },
 			filter(event, player) {
-				return "DB_diaogong" in lib.card;
+				// 雕弓属于「神武再世」卡牌包，关包后不再提供（lib.card里永远有定义，故不能只判断是否定义过）
+				return "DB_diaogong" in lib.card && lib.config.cards.includes("swCard");
 			},
 			async cost(event, trigger, player) {
 				event.result = await player
@@ -28301,6 +28302,10 @@ const lmCharacter = {
 			forced: true,
 			locked: true,
 			filter(event, player) {
+				// 虎翼属于「神武再世」卡牌包，关包后不再提供
+				if (!lib.config.cards.includes("swCard")) {
+					return false;
+				}
 				if (
 					game.hasPlayer(function (current) {
 						return current.countCards("hej", "huyi");
@@ -28324,7 +28329,8 @@ const lmCharacter = {
 			forced: true,
 			locked: false,
 			filter(event, player) {
-				return (event.name != "phase" || game.phaseNumber == 0) && !player.storage.shenwuzaishi;
+				// 卡牌包「神武再世」关闭时，这些武将不再提供该包的牌
+				return lib.config.cards.includes("swCard") && (event.name != "phase" || game.phaseNumber == 0) && !player.storage.shenwuzaishi;
 			},
 			content() {
 				"step 0";
