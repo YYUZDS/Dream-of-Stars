@@ -12,7 +12,7 @@ export async function precontent(config, pack) {
 			min = [0],
 			len = Math.min(noname.length, min.length),
 			status = false;
-		if (lib.version.slice(0, 5) === "1.11.")
+		if (lib.version.slice(0, 5) === "1.15.")
 			for (let i = 0; i < len; i++) {
 				if (Number(noname[i]) < min[i]) {
 					status = "您的无名杀版本太低";
