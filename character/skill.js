@@ -20947,21 +20947,8 @@ const lmCharacter = {
 				player.addTempSkill("old_sbliegong_clear");
 				const target = trigger.target;
 				target.addTempSkill("old_sbliegong_block");
-				if (!target.storage.old_sbliegong_block) {
-					target.storage.old_sbliegong_block = [];
-				}
-				target.storage.old_sbliegong_block.push([evt.card, storage]);
-				lib.skill.old_sbliegong.updateBlocker(target);
-			},
-			updateBlocker(player) {
-				const list = [];
-				const storage = player.storage.old_sbliegong_block;
-				if (storage?.length) {
-					for (const i of storage) {
-						list.addArray(i[1]);
-					}
-				}
-				player.storage.old_sbliegong_blocker = list;
+				// 记录[此【杀】, 已记录花色]；markAuto会广播给客机，比对时用cardid（联机下实体牌不是同一引用）
+				target.markAuto("old_sbliegong_block", [[evt.card, storage]]);
 			},
 			ai: {
 				threaten: 3.5,
@@ -21005,9 +20992,12 @@ const lmCharacter = {
 					},
 				},
 				block: {
+					charlotte: true,
+					onremove: true,
 					mod: {
 						cardEnabled(card, player) {
-							if (!player.storage.old_sbliegong_blocker) {
+							const storage = player.getStorage("old_sbliegong_block");
+							if (!storage.length) {
 								return;
 							}
 							const suit = get.suit(card);
@@ -21018,11 +21008,17 @@ const lmCharacter = {
 							if (evt.name !== "chooseToUse") {
 								evt = evt.getParent("chooseToUse");
 							}
-							const cards = player.storage.old_sbliegong_block.map(i => i[0]);
-							if (!evt || !evt.respondTo || !cards.includes(evt.respondTo[1])) {
+							const respond = evt?.respondTo?.[1];
+							if (!respond) {
 								return;
 							}
-							if (player.storage.old_sbliegong_blocker.includes(suit)) {
+							const suits = [];
+							for (const item of storage) {
+								if (item[0] === respond || (item[0]?.cardid != null && item[0].cardid == respond.cardid)) {
+									suits.addArray(item[1]);
+								}
+							}
+							if (suits.includes(suit)) {
 								return false;
 							}
 						},
@@ -21034,33 +21030,22 @@ const lmCharacter = {
 					},
 					forced: true,
 					firstDo: true,
-					charlotte: true,
 					popup: false,
-					onremove(player) {
-						delete player.storage.old_sbliegong_block;
-						delete player.storage.old_sbliegong_blocker;
-					},
 					filter(event, player) {
 						const evt = event.getParent("useCard", true, true);
 						if (evt && evt.effectedCount < evt.effectCount) {
 							return false;
 						}
-						if (!event.card || !player.storage.old_sbliegong_block) {
+						if (!event.card) {
 							return false;
 						}
-						return player.storage.old_sbliegong_block.some(i => i[0] === event.card);
+						return player.getStorage("old_sbliegong_block").some(i => i[0] === event.card || (i[0]?.cardid != null && i[0].cardid == event.card.cardid));
 					},
 					async content(event, trigger, player) {
-						const storage = player.storage.old_sbliegong_block;
-						for (const item of storage.slice()) {
-							if (item[0] === trigger.card) {
-								storage.remove(item);
-							}
-						}
-						if (!storage.length) {
+						const list = player.getStorage("old_sbliegong_block").filter(i => i[0] === trigger.card || (i[0]?.cardid != null && i[0].cardid == trigger.card?.cardid));
+						player.unmarkAuto("old_sbliegong_block", list);
+						if (!player.getStorage("old_sbliegong_block").length) {
 							player.removeSkill(event.name);
-						} else {
-							lib.skill.old_sbliegong.updateBlocker(player);
 						}
 					},
 				},
@@ -21097,7 +21082,6 @@ const lmCharacter = {
 				},
 			},
 		},
-
 		//谋公孙瓒
 		old_sbqiaomeng: {
 			audio: "sbqiaomeng",
