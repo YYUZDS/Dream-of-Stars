@@ -9777,27 +9777,26 @@ const lmCharacter = {
 			onremove(player, skill) {
 				player.removeGaintag(`${skill}_tag`);
 			},
-			filter(event, player) {
-				if (event.name === "phase") {
+			filter(event, player, name) {
+				if (name === "phaseBefore") {
 					return game.phaseNumber === 0;
 				}
-				if (event.name === "roundEnd") {
-					if (!player.isIn()) {
-						return false;
-					}
+				if (name === "roundEnd") {
 					const damage = current => current.getRoundHistory("sourceDamage").reduce((sum, evt) => sum + evt.num, 0);
 					const num = damage(player);
 					return game.players.concat(game.dead).every(current => current === player || damage(current) <= num);
 				}
-				const evt = event.getl?.(player);
-				return evt?.cards2?.length;
+				return !!event.getl?.(player)?.cards2?.length;
 			},
-			getIndex(event, player) {
-				if (event.name === "phase" || event.name === "roundEnd") {
+			getIndex(event, player, name) {
+				if (name === "phaseBefore" || name === "roundEnd") {
 					return 1;
 				}
-				let num = 0;
 				const evt = event.getl?.(player);
+				if (!evt?.gaintag_map) {
+					return 0;
+				}
+				let num = 0;
 				for (const i in evt.gaintag_map) {
 					if (evt.gaintag_map[i].includes("old_dcsbguyi_tag")) {
 						num++;
@@ -9806,7 +9805,7 @@ const lmCharacter = {
 				return num;
 			},
 			async content(event, trigger, player) {
-				if (trigger.name === "phase" || trigger.name === "roundEnd") {
+				if (event.triggername === "phaseBefore" || event.triggername === "roundEnd") {
 					await player.draw({ num: 1, gaintag: ["old_dcsbguyi_tag"] });
 				} else {
 					const num = Math.min(7, player.countMark("old_dcsbguyi_round") + 1);
