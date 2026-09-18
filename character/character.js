@@ -394,7 +394,7 @@ const characters = {
 	old_dc_muludawang: {
 		sex: "male",
 		group: "wei",
-		hp: 3,
+		hp: 6,
 		skills: ["old_dczhoufa", "dcshouqun"],
 		img: "image/character/dc_muludawang.jpg",
 		dieAudios: ["dc_muludawang"],
