@@ -1467,6 +1467,23 @@ export async function precontent(config, pack) {
 			},
 			character.translate,
 		];
+	if (!_status.postReconnect.lm_characterReplace)
+		_status.postReconnect.lm_characterReplace = [
+			function (replaces) {
+				for (let name in replaces) {
+					if (!lib.characterReplace[name]) lib.characterReplace[name] = [];
+					lib.characterReplace[name].addArray(replaces[name]);
+				}
+			},
+			character.characterReplace,
+		];
+	//本体character/replace.js会在模式加载时用同名键覆盖lib.characterReplace，所以本扩展的名单要等到那之后再合并进去
+	lib.arenaReady.push(function () {
+		for (let name in character.characterReplace) {
+			if (!lib.characterReplace[name]) lib.characterReplace[name] = [];
+			lib.characterReplace[name].addArray(character.characterReplace[name]);
+		}
+	});
 	if (!_status.postReconnect.lm_pack_namePrefix)
 		_status.postReconnect.lm_pack_namePrefix = [
 			function () {
