@@ -35,6 +35,7 @@ const characterSubstitute = {
 		["ol_sb_dongzhuo_shadow1", ["tempname:ol_sb_dongzhuo", "die:ol_sb_dongzhuo"]],
 		["ol_sb_dongzhuo_shadow2", ["tempname:ol_sb_dongzhuo", "die:ol_sb_dongzhuo"]],
 	],
+	old_dc_sb_zhugeliang: [["dc_sb_zhugeliang_shadow", ["tempname:dc_sb_zhugeliang_shadow"]]],
 	old_dc_sb_xunyu: [["dc_sb_xunyu_shadow", ["tempname:dc_sb_xunyu_shadow"]]],
 	old_dc_sb_luxun: [["dc_sb_luxun_shadow", ["tempname:dc_sb_luxun_shadow"]]],
 	old_ol_sb_zhangrang: [["ol_sb_zhangrang_shadow", ["tempname:ol_sb_zhangrang_shadow"]]],

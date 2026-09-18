@@ -617,6 +617,14 @@ const characters = {
 		img: "image/character/v_zhangxingcai.jpg",
 		dieAudios: ["v_zhangxingcai"],
 	},
+	old_dc_sb_zhugeliang: {
+		sex: "male",
+		group: "shu",
+		hp: 4,
+		skills: ["dcsbjingmou", "old_dcsbguyi"],
+		img: "image/character/dc_sb_zhugeliang.jpg",
+		dieAudios: ["dc_sb_zhugeliang"],
+	},
 	old_dc_sb_xunyu: {
 		sex: "male",
 		group: "wei",
