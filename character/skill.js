@@ -9765,6 +9765,112 @@ const lmCharacter = {
 			},
 		},
 
+		//新杀谋诸葛亮
+		old_dcsbguyi: {
+			audio: "dcsbguyi",
+			audioname: ["dc_sb_zhugeliang_shadow"],
+			forced: true,
+			trigger: {
+				player: "loseAfter",
+				global: ["phaseBefore", "roundEnd", "equipAfter", "addJudgeAfter", "gainAfter", "loseAsyncAfter", "addToExpansionAfter"],
+			},
+			onremove(player, skill) {
+				player.removeGaintag(`${skill}_tag`);
+			},
+			filter(event, player, name) {
+				if (name === "phaseBefore") {
+					return game.phaseNumber === 0;
+				}
+				if (name === "roundEnd") {
+					const damage = current => current.getRoundHistory("sourceDamage").reduce((sum, evt) => sum + evt.num, 0);
+					const num = damage(player);
+					return game.players.concat(game.dead).every(current => current === player || damage(current) <= num);
+				}
+				return !!event.getl?.(player)?.cards2?.length;
+			},
+			getIndex(event, player, name) {
+				if (name === "phaseBefore" || name === "roundEnd") {
+					return 1;
+				}
+				const evt = event.getl?.(player);
+				if (!evt?.gaintag_map) {
+					return 0;
+				}
+				let num = 0;
+				for (const i in evt.gaintag_map) {
+					if (evt.gaintag_map[i].includes("old_dcsbguyi_tag")) {
+						num++;
+					}
+				}
+				return num;
+			},
+			async content(event, trigger, player) {
+				if (event.triggername === "phaseBefore" || event.triggername === "roundEnd") {
+					await player.draw({ num: 1, gaintag: ["old_dcsbguyi_tag"] });
+				} else {
+					const num = Math.min(7, player.countMark("old_dcsbguyi_round") + 1);
+					const cards = get.cards(num, true);
+					await game.cardsGotoOrdering(cards);
+					const result = await player
+						.chooseToMove_new({
+							prompt: "孤熠：获得一张牌标记为“熠”并将其余牌以任意顺序放回牌堆顶（靠左的在上）",
+							forced: true,
+							list: [["牌堆顶", cards], ["获得"]],
+							filterMove(from, to, moved) {
+								if (to === 1 && moved[1].length >= 1) {
+									return false;
+								}
+								return true;
+							},
+							filterOk(moved) {
+								return moved[1].length === 1;
+							},
+							processAI(list) {
+								const cards = list[0][1].slice(0).sort((a, b) => {
+									return get.value(b) - get.value(a);
+								});
+								return [cards.splice(1), cards];
+							},
+						})
+						.forResult();
+					if (result?.bool && result.moved?.length) {
+						player.addTempSkill(`${event.name}_round`, "roundStart");
+						player.addMark(`${event.name}_round`, 1, false);
+						const { moved } = result;
+						const top = moved[0];
+						const gains = moved[1];
+						if (gains.length) {
+							await player.gain({
+								cards: gains,
+								animate: "gain2",
+								gaintag: ["old_dcsbguyi_tag"],
+							});
+						}
+						await game.cardsGotoPile(top.reverse(), "insert");
+					}
+				}
+			},
+			mod: {
+				aiOrder(player, card, num) {
+					if (get.itemtype(card) === "card" && card.hasGaintag("old_dcsbguyi_tag")) {
+						return num + 0.1;
+					}
+				},
+				aiValue(player, card, num) {
+					if (get.itemtype(card) === "card" && card.hasGaintag("old_dcsbguyi_tag")) {
+						return num / 10;
+					}
+				},
+				aiUseful() {
+					return lib.skill.old_dcsbguyi.mod.aiValue.apply(this, arguments);
+				},
+			},
+			subSkill: {
+				tag: {},
+				round: { charlotte: true, onremove: true },
+			},
+		},
+
 		//谋陆逊
 		old_dcsbjunmou: {
 			audio: "dcsbjunmou",
@@ -20841,21 +20947,8 @@ const lmCharacter = {
 				player.addTempSkill("old_sbliegong_clear");
 				const target = trigger.target;
 				target.addTempSkill("old_sbliegong_block");
-				if (!target.storage.old_sbliegong_block) {
-					target.storage.old_sbliegong_block = [];
-				}
-				target.storage.old_sbliegong_block.push([evt.card, storage]);
-				lib.skill.old_sbliegong.updateBlocker(target);
-			},
-			updateBlocker(player) {
-				const list = [];
-				const storage = player.storage.old_sbliegong_block;
-				if (storage?.length) {
-					for (const i of storage) {
-						list.addArray(i[1]);
-					}
-				}
-				player.storage.old_sbliegong_blocker = list;
+				// 记录[此【杀】, 已记录花色]；markAuto会广播给客机，比对时用cardid（联机下实体牌不是同一引用）
+				target.markAuto("old_sbliegong_block", [[evt.card, storage]]);
 			},
 			ai: {
 				threaten: 3.5,
@@ -20899,9 +20992,12 @@ const lmCharacter = {
 					},
 				},
 				block: {
+					charlotte: true,
+					onremove: true,
 					mod: {
 						cardEnabled(card, player) {
-							if (!player.storage.old_sbliegong_blocker) {
+							const storage = player.getStorage("old_sbliegong_block");
+							if (!storage.length) {
 								return;
 							}
 							const suit = get.suit(card);
@@ -20912,11 +21008,17 @@ const lmCharacter = {
 							if (evt.name !== "chooseToUse") {
 								evt = evt.getParent("chooseToUse");
 							}
-							const cards = player.storage.old_sbliegong_block.map(i => i[0]);
-							if (!evt || !evt.respondTo || !cards.includes(evt.respondTo[1])) {
+							const respond = evt?.respondTo?.[1];
+							if (!respond) {
 								return;
 							}
-							if (player.storage.old_sbliegong_blocker.includes(suit)) {
+							const suits = [];
+							for (const item of storage) {
+								if (item[0] === respond || (item[0]?.cardid != null && item[0].cardid == respond.cardid)) {
+									suits.addArray(item[1]);
+								}
+							}
+							if (suits.includes(suit)) {
 								return false;
 							}
 						},
@@ -20928,33 +21030,22 @@ const lmCharacter = {
 					},
 					forced: true,
 					firstDo: true,
-					charlotte: true,
 					popup: false,
-					onremove(player) {
-						delete player.storage.old_sbliegong_block;
-						delete player.storage.old_sbliegong_blocker;
-					},
 					filter(event, player) {
 						const evt = event.getParent("useCard", true, true);
 						if (evt && evt.effectedCount < evt.effectCount) {
 							return false;
 						}
-						if (!event.card || !player.storage.old_sbliegong_block) {
+						if (!event.card) {
 							return false;
 						}
-						return player.storage.old_sbliegong_block.some(i => i[0] === event.card);
+						return player.getStorage("old_sbliegong_block").some(i => i[0] === event.card || (i[0]?.cardid != null && i[0].cardid == event.card.cardid));
 					},
 					async content(event, trigger, player) {
-						const storage = player.storage.old_sbliegong_block;
-						for (const item of storage.slice()) {
-							if (item[0] === trigger.card) {
-								storage.remove(item);
-							}
-						}
-						if (!storage.length) {
+						const list = player.getStorage("old_sbliegong_block").filter(i => i[0] === trigger.card || (i[0]?.cardid != null && i[0].cardid == trigger.card?.cardid));
+						player.unmarkAuto("old_sbliegong_block", list);
+						if (!player.getStorage("old_sbliegong_block").length) {
 							player.removeSkill(event.name);
-						} else {
-							lib.skill.old_sbliegong.updateBlocker(player);
 						}
 					},
 				},
@@ -20991,7 +21082,6 @@ const lmCharacter = {
 				},
 			},
 		},
-
 		//谋公孙瓒
 		old_sbqiaomeng: {
 			audio: "sbqiaomeng",
@@ -28234,7 +28324,8 @@ const lmCharacter = {
 			forced: true,
 			locked: false,
 			filter(event, player) {
-				return (event.name != "phase" || game.phaseNumber == 0) && !player.storage.shenwuzaishi;
+				// 卡牌包「神武再世」关闭时，这些武将不再提供该包的牌
+				return lib.config.cards.includes("swCard") && (event.name != "phase" || game.phaseNumber == 0) && !player.storage.shenwuzaishi;
 			},
 			content() {
 				"step 0";
@@ -28985,6 +29076,11 @@ const lmCharacter = {
 		old_dchuangnu_info: "出牌阶段或受到伤害后，你可选择一项执行：1.弃置一名角色X张手牌；2.你视为使用一张无距离限制的【杀】；3.令一名角色本回合下次使用牌无效。执行后随机恢复X个装备栏，若恢复数不足对应数量则此技能失效至本回合结束。（X为此技能本回合发动的次数）",
 		old_dcxiankuang: "贤贶",
 		old_dcxiankuang_info: "有角色非因使用失去基本牌进入弃牌堆后，你可废除一个装备栏并选择一项发动：1.获得此牌；2.令此角色摸你废除的装备栏数张牌。",
+
+		old_dc_sb_zhugeliang: "旧新杀谋诸葛亮",
+		old_dc_sb_zhugeliang_prefix: "旧|新杀谋",
+		old_dcsbguyi: "孤熠",
+		old_dcsbguyi_info: "锁定技，游戏开始时，你额外摸一张牌，并标记为“熠”；“熠”牌离开手牌区后，你观看牌堆顶X张牌，选择其中一张牌获得并标记为“熠”，然后以任意顺序放回牌堆顶（X为本轮触发此效果的次数且至多为7）；每轮结束时，若你为本轮造成伤害最高者，你摸一张牌并标记为“熠”。",
 
 		old_dc_sb_xunyu: "旧新杀谋荀彧",
 		old_dc_sb_xunyu_prefix: "旧|新杀谋",

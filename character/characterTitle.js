@@ -86,6 +86,7 @@ const characterTitles = {
 	old_dc_chenzhi: "朝野弄权",
 	old_v_machao: "雄烈盖世",
 	old_v_zhangxingcai: "帼姿凤舞",
+	old_dc_sb_zhugeliang: "威谋定疆",
 	old_dc_sb_xunyu: "贞谋弼汉",
 	old_dc_sb_luxun: "渊谋谦略",
 	old_dc_sb_hulie: "暗舆平叛",
