@@ -1610,4 +1610,45 @@ export async function precontent(config, pack) {
 			ui.cardPileButton.style.display = "";
 		}
 	};
+	//自定义初始手牌数
+	{
+		//配置值只在进入游戏前读取一次，避免游戏中改动导致主机与客机所发手牌数不一致
+		let initCards = 4;
+		{
+			const value = parseInt(lib.config.extension_星之梦_initCardNum);
+			if (!isNaN(value)) initCards = Math.max(0, Math.min(10, value));
+		}
+		//只替换本体的4张基准：单挑按体力上限摸牌、斗地主叫地主、BOSS等特殊数值保持原样
+		const seedNum = (player, base) => {
+			const num = typeof base == "function" ? base(player) : base;
+			if (!isNaN(num) && num === 4) return initCards;
+			return num;
+		};
+		if (initCards != 4 && typeof game.gameDraw == "function" && !game.gameDraw.initNumPatched) {
+			const gameDraw = game.gameDraw;
+			const newGameDraw = function (player, num, targets) {
+				return gameDraw.call(this, player, typeof player == "undefined" ? initCards : seedNum(player, typeof num == "undefined" ? 4 : num), targets);
+			};
+			newGameDraw.initNumPatched = true;
+			game.gameDraw = newGameDraw;
+		}
+		//部分模式（如斗地主）是在gameDraw之后才改写摸牌数的，所以事件那一层也要处理一次
+		const content = lib.element.content;
+		if (typeof content.gameDraw == "function" && !content.gameDraw.initNumPatched) {
+			const gameDrawContent = content.gameDraw;
+			const newGameDrawContent = async function (event, trigger, player) {
+				if (!isNaN(event.num)) {
+					event.num = seedNum(player, event.num);
+				} else if (typeof event.num == "function") {
+					const num = event.num;
+					event.num = function (player) {
+						return seedNum(player, num(player));
+					};
+				}
+				return gameDrawContent.call(this, event, trigger, player);
+			};
+			newGameDrawContent.initNumPatched = true;
+			content.gameDraw = newGameDrawContent;
+		}
+	}
 }
