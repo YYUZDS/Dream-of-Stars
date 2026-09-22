@@ -7,19 +7,22 @@ import {} from "../js/broadcast.js";
 import {} from "../js/private.js";
 export async function precontent(config, pack) {
 	{
-		//本体版本检测
-		let noname = lib.version.split(".").slice(2),
-			min = [0],
-			len = Math.min(noname.length, min.length),
-			status = false;
-		if (lib.version.slice(0, 5) === "1.11.")
-			for (let i = 0; i < len; i++) {
-				if (Number(noname[i]) < min[i]) {
-					status = "您的无名杀版本太低";
-					break;
-				}
+		//本体版本检测：最低适配 1.11.5，1.11.5.x / 1.11.6 / 更高的版本都视为通过
+		const currentVersion = lib.version.split(".").map(num => parseInt(num) || 0),
+			minVersion = [1, 11, 5];
+		let status = false,
+			compare = 0;
+		//只比较最低要求的前几位，缺位当0（例如 1.11 → 1.11.0）
+		for (let i = 0; i < minVersion.length; i++) {
+			const num = currentVersion[i] || 0;
+			if (num !== minVersion[i]) {
+				compare = num - minVersion[i];
+				break;
 			}
-		else status = "检测到游戏版本号与本扩展支持版本号不同";
+		}
+		if (compare < 0) {
+			status = `您的无名杀版本过低（当前${lib.version}，需要1.11.5或更高）`;
+		}
 		if (typeof status === "string") {
 			alert(status + "，为避免版本不兼容产生不必要的问题，已为您关闭《星之梦》，稍后重启游戏");
 			game.saveExtensionConfig("星之梦", "enable", false);
