@@ -1170,6 +1170,7 @@ export async function precontent(config, pack) {
 		};
 	}
 	//阶段提示
+	//阶段提示：本机只维护一个提示元素，状态存在元素自己身上（广播函数会被序列化到客机执行，不能依赖闭包变量）
 	lib.skill._tphaseTip = {
 		trigger: {
 			global: ["phaseBegin", "phaseZhunbeiBefore", "phaseJudgeBefore", "phaseDrawBefore", "phaseUseBefore", "phaseDiscardBefore", "phaseJieshuBefore", "phaseEnd", "phaseAfter"],
@@ -1179,179 +1180,170 @@ export async function precontent(config, pack) {
 			return config && lib.config.extension_星之梦_tphaseTip;
 		},
 		async content(event, trigger) {
-			game.broadcastAll(
-				(phasename, player) => {
-					// 只对主玩家处理，非主玩家直接返回
-					if (player !== game.me) return;
+			//=== 重要：本函数在联机时会在「所有机器」上各自执行一次，但每台机器要走的路径不同 ===
+			//① 主机开了扩展：主机需要把显示逻辑广播给客机 → 用 broadcastAll，客机在 showTip 里按本机开关拦下
+			//② 主机没开扩展：主机不会广播（客机也收不到），此时客机必须「自己直接执行」，否则功能失效
+			//   （客机上的 broadcastAll 是空操作：game.online 为真会直接 return，客机也没有 lib.node 可广播）
+			const showTip = (phasename, player) => {
+				//只认「本机是否开启了本扩展」：没开的机器什么都不做
+				if (!lib.config.extension_星之梦_tphaseTip) return;
+				if (!player || !player.isIn()) return;
 
-					if (phasename === "phaseAfter") {
-						if (player.tphaseTip) {
-							// 添加向右淡出动画
-							if (player.tphaseTip && player.tphaseTip.classList) {
-								player.tphaseTip.classList.remove("active");
-								player.tphaseTip.classList.add("fade-out-right");
-							}
+				const tipEl = () => document.querySelector(".tphaseTip");
+				const tipImg = () => {
+					const el = tipEl();
+					return el && el.firstChild ? el.firstChild : null;
+				};
+				//换人操作等原因导致提示易主时，先把旧提示清掉，避免残留
+				const old = tipEl();
+				if (old && old.dataset.owner !== player.playerid) {
+					old.remove();
+				}
 
-							// 动画结束后移除元素
-							setTimeout(() => {
-								if (player.tphaseTip && player.tphaseTip.parentNode) {
-									player.tphaseTip.remove();
-								}
-								player.tphaseTip = null;
-								player.tphaseTipImg = null;
-							}, 600);
-						}
-					} else {
-						const config = lib.config.extension_星之梦_tphaseTipStyle;
-						const basePath = "extension/星之梦/image/JDTS/";
-						const imageTypes = ["hhks", "zbjd", "pdjd", "mpjd", "cpjd", "qpjd", "jsjd", "hhjs"];
-						const phases = ["Begin", "ZhunbeiBefore", "JudgeBefore", "DrawBefore", "UseBefore", "DiscardBefore", "JieshuBefore", "End"];
-						const phaseStyles = {
-							1: {},
-							2: {},
-						};
-						[1, 2].forEach(version => {
-							const ext = version === 1 ? "jpg" : "png";
-							phases.forEach((phase, index) => {
-								const key = `phase${phase}`;
-								phaseStyles[version][key] = `${basePath}${imageTypes[index]}.${ext}`;
-							});
-						});
-						// 根据配置选择对应的图片路径
-						const phase = phaseStyles[config] || phaseStyles["1"];
-						const imgSrc = phase[phasename];
+				if (phasename === "phaseAfter") {
+					const current = tipEl();
+					if (current) {
+						current.classList.remove("active");
+						// 等过渡结束后移除元素
+						setTimeout(() => {
+							const el = tipEl();
+							if (el) el.remove();
+						}, 300);
+					}
+					return;
+				}
 
-						if (!player.tphaseTip) {
-							const addStyle = () => {
-								// 检查样式是否已添加
-								if (document.getElementById("tphaseTip-styles")) return;
+				const config = lib.config.extension_星之梦_tphaseTipStyle;
+				const basePath = "extension/星之梦/image/JDTS/";
+				const imageTypes = ["hhks", "zbjd", "pdjd", "mpjd", "cpjd", "qpjd", "jsjd", "hhjs"];
+				const phases = ["Begin", "ZhunbeiBefore", "JudgeBefore", "DrawBefore", "UseBefore", "DiscardBefore", "JieshuBefore", "End"];
+				const phaseStyles = {
+					1: {},
+					2: {},
+				};
+				[1, 2].forEach(version => {
+					const ext = version === 1 ? "jpg" : "png";
+					phases.forEach((phase, index) => {
+						const key = `phase${phase}`;
+						phaseStyles[version][key] = `${basePath}${imageTypes[index]}.${ext}`;
+					});
+				});
+				// 根据配置选择对应的图片路径
+				const phase = phaseStyles[config] || phaseStyles["1"];
+				const imgSrc = phase[phasename];
+				// 位置固定：自己贴在自己框上方，别人贴在别人框下方
+				const above = player === game.me;
 
-								const style = document.createElement("style");
-								style.id = "tphaseTip-styles";
-								style.textContent = `
+				const addStyle = () => {
+					// 检查样式是否已添加
+					if (document.getElementById("tphaseTip-styles")) return;
+
+					const style = document.createElement("style");
+					style.id = "tphaseTip-styles";
+					style.textContent = `
+                                /* 位置由 left/top 动态计算，这里只管大小和淡入淡出 */
                                 .tphaseTip {
                                     position: fixed;
-                                    left: 40px;
-                                    bottom: 195px;
+                                    left: 0;
+                                    top: 0;
                                     width: 85px;
                                     opacity: 0;
                                     pointer-events: none;
                                     z-index: 4;
+                                    transition: opacity 0.3s ease, transform 0.3s ease;
                                 }
                                 .tphaseTip.active {
                                     opacity: 1;
+                                    transform: translateY(0);
+                                }
+                                .tphaseTip.tphaseTip-above {
+                                    transform: translateY(12px);
+                                }
+                                .tphaseTip.tphaseTip-below {
+                                    transform: translateY(-12px);
                                 }
                                 .tphaseTip img {
                                     max-width: 100%;
                                     height: auto;
-                                }
-
-                                /* 从左淡入动画 */
-                                @keyframes tphaseTip-fadeInLeft {
-                                    from {
-                                        opacity: 0;
-                                        transform: translateX(-25px);
-                                    }
-                                    to {
-                                        opacity: 1;
-                                        transform: translateX(0);
-                                    }
-                                }
-
-                                /* 向右淡出动画 */
-                                @keyframes tphaseTip-fadeOutRight {
-                                    from {
-                                        opacity: 1;
-                                        transform: translateX(0);
-                                    }
-                                    to {
-                                        opacity: 0;
-                                        transform: translateX(75px);
-                                    }
-                                }
-
-                                .tphaseTip.fade-in-left {
-                                    animation: tphaseTip-fadeInLeft 0.6s ease-out forwards; /* 改为0.6秒 */
-                                }
-
-                                .tphaseTip.fade-out-right {
-                                    animation: tphaseTip-fadeOutRight 0.6s ease-in forwards; /* 改为0.6秒 */
+                                    display: block;
                                 }
                             `;
-								document.head.appendChild(style);
-							};
+					document.head.appendChild(style);
+				};
 
-							if (!game.phaseStyle) {
-								game.phaseStyle = true;
-								addStyle();
+				if (!game.phaseStyle) {
+					game.phaseStyle = true;
+					addStyle();
+				}
+
+				// 把提示锚在对应角色框上：横向对齐头像，纵向贴在头像上/下方
+				const updateAnchor = el => {
+					if (!el || !player.node || !player.node.avatar) return;
+					const rect = player.getBoundingClientRect();
+					const avatarRect = player.node.avatar.getBoundingClientRect();
+					const imgWidth = el.offsetWidth || 85;
+					const avatarWidth = avatarRect.width || 100;
+					el.style.left = `${Math.round(rect.left + (avatarRect.left - rect.left) + (avatarWidth - imgWidth) / 2)}px`;
+					el.style.top = `${Math.round(above ? avatarRect.top - el.offsetHeight - 4 : avatarRect.bottom + 4)}px`;
+				};
+
+				const current = tipEl();
+				if (!current) {
+					const el = document.createElement("div");
+					el.className = above ? "tphaseTip tphaseTip-above" : "tphaseTip tphaseTip-below";
+					el.dataset.owner = player.playerid;
+					document.body.appendChild(el);
+
+					const img = document.createElement("img");
+					img.src = imgSrc;
+					img.alt = phasename;
+					el.appendChild(img);
+
+					updateAnchor(el);
+
+					// 下一帧加 active，触发淡入 + 上浮/下沉动画
+					setTimeout(() => {
+						const tip = tipEl();
+						if (tip) tip.classList.add("active");
+					}, 10);
+
+					// 客户端同步
+					if (lib.node && lib.node.clients) {
+						lib.node.clients.forEach(c => {
+							if (!c.gameOptions) c.gameOptions = {};
+							if (!c.gameOptions.phaseTip) {
+								c.send(addStyle);
+								c.gameOptions.phaseTip = true;
 							}
-
-							// 创建并附加到 document.body
-							player.tphaseTip = document.createElement("div");
-							player.tphaseTip.className = "tphaseTip";
-							document.body.appendChild(player.tphaseTip);
-
-							// 创建图片元素并存储引用
-							player.tphaseTipImg = document.createElement("img");
-							player.tphaseTipImg.src = imgSrc;
-							player.tphaseTipImg.alt = phasename;
-							player.tphaseTip.appendChild(player.tphaseTipImg);
-
-							// 执行淡入动画
-							if (player.tphaseTip && player.tphaseTip.classList) {
-								player.tphaseTip.classList.add("fade-in-left");
-								setTimeout(() => {
-									if (player.tphaseTip && player.tphaseTip.classList) {
-										player.tphaseTip.classList.add("active");
-									}
-								}, 10);
-							}
-
-							// 客户端同步
-							if (lib.node && lib.node.clients) {
-								lib.node.clients.forEach(c => {
-									if (!c.gameOptions) c.gameOptions = {};
-									if (!c.gameOptions.phaseTip) {
-										c.send(addStyle);
-										c.gameOptions.phaseTip = true;
-									}
-								});
-							}
-						} else {
-							// 先添加向右淡出动画
-							if (player.tphaseTip && player.tphaseTip.classList) {
-								player.tphaseTip.classList.remove("active", "fade-in-left");
-								player.tphaseTip.classList.add("fade-out-right");
-							}
-
-							// 动画结束后更新图片并重新从左淡入
-							setTimeout(() => {
-								// 直接使用存储的图片引用更新
-								if (player.tphaseTipImg) {
-									player.tphaseTipImg.src = imgSrc;
-									player.tphaseTipImg.alt = phasename;
-								}
-
-								// 移除淡出类，添加淡入类
-								if (player.tphaseTip && player.tphaseTip.classList) {
-									player.tphaseTip.classList.remove("fade-out-right");
-									void player.tphaseTip.offsetWidth; // 触发重绘
-									player.tphaseTip.classList.add("fade-in-left");
-
-									// 短暂延迟后添加active类
-									setTimeout(() => {
-										if (player.tphaseTip && player.tphaseTip.classList) {
-											player.tphaseTip.classList.add("active");
-										}
-									}, 10);
-								}
-							}, 600);
-						}
+						});
 					}
-				},
-				event.triggername,
-				trigger.player
-			);
+				} else {
+					// 新阶段先淡出，再换图淡入
+					current.dataset.owner = player.playerid;
+					current.classList.remove("active");
+					setTimeout(() => {
+						const tip = tipEl();
+						const img = tipImg();
+						if (!tip) return;
+						tip.className = above ? "tphaseTip tphaseTip-above" : "tphaseTip tphaseTip-below";
+						img.src = imgSrc;
+						img.alt = phasename;
+						updateAnchor(tip);
+						setTimeout(() => {
+							const again = tipEl();
+							if (again) again.classList.add("active");
+						}, 10);
+					}, 300);
+				}
+			};
+			//主机负责把显示逻辑发给客机；客机上 broadcastAll 是空操作（game.online 为真直接 return，也没有 lib.node 可广播），
+			//所以客机（以及单机）必须自己直接执行，否则「主机没装扩展时客机自己开了扩展」这种情况会完全没有提示
+			const isHost = !game.online && !!(lib.node && lib.node.clients);
+			if (isHost && lib.config.extension_星之梦_tphaseTip) {
+				game.broadcastAll(showTip, event.triggername, trigger.player);
+			} else {
+				showTip(event.triggername, trigger.player);
+			}
 		},
 		direct: true,
 		popup: false,
