@@ -233,6 +233,20 @@ export let config = {
 		name: "<font size='4'>---------自用修改---------</font>",
 		clear: true,
 	},
+	initCardNum: {
+		name: "初始手牌数",
+		intro: "设置所有玩家的初始手牌数，可填0-10，默认为4。<br>只替换本体的4张基准，如单挑模式按体力上限摸牌、斗地主叫地主多摸牌等特殊规则保持不变。",
+		init: "4",
+		input: true,
+		onblur: function () {
+			this.innerHTML = this.innerHTML.replace(/<br>/g, "");
+			let value = parseInt(this.innerHTML.replace(/[^\d]/g, ""));
+			if (isNaN(value)) value = 4;
+			value = Math.max(0, Math.min(10, value));
+			this.innerHTML = value;
+			game.saveConfig("extension_星之梦_initCardNum", value);
+		},
+	},
 	scsEnhance: {
 		name: "增强十常侍",
 		init: true,
