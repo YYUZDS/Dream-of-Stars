@@ -5,6 +5,7 @@ import {} from "../js/pause.js";
 import {} from "../js/connect.js";
 import {} from "../js/broadcast.js";
 import {} from "../js/private.js";
+import { syncCharacterAssets } from "./assetSync.js";
 export async function precontent(config, pack) {
 	{
 		//本体版本检测：最低适配 1.11.5，1.11.5.x / 1.11.6 / 更高的版本都视为通过
@@ -1535,6 +1536,8 @@ export async function precontent(config, pack) {
 			},
 			[],
 		];
+	//联机素材同步：把扩展目录下的武将图发给没装本扩展的客机
+	syncCharacterAssets();
 	lib.element.content.waitForPlayer = function () {
 		"step 0";
 		ui.auto.hide();
