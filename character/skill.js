@@ -8491,7 +8491,9 @@ const lmCharacter = {
 				} else {
 					await player.link(false);
 					await player.turnOver(false);
-					const cards = get.inpileVCardList(info => info[0] == "trick" && player.hasUseTarget(info[2]));
+					const cards = get.inpileVCardList(info => {
+						return info[0] == "trick" && player.hasUseTarget(info[2]) && !player.getStorage("old_dcrenshuang_used").includes(info[2]);
+					});
 					if (!cards?.length) {
 						return;
 					}
@@ -8502,12 +8504,20 @@ const lmCharacter = {
 						})
 						.forResult();
 					if (result?.bool) {
+						player.addTempSkill("old_dcrenshuang_used", "roundStart");
+						player.markAuto("old_dcrenshuang_used", result.links[0][2]);
 						const card = new lib.element.VCard({ name: result.links[0][2] });
 						if (player.hasUseTarget(card)) {
 							await player.chooseUseTarget(card, true);
 						}
 					}
 				}
+			},
+			subSkill: {
+				used: {
+					charlotte: true,
+					onremove: true,
+				},
 			},
 		},
 
@@ -8726,21 +8736,14 @@ const lmCharacter = {
 			audio: "dcrenshuang",
 			forced: true,
 			filter(event, player) {
-				return player.hp == 1 && event.changedHp != 0;
+				return player.hp === 1 && event.changedHp !== 0;
 			},
 			async content(event, trigger, player) {
-				// 1. 复原武将牌（解除横置与翻面）
 				await player.link(false);
 				await player.turnOver(false);
-
-				// 2. 新增：令其他角色本轮对你使用的下一张牌无效
-				//    设置存储标记，并添加临时技能（回合结束时自动移除）
-				player.storage.oldx_dcrenshuang_invalid = true;
-				player.addTempSkill("oldx_dcrenshuang_invalid", "roundEnd");
-
-				// 3. 视为使用普通锦囊牌（每种牌名每轮限一次）
+				player.addTempSkill("oldx_dcrenshuang_effect", "roundStart");
 				const cards = get.inpileVCardList(info => {
-					return info[0] == "trick" && player.hasUseTarget(info[2]) && !player.getStorage("oldx_dcrenshuang_used").includes(info[2]);
+					return info[0] === "trick" && player.hasUseTarget(info[2]) && !player.getStorage("oldx_dcrenshuang_used").includes(info[2]);
 				});
 				if (!cards?.length) {
 					return;
@@ -8754,10 +8757,7 @@ const lmCharacter = {
 				if (result?.bool) {
 					player.addTempSkill("oldx_dcrenshuang_used", "roundStart");
 					player.markAuto("oldx_dcrenshuang_used", result.links[0][2]);
-					const card = new lib.element.VCard({
-						name: result.links[0][2],
-						isCard: true,
-					});
+					const card = new lib.element.VCard({ name: result.links[0][2], isCard: true });
 					if (player.hasUseTarget(card)) {
 						await player.chooseUseTarget(card, true);
 					}
@@ -8768,25 +8768,19 @@ const lmCharacter = {
 					charlotte: true,
 					onremove: true,
 				},
-				invalid: {
+				effect: {
 					charlotte: true,
-					onremove: true,
+					trigger: { target: "useCardToTarget" },
 					forced: true,
-					trigger: { global: "useCard" },
 					filter(event, player) {
-						if (!player.storage.oldx_dcrenshuang_invalid) return false;
-						if (!event.targets || !event.targets.includes(player)) return false;
-						if (event.player == player) return false;
-						return true;
+						return event.player !== player;
 					},
 					async content(event, trigger, player) {
-						trigger.excluded.add(player);
-						game.log(player, "令", trigger.player, "对", player, "使用的", trigger.card, "无效");
-						player.storage.oldx_dcrenshuang_invalid = false;
+						trigger.getParent().excluded.add(player);
+						game.log(trigger.card, "对", player, "无效");
+						await player.removeSkill("oldx_dcrenshuang_effect");
 					},
-					onremove(player) {
-						delete player.storage.oldx_dcrenshuang_invalid;
-					},
+					intro: { content: "其他角色本轮对你使用的下一张牌无效" },
 				},
 			},
 		},
@@ -12420,7 +12414,7 @@ const lmCharacter = {
 			},
 		},
 		old_dcchouxi: {
-			audio: 2,
+			audio: "dcchouxi",
 			enable: "phaseUse",
 			onChooseToUse(event) {
 				if (game.online) {
@@ -12520,7 +12514,7 @@ const lmCharacter = {
 			},
 		},
 		old_dcjichao: {
-			audio: 2,
+			audio: "dcjichao",
 			enable: "phaseUse",
 			usable: 1,
 			filter(event, player) {
@@ -21314,6 +21308,7 @@ const lmCharacter = {
 				},
 			},
 		},
+		
 		//谋公孙瓒
 		old_sbqiaomeng: {
 			audio: "sbqiaomeng",
@@ -29253,7 +29248,7 @@ const lmCharacter = {
 		old_dcjuanji: "狷急",
 		old_dcjuanji_info: "摸牌阶段开始时，你可以摸体力上限张牌；出牌阶段开始时，你可以失去1点体力，然后视为对一名角色使用一张【杀】；弃牌阶段开始时，你可以调整手牌至手牌上限，然后弃置一名角色区域里至多两张牌。",
 		old_dcrenshuang: "纫霜",
-		old_dcrenshuang_info: "锁定技，①你每轮首次进入濒死时，回复体力至1点并增加1点体力上限（至多以此法增加3点）。②你脱离濒死时，复原武将牌并视为使用一张普通锦囊牌。",
+		old_dcrenshuang_info: "锁定技，①你每轮首次进入濒死时，回复体力至1点并增加1点体力上限（至多以此法增加3点）。②你脱离濒死时，复原武将牌并视为使用一张普通锦囊牌。（每种牌名每轮限一次）",
 
 		oldx_renwan: "旧任婉",
 		oldx_renwan_prefix: "旧",
