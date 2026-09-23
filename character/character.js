@@ -501,6 +501,14 @@ const characters = {
 	},
 
 	//限定专属
+	old_caofang: {
+		sex: "male",
+		group: "wei",
+		hp: 4,
+		skills: ["old_dczhimin", "dcjujian"],
+		img: "image/character/caofang.jpg",
+		dieAudios: ["caofang"],
+	},
 	old_dc_zhushuo: {
 		sex: "male",
 		group: "wei",

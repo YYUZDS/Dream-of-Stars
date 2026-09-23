@@ -6,6 +6,7 @@ const characterReplaces = {
 	caoang: ["old_huan_caoang"],
 	caocao: ["old_mb_caocao"],
 	caochong: ["old_strong_caochong"],
+	caofang: ["old_caofang"],
 	caomao: ["old_mb_caomao"],
 	caopi: ["old_sb_caopi"],
 	caorui: ["old_re_caorui"],
