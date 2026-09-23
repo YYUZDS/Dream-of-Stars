@@ -8187,7 +8187,7 @@ const lmCharacter = {
 			},
 			subSkill: {
 				mark: {
-					audio: "old_dczhimin",
+					audio: "dczhimin",
 					trigger: {
 						player: "gainAfter",
 						global: "loseAsyncAfter",
@@ -8207,7 +8207,7 @@ const lmCharacter = {
 					},
 				},
 				draw: {
-					audio: "old_dczhimin",
+					audio: "dczhimin",
 					trigger: {
 						player: "loseAfter",
 						global: ["equipAfter", "addJudgeAfter", "gainAfter", "loseAsyncAfter", "addToExpansionAfter"],
