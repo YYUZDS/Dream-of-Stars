@@ -14,7 +14,7 @@ const characterSorts = {
 		//界限突破
 		refresh_old: ["old_xin_zhonghui", "old_dc_xushu", "old_re_caorui", "old_re_zhangchunhua"],
 		//群英荟萃
-		huicui_old: ["old_dc_weifeng", "old_chengui", "old_dc_zhugejun", "old_dc_xiahouxuan", "old_dc_sp_zhurong", "old_yue_miheng", "old_dc_liuli", "old_yuechen"],
+		huicui_old: ["old_dc_zhangmancheng", "old_dc_muludawang", "old_dc_weifeng", "old_chengui", "old_dc_zhugejun", "old_dc_xiahouxuan", "old_dc_sp_zhurong", "old_yue_miheng", "old_dc_liuli", "old_yuechen"],
 		//系列专属
 		sp2_old: ["old_hansong", "old_star_dingfeng", "old_star_fazheng"],
 		//限定专属

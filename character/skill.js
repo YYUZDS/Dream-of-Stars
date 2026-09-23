@@ -6698,6 +6698,139 @@ const lmCharacter = {
 		},
 
 		//群英荟萃
+		//新杀张曼成
+		old_dclvecheng: {
+			audio: "dclvecheng",
+			enable: "phaseUse",
+			usable: 1,
+			filterTarget: lib.filter.notMe,
+			async content(event, trigger, player) {
+				const { target } = event;
+				player.addTempSkill("old_dclvecheng_xiongluan");
+				player.markAuto("old_dclvecheng_xiongluan", [target]);
+			},
+			ai: {
+				threaten: 3.1,
+				order: 3.5,
+				expose: 0.2,
+				result: {
+					target(player, target) {
+						if (player.getStorage("old_dclvecheng_xiongluan").includes(target)) {
+							return 0;
+						}
+						if (
+							target.hasSkillTag(
+								"freeShan",
+								false,
+								{
+									player: player,
+									type: "use",
+								},
+								true
+							)
+						) {
+							return -0.6;
+						}
+						var hs = player.countCards("h", card => {
+							if (!player.canUse(card, target)) {
+								return false;
+							}
+							return get.name(card) == "sha" && get.effect(target, card, player, player) > 0;
+						});
+						var ts = target.hp;
+						if (hs >= ts && ts > 1) {
+							return -2;
+						}
+						return -1;
+					},
+				},
+			},
+			subSkill: {
+				xiongluan: {
+					trigger: { player: ["phaseEnd", "useCard1"] },
+					charlotte: true,
+					forced: true,
+					popup: false,
+					onremove(player, skill) {
+						delete player.storage[skill];
+					},
+					filter(event, player) {
+						if (event.name == "useCard") {
+							return event.card.name == "sha" && event.addCount !== false && event.targets?.some(target => player.getStorage("old_dclvecheng_xiongluan").includes(target));
+						}
+						return player.getStorage("old_dclvecheng_xiongluan").some(i => i.isIn());
+					},
+					async content(event, trigger, player) {
+						if (trigger.name == "useCard") {
+							trigger.addCount = false;
+							const stat = player.getStat().card,
+								name = trigger.card.name;
+							if (typeof stat[name] == "number") {
+								stat[name]--;
+							}
+							return;
+						}
+						const targets = player.getStorage(event.name).slice().sortBySeat();
+						if (!targets.length) {
+							return;
+						}
+						while (targets.length && player.isIn()) {
+							const target = targets.shift();
+							await target.showHandcards();
+							let cards = target.getCards("h", card => {
+								return get.name(card) === "sha" && target.canUse(card, player, false);
+							});
+							if (!cards.length) {
+								continue;
+							}
+							let forced = false;
+							while (cards.length && player.isIn()) {
+								const prompt2 = forced ? `掠城：选择对${get.translation(player)}使用的【杀】` : `掠城：是否依次对${get.translation(player)}使用所有的【杀】？`;
+								const result = await target
+									.chooseToUse(
+										forced,
+										function (card, player, event) {
+											if (get.itemtype(card) != "card" || get.name(card) != "sha") {
+												return false;
+											}
+											return lib.filter.filterCard.apply(this, arguments);
+										},
+										prompt2
+									)
+									.set("targetRequired", true)
+									.set("complexTarget", true)
+									.set("complexSelect", true)
+									.set("filterTarget", function (card, player, target) {
+										if (target != _status.event.sourcex && !ui.selected.targets.includes(_status.event.sourcex)) {
+											return false;
+										}
+										return lib.filter.targetEnabled.apply(this, arguments);
+									})
+									.set("sourcex", player)
+									.forResult();
+								if (result.bool) {
+									cards = target.getCards("h", card => {
+										return get.name(card) === "sha" && target.canUse(card, player, false);
+									});
+									forced = true;
+								} else {
+									break;
+								}
+							}
+						}
+					},
+					intro: { content: "对$使用【杀】无任何次数限制" },
+					mod: {
+						cardUsableTarget(card, player, target) {
+							if (card.name == "sha" && player.getStorage("old_dclvecheng_xiongluan").includes(target)) {
+								return true;
+							}
+						},
+					},
+				},
+			},
+		},
+
 		//新杀木鹿大王
 		old_dczhoufa: {
 			audio: "dczhoufa",
@@ -28925,6 +29058,11 @@ const lmCharacter = {
 		old_re_zhangchunhua_prefix: "旧|界",
 
 		//群英荟萃
+		old_dc_zhangmancheng: "旧新杀张曼成",
+		old_dc_zhangmancheng_prefix: "旧|新杀",
+		old_dclvecheng: "掠城",
+		old_dclvecheng_info: "出牌阶段限一次。你可以选择一名其他角色，你于本回合对其使用【杀】无次数限制。然后回合结束时，其展示所有手牌，若其中有【杀】，其可以选择对你依次使用其中所有的【杀】。",
+
 		old_dc_muludawang: "旧新杀木鹿大王",
 		old_dc_muludawang_prefix: "旧|新杀",
 		old_dczhoufa: "咒法",

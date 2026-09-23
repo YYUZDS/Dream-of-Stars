@@ -105,7 +105,7 @@ const characterReplaces = {
 	zhangfei: ["diy_zhangfei"],
 	zhanghe: ["old_sb_zhanghe"],
 	zhangliao: ["old_hefei_zhangliao", "old_sb_zhangliao"],
-	dc_zhangmancheng: ["old_tw_zhangmancheng"],
+	dc_zhangmancheng: ["old_dc_zhangmancheng", "old_tw_zhangmancheng"],
 	zhangqiying: ["old_zhangqiying"],
 	zhangxingcai: ["old_v_zhangxingcai"],
 	zhangyan: ["old_mb_zhangyan"],
