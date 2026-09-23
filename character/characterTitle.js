@@ -263,7 +263,7 @@ const characterTitles = {
 	sw_diaochan: "欲界非天",
 	sw_tw_guanyu: "魂追弗届",
 	sw_tw_lvmeng: "兼资文武",
-	sw_wechat_zhugeliang: "赤壁的妖术师", // 未定义称号
+	sw_wechat_zhugeliang: "赤壁的妖术师",
 	lm_xurong: "玄菟战魔",
 
 	//lm-diy
