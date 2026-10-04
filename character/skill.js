@@ -28770,133 +28770,6 @@ const lmCharacter = {
 			ai: { expose: 0.2 },
 		},
 
-		//神武张辽
-		lmzhiti: {
-			audio: "drlt_zhiti",
-			group: ["lmzhiti_ol"],
-			trigger: {
-				global: ["juedouAfter", "chooseToCompareAfter", "compareMultipleAfter"],
-				player: "damageEnd",
-			},
-			filter(event, player) {
-				if (!player.hasDisabledSlot()) return false;
-				if (event.name == "juedou") {
-					if (![event.player, event.target].includes(player)) return false;
-					if (!event.turn || event.turn === player) return false;
-					const opposite = event.player === player ? event.target : event.player;
-					return opposite?.isIn() && opposite.inRangeOf(player) && opposite.isDamaged();
-				} else if (event.name == "damage") {
-					const opposite = event.source;
-					return opposite?.isIn() && opposite.inRangeOf(player) && opposite.isDamaged();
-				} else {
-					if (![event.player, event.target].includes(player)) return false;
-					if (event.preserve) return false;
-					let opposite;
-					if (player === event.player) {
-						if (event.num1 > event.num2) {
-							opposite = event.target;
-						} else {
-							return false;
-						}
-					} else {
-						if (event.num1 < event.num2) {
-							opposite = event.player;
-						} else {
-							return false;
-						}
-					}
-					return opposite?.isIn() && opposite.inRangeOf(player) && opposite.isDamaged();
-				}
-			},
-			forced: true,
-			content() {
-				player.chooseToEnable();
-			},
-			global: "g_lmzhiti",
-			subSkill: {
-				ol: {
-					audio: "drlt_zhiti",
-					mod: {
-						maxHandcard(player, num) {
-							if (
-								game.hasPlayer(function (current) {
-									return current.isDamaged();
-								})
-							) {
-								return num + 1;
-							}
-						},
-					},
-					trigger: { player: ["phaseDrawBegin2", "phaseEnd"] },
-					forced: true,
-					filter(event, player) {
-						var num = event.name == "phase" ? 5 : 3;
-						if (
-							num == 3
-								? event.numFixed
-								: !game.hasPlayer(function (current) {
-										return current.hasEnabledSlot();
-									})
-						) {
-							return false;
-						}
-						return (
-							game.countPlayer(function (current) {
-								return current.isDamaged();
-							}) >= num
-						);
-					},
-					direct: true,
-					async content(event, trigger, player) {
-						if (trigger.name == "phaseDraw") {
-							player.logSkill("olzhiti");
-							trigger.num++;
-							return;
-						}
-
-						const result = await player
-							.chooseTarget(get.prompt("olzhiti"), "废除一名角色的一个随机装备栏", (card, player, target) => {
-								return target.hasEnabledSlot();
-							})
-							.set("ai", target => {
-								return -get.attitude(_status.event.player, target) * (target.countCards("e") + 1);
-							})
-							.forResult();
-
-						if (result.bool) {
-							const target = result.targets[0];
-							player.logSkill("olzhiti", target);
-							const list = [];
-							for (let i = 1; i < 6; i++) {
-								if (target.hasEnabledSlot(i)) {
-									list.add(i == 3 || i == 4 ? 6 : i);
-								}
-							}
-							const num = list.randomGet();
-							if (num != 6) {
-								await target.disableEquip(num);
-							} else {
-								await target.disableEquip(3, 4);
-							}
-						}
-					},
-				},
-			},
-		},
-		g_lmzhiti: {
-			mod: {
-				maxHandcard(player, num) {
-					if (player.isDamaged())
-						return (
-							num -
-							game.countPlayer(function (current) {
-								return current != player && current.hasSkill("lmzhiti") && current.inRange(player);
-							})
-						);
-				},
-			},
-		},
-
 		//神貂蝉
 		minimeihun: {
 			audio: "meihun",
@@ -29500,6 +29373,99 @@ const lmCharacter = {
 					content() {
 						player.chooseUseTarget(player.storage.shenwuzaishi, "nopopup", true);
 					},
+				},
+			},
+		},
+
+		hf_zhiti: {
+			audio: "drlt_zhiti",
+			trigger: {
+				player: ["phaseEnd", "phaseDrawBegin2", "damageEnd"],
+				global: ["juedouAfter", "chooseToCompareAfter", "compareMultipleAfter"],
+			},
+			forced: true,
+			filter(event, player, name) {
+				if (name == "phaseDrawBegin2") {
+					return !event.numFixed;
+				}
+				if (name == "phaseEnd") {
+					const targets = game.filterPlayer(current => current != player && player.inRangeOf(current));
+					return targets.length > 0 && targets.every(current => current.isDamaged()) && game.hasPlayer(current => current != player && current.countEnabledSlot() > 0);
+				}
+				// ② 自己没有可恢复的装备栏就不必发动
+				if (!player.hasDisabledSlot()) {
+					return false;
+				}
+				// ② 受到伤害后
+				if (name == "damageEnd") {
+					return true;
+				}
+				if (![event.player, event.target].includes(player)) {
+					return false;
+				}
+				// ②【决斗】胜利
+				if (name == "juedouAfter") {
+					return !!event.turn && event.turn !== player;
+				}
+				// ②拼点胜利
+				if (event.preserve) {
+					return false;
+				}
+				return player === event.player ? event.num1 > event.num2 : event.num1 < event.num2;
+			},
+			async content(event, trigger, player) {
+				// ③ 摸牌阶段的额定摸牌数
+				if (event.triggername == "phaseDrawBegin2") {
+					trigger.num += game.countPlayer(current => current.isDamaged());
+					return;
+				}
+				// ① 废除一名其他角色的一个随机装备栏
+				if (event.triggername == "phaseEnd") {
+					const result = await player
+						.chooseTarget(
+							"止啼：请选择一名其他角色，废除其一个随机装备栏",
+							true,
+							(card, player, target) => target != player && target.countEnabledSlot() > 0,
+							target => -get.attitude(get.player(), target)
+						)
+						.forResult();
+					const target = result.targets[0];
+					const slots = [];
+					for (let i = 1; i <= 5; i++) {
+						if (target.countEnabledSlot(i) > 0) {
+							slots.push("equip" + i);
+						}
+					}
+					if (!slots.length) {
+						return;
+					}
+					await target.disableEquip(slots.randomGet());
+					return;
+				}
+				// ② 恢复一个装备栏
+				await player.chooseToEnable();
+			},
+			mod: {
+				// ③ 手牌上限
+				maxHandcard(player, num) {
+					return num + game.countPlayer(current => current.isDamaged());
+				},
+				// ③ 出杀次数
+				cardUsable(card, player, num) {
+					if (card.name == "sha") {
+						return num + game.countPlayer(current => current.isDamaged());
+					}
+				},
+			},
+			global: "g_hf_zhiti",
+		},
+		g_hf_zhiti: {
+			mod: {
+				// ① 你攻击范围内已受伤的其他角色手牌上限-1
+				maxHandcard(player, num) {
+					if (player.isDamaged()) {
+						return num - game.countPlayer(current => current != player && current.hasSkill("hf_zhiti") && current.inRange(player));
+					}
 				},
 			},
 		},
@@ -30816,9 +30782,6 @@ const lmCharacter = {
 
 		sw_zhangliao: "☆神张辽",
 		sw_zhangliao_prefix: "☆神",
-		lmzhiti: "止啼",
-		lmzhiti: "止啼",
-		lmzhiti_info: "锁定技。①你攻击范围内已受伤的其他角色手牌上限-1；②当你和已受伤的角色拼点或【决斗】胜利/受到已受伤角色造成的伤害后，若对方/伤害来源在你的攻击范围内，则你恢复一个装备栏。③若场上已受伤的角色数：不小于1，你的手牌上限+1；不小于3，你于摸牌阶段开始时令额定摸牌数+1；不小于5，回合结束时，你废除一名角色的一个随机装备栏。",
 
 		sw_ganning: "☆神甘宁",
 		sw_ganning_prefix: "☆神",
@@ -30875,6 +30838,9 @@ const lmCharacter = {
 		"#ext:星之梦/audio/die/old_mb_caomao:die": "司马昭！朕宁舍身一死，以坐汝弑君之名。",
 		"#ext:星之梦/audio/die/wangtaowangyue1:die": "落花有意，何人来摘……",
 		"#ext:星之梦/audio/die/wangtaowangyue2:die": "这次比试不算，再来……",
+
+		hf_zhiti: "止啼",
+		hf_zhiti_info: "锁定技。①你攻击范围内已受伤的其他角色手牌上限-1；回合结束时，若你攻击范围内的其他角色均已受伤，你废除一名其他角色的一个随机装备栏。②当你拼点或【决斗】胜利/受到伤害后，你恢复一个装备栏。③你的手牌上限，出杀次数，摸牌阶段的额定摸牌数+X（X为场上已受伤的角色数）",
 	},
 };
 if (!_status.postReconnect.extErdai_skill) {

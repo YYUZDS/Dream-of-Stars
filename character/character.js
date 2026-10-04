@@ -1853,7 +1853,7 @@ const characters = {
 		sex: "male",
 		group: "shen",
 		hp: 4,
-		skills: ["drlt_duorui", "lmzhiti", "shenwuzaishi"],
+		skills: ["drlt_duorui", "hf_zhiti", "shenwuzaishi"],
 		img: "image/character/shen_zhangliao.jpg",
 		dieAudios: ["shen_zhangliao"],
 		groupInGuozhan: "wei",
