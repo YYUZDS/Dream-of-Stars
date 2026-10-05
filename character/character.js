@@ -1484,7 +1484,7 @@ const characters = {
 		sex: "male",
 		group: "qun",
 		hp: 4,
-		skills: ["twguanhuo", "old_twjuxia"],
+		skills: ["old_twjuxia"],
 		img: "image/character/jsrg_huangfusong.jpg",
 		dieAudios: ["jsrg_huangfusong"],
 		names: "皇甫|嵩",

@@ -3308,7 +3308,12 @@ const lmCharacter = {
 					async content(event, trigger, player) {
 						player.removeMark("old_falu_spade", 1);
 						player.popup(event.cost_data);
-						const map = { 黑桃: "spade", 红桃: "heart", 梅花: "club", 方块: "diamond" };
+						const map = {
+							黑桃: "spade",
+							红桃: "heart",
+							梅花: "club",
+							方块: "diamond",
+						};
 						const suit = map[event.cost_data.slice(0, 2)];
 						game.log(player, "将判定结果改为了", `#y${event.cost_data}`);
 						trigger.fixedResult = {
@@ -6833,7 +6838,11 @@ const lmCharacter = {
 						check(card) {
 							return 8 - get.value(card);
 						},
-						viewAs: { name: links[0][2], nature: links[0][3], storage: { old_dczhoufa: true } },
+						viewAs: {
+							name: links[0][2],
+							nature: links[0][3],
+							storage: { old_dczhoufa: true },
+						},
 						popname: true,
 						async precontent(event, trigger, player) {
 							event.getParent().addCount = false;
@@ -8791,7 +8800,10 @@ const lmCharacter = {
 				if (result?.bool) {
 					player.addTempSkill("oldx_dcrenshuang_used", "roundStart");
 					player.markAuto("oldx_dcrenshuang_used", result.links[0][2]);
-					const card = new lib.element.VCard({ name: result.links[0][2], isCard: true });
+					const card = new lib.element.VCard({
+						name: result.links[0][2],
+						isCard: true,
+					});
 					if (player.hasUseTarget(card)) {
 						await player.chooseUseTarget(card, true);
 					}
@@ -9451,9 +9463,24 @@ const lmCharacter = {
 						return false;
 					}
 					if (!event) {
-						return player.hasUseTarget({ name: info[2], nature: info[3], storage: { old_dcczchouxi: true } });
+						return player.hasUseTarget({
+							name: info[2],
+							nature: info[3],
+							storage: { old_dcczchouxi: true },
+						});
 					}
-					return event.filterCard(get.autoViewAs({ name: info[2], nature: info[3], storage: { old_dcczchouxi: true } }, "unsure"), player, event);
+					return event.filterCard(
+						get.autoViewAs(
+							{
+								name: info[2],
+								nature: info[3],
+								storage: { old_dcczchouxi: true },
+							},
+							"unsure"
+						),
+						player,
+						event
+					);
 				});
 				return vcards;
 			},
@@ -9482,7 +9509,11 @@ const lmCharacter = {
 				},
 				check(button) {
 					const player = get.player();
-					const card = get.autoViewAs({ name: button.link[2], nature: button.link[3], storage: { dcchouxi: true } });
+					const card = get.autoViewAs({
+						name: button.link[2],
+						nature: button.link[3],
+						storage: { dcchouxi: true },
+					});
 					return player.getUseValue(card);
 				},
 				backup(links, player) {
@@ -9552,7 +9583,12 @@ const lmCharacter = {
 						player.awakenSkill("old_dcczchouxi");
 						player.addSkill("old_dcczchouxi_refresh");
 						player.addTempSkill("old_dcczchouxi_effect");
-						const card = get.autoViewAs({ name: event.cost_data[0][2], nature: event.cost_data[0][3], isCard: true, storage: { old_dcczchouxi: true } });
+						const card = get.autoViewAs({
+							name: event.cost_data[0][2],
+							nature: event.cost_data[0][3],
+							isCard: true,
+							storage: { old_dcczchouxi: true },
+						});
 						await player.chooseUseTarget(card, true, false).set("prompt", `选择${get.translation(card)}的目标`);
 					},
 				},
@@ -11259,7 +11295,9 @@ const lmCharacter = {
 					charlotte: true,
 					onremove: true,
 					forced: true,
-					intro: { content: "下次使用【杀】或普通锦囊牌必须指定$为目标（无次数与距离限制）" },
+					intro: {
+						content: "下次使用【杀】或普通锦囊牌必须指定$为目标（无次数与距离限制）",
+					},
 					mod: {
 						cardUsable(card) {
 							if (card.name === "sha" || get.type(card) === "trick") {
