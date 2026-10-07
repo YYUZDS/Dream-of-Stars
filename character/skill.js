@@ -233,10 +233,14 @@ const lmCharacter = {
 						viewAs: { name: links[0][2], nature: links[0][3], isCard: true },
 						async precontent(event, trigger, player) {
 							player.logSkill("old_olsblucun");
-							const name = "old_ol_sb_zhangrang";
+							//换肤①：照核心，发动赂存时翻转形象（普通↔影）
+							//核心的武将 id 与皮肤名同名（ol_sb_zhangrang），可以直接和 id 比；
+							//这里的武将 id 是 old_ol_sb_zhangrang，只能按“当前是不是影”来判断
+							const skin = "ol_sb_zhangrang",
+								name = "old_ol_sb_zhangrang";
 							const key = ["name", "name2"].find(i => player[i] == name);
 							if (key) {
-								player.changeSkin({ characterName: name }, `${"ol_sb_zhangrang"}${player.skin[key] == name ? "_shadow" : ""}`);
+								player.changeSkin({ characterName: name }, player.skin[key] == `${skin}_shadow` ? skin : `${skin}_shadow`);
 							}
 							player.addTempSkill("old_olsblucun_used", "roundStart");
 							player.markAuto("old_olsblucun_used", [event.result.card.name]);
@@ -335,45 +339,56 @@ const lmCharacter = {
 						if (event.name === "useCard") {
 							return event.skill === "old_olsblucun_backup" && _status.currentPhase?.countCards("h") > 0;
 						}
-						return player.getExpansions("old_olsblucun").length;
+						//照核心：阶段结束一律进来（有没有“赂”都要把形象刷回普通图）
+						return true;
 					},
 					forced: true,
+					//静默发动：现在没有“赂”的阶段结束也要走一遍，不能让引擎每阶段都播报一次【赂存】，
+					//真正有事发生时在各分支里自己 logSkill
+					popup: false,
 					async content(event, trigger, player) {
+						const skin = "ol_sb_zhangrang",
+							name = "old_ol_sb_zhangrang";
 						if (trigger.name === "useCard") {
 							const target = _status.currentPhase;
 							player.line(target);
 							const { cards } = await target.chooseCard("赂存：将一张手牌置于" + get.translation(player) + "的武将牌", "h", true).forResult();
 							if (cards?.length) {
+								player.logSkill(event.name);
+								//换肤②：照核心，手牌被置为“赂”的瞬间强制变影
+								player.changeSkin({ characterName: name }, `${skin}_shadow`);
 								const next = player.addToExpansion(cards, target, "give");
 								next.gaintag.add("old_olsblucun");
 								await next;
 							}
 						} else {
-							const names = player
-								.getHistory("useCard", evt => evt.skill === "old_olsblucun_backup")
-								.map(evt => evt.card.name)
-								.unique();
-							let prompt = "赂存：将一张“赂”置入弃牌堆并摸一张牌";
-							if (names.length) {
-								prompt = "###" + prompt;
-								prompt += '###<div class="text center">若你移去了' + get.translation(names) + "，则额外摸一张牌</div>";
+							if (player.getExpansions("old_olsblucun").length) {
+								player.logSkill(event.name);
+								//换肤③：照核心，弃“赂”摸牌的这段结算期间是影
+								player.changeSkin({ characterName: name }, `${skin}_shadow`);
+								const names = player
+									.getHistory("useCard", evt => evt.skill === "old_olsblucun_backup")
+									.map(evt => evt.card.name)
+									.unique();
+								let prompt = "赂存：将一张“赂”置入弃牌堆并摸一张牌";
+								if (names.length) {
+									prompt = "###" + prompt;
+									prompt += '###<div class="text center">若你移去了' + get.translation(names) + "，则额外摸一张牌</div>";
+								}
+								const { links: cards } = await player
+									.chooseButton([prompt, player.getExpansions("old_olsblucun")], true)
+									.set("names", names)
+									.set("ai", button => {
+										return Math.random() + (get.event().names.includes(get.name(button.link, false)) ? 2 : 1);
+									})
+									.forResult();
+								if (cards?.length) {
+									await player.loseToDiscardpile(cards);
+									await player.draw(1 + cards.some(card => names.includes(get.name(card, false))));
+								}
 							}
-							const { links: cards } = await player
-								.chooseButton([prompt, player.getExpansions("old_olsblucun")], true)
-								.set("names", names)
-								.set("ai", button => {
-									return Math.random() + (get.event().names.includes(get.name(button.link, false)) ? 2 : 1);
-								})
-								.forResult();
-							if (cards?.length) {
-								await player.loseToDiscardpile(cards);
-								await player.draw(1 + cards.some(card => names.includes(get.name(card, false))));
-							}
-							const name = "old_ol_sb_zhangrang";
-							const key = ["name", "name2"].find(i => player[i] == name);
-							if (key) {
-								player.changeSkin({ characterName: name }, `${"ol_sb_zhangrang"}${player.skin[key] == name ? "_shadow" : ""}`);
-							}
+							//照核心：结算完（哪怕一张“赂”都没有）一律刷回普通图
+							player.changeSkin({ characterName: name }, skin);
 						}
 					},
 				},
@@ -14425,7 +14440,7 @@ const lmCharacter = {
 					popup: false,
 					forceDie: true,
 					async content(event, trigger, player) {
-						player.changeSkin({ characterName: "old_mb_caomaoo" }, "mb_caomao_dead");
+						player.changeSkin({ characterName: "old_mb_caomao" }, "mb_caomao_dead");
 					},
 				},
 			},

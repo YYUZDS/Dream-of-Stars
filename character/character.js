@@ -871,6 +871,7 @@ const characters = {
 		group: "wei",
 		hp: 3,
 		skills: ["old_mbqianlong", "old_mbweitong"],
+		img: "image/character/lx_caomao.jpg",
 		isZhugong: true,
 	},
 	old_mb_cuilingyi: {
