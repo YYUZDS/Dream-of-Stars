@@ -1282,7 +1282,7 @@ const characters = {
 		sex: "male",
 		group: "wu",
 		hp: 4,
-		skills: ["old_potshanxi", "potdimeng"],
+		skills: ["old_potshanxi", "old_potqizhou"],
 		img: "image/character/pot_heqi.jpg",
 		dieAudios: ["pot_heqi"],
 	},
