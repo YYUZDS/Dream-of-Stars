@@ -625,6 +625,14 @@ const characters = {
 		img: "image/character/dc_chenzhi.jpg",
 		dieAudios: ["dc_chenzhi"],
 	},
+	old_v_guanyinping: {
+		sex: "female",
+		group: "shu",
+		hp: 4,
+		skills: ["old_dcshaowei", "dcdichou"],
+		img: "image/character/v_guanyinping.jpg",
+		dieAudios: ["v_guanyinping"],
+	},
 	old_v_machao: {
 		sex: "male",
 		group: "qun",

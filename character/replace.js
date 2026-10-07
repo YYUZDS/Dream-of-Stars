@@ -27,6 +27,7 @@ const characterReplaces = {
 	gexuan: ["old_tw_gexuan"],
 	gongsunzan: ["old_sb_gongsunzan"],
 	guanqiujian: ["old_mb_sp_guanqiujian", "old_tw_guanqiujian"],
+	guanyinping: ["old_v_guanyinping"],
 	guanyu: ["old_dc_sb_guanyu", "old_wu_guanyu", "old_sb_guanyu", "old_xia_guanyu"],
 	guohuai: ["old_tw_guohuai"],
 	guojia: ["old_sb_guojia"],

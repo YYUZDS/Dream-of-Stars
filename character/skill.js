@@ -9669,6 +9669,75 @@ const lmCharacter = {
 			},
 		},
 
+		//威关银屏
+		//威关银屏
+		old_dcshaowei: {
+			audio: "dcshaowei",
+			audioname: ["v_guanyinping_shadow"],
+			trigger: {
+				player: "loseAfter",
+				global: ["equipAfter", "addJudgeAfter", "gainAfter", "loseAsyncAfter", "addToExpansionAfter"],
+			},
+			filter(event, player, name, index) {
+				if (index && player.getStorage("old_dcshaowei_used").includes(index)) {
+					return false;
+				}
+				if (event.name === "gain" && event.player === player) {
+					return false;
+				}
+				const evt = event.getl?.(player);
+				if (!evt?.cards2?.length) {
+					return false;
+				}
+				const suits = evt.cards2
+					.map(card => get.suit(card, player))
+					.filter(suit => ["diamond", "heart"].includes(suit))
+					.unique();
+				if (!player.isDamaged() && !player.hasDisabledSlot()) {
+					suits.remove("heart");
+				}
+				return index ? suits.includes(index) : suits.length > 0;
+			},
+			getIndex(event, player) {
+				const evt = event.getl?.(player);
+				return evt.cards2
+					.map(card => get.suit(card, player))
+					.filter(suit => ["diamond", "heart"].includes(suit))
+					.unique();
+			},
+			prompt2(event, player, name, suit) {
+				if (suit == "diamond") return "你失去♦️牌后，你可以摸三张红色牌";
+				return "你失去♥️牌后，你可以回复1点体力并恢复一个装备栏";
+			},
+			async content(event, trigger, player) {
+				const suit = event.indexedData;
+				player.addTempSkill("old_dcshaowei_used");
+				player.markAuto("old_dcshaowei_used", [suit]);
+				if (suit == "diamond") {
+					const cards = [];
+					while (cards.length < 3) {
+						const card = get.cardPile2(card => get.color(card, false) == "red" && !cards.includes(card), "random");
+						if (!card) {
+							break;
+						}
+						cards.push(card);
+					}
+					if (cards.length) {
+						await player.gain(cards, "draw");
+					}
+				} else {
+					await player.recover();
+					if (player.hasDisabledSlot()) {
+						await player.chooseToEnable();
+						player.changeSkin({ skill: "old_dcshaowei" }, "v_guanyinping_shadow");
+					}
+				}
+			},
+			subSkill: {
+				used: { charlotte: true, onremove: true },
+			},
+		},
+
 		//威马超
 		old_dczhongtao: {
 			audio: "dczhongtao",
@@ -30123,6 +30192,11 @@ const lmCharacter = {
 		old_dc_chenzhi_prefix: "旧|新杀",
 		old_dcczchouxi: "仇隙",
 		old_dcczchouxi_info: "限定技，出牌阶段或受到伤害后，你可视为使用一张牌名字数至多为X的伤害牌（X为本轮此技能使用的次数），此牌可额外选择任意名本轮对你造成过伤害的角色为目标。当你弃置手牌时，若弃置手牌数大于等于当前你剩余手牌数，此技能视为未发动过。",
+
+		old_v_guanyinping: "旧威关银屏",
+		old_v_guanyinping_prefix: "旧|威",
+		old_dcshaowei: "绍威",
+		old_dcshaowei_info: "每回合每项各限一次：1.你失去♦️牌后，你可以摸三张红色牌；2.你失去♥️牌后，你可以回复1点体力并恢复一个装备栏。",
 
 		old_v_machao: "旧威马超",
 		old_v_machao_prefix: "旧|威",
