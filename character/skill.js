@@ -22603,6 +22603,159 @@ const lmCharacter = {
 			},
 		},
 
+		//兵势篇
+		//势贺齐
+		old_potshanxi: {
+			audio: "potshanxi",
+			enable: "phaseUse",
+			filter(event, player) {
+				const num = player.countCards("h", card => card.hasGaintag("potshanxi_tag"));
+				return num > player.countCards("h") - num;
+			},
+			filterTarget(card, player, target) {
+				return !player.getStorage("old_potshanxi_used").includes(target) && player.canUse(card, target);
+			},
+			filterCard(card) {
+				return card.hasGaintag("potshanxi_tag");
+			},
+			position: "h",
+			selectCard: [1, Infinity],
+			check(card) {
+				return 114514 - get.value(card);
+			},
+			viewAs: { name: "juedou" },
+			onuse(result, player) {
+				const cards = result.cards || [];
+				if (result.card) {
+					result.card.storage = { ...result.card.storage, old_potshanxi: cards.length || 1 };
+				}
+				const target = result.targets?.[0];
+				if (target) {
+					player.addTempSkill("old_potshanxi_used", "phaseAnyAfter");
+					player.markAuto("old_potshanxi_used", [target]);
+				}
+			},
+			group: ["old_potshanxi_damage"],
+			ai: {
+				combo: "potqizhou",
+				order() {
+					return get.order({ name: "juedou" }) + 0.5;
+				},
+			},
+			subSkill: {
+				used: { charlotte: true, onremove: true },
+				damage: {
+					charlotte: true,
+					silent: true,
+					trigger: { global: "damageBegin1" },
+					filter(event) {
+						return typeof event.card?.storage?.old_potshanxi == "number";
+					},
+					async content(event, trigger, player) {
+						trigger.num = trigger.card.storage.old_potshanxi;
+					},
+				},
+			},
+		},
+		old_potqizhou: {
+			audio: "potqizhou",
+			init(player, skill) {
+				game.addGlobalSkill("potshanxi_tag");
+			},
+			trigger: {
+				player: ["addJudgeAfter", "equipAfter"],
+			},
+			filter(event, player) {
+				return game.hasPlayer(current => current.hasCards("h"));
+			},
+			async cost(event, trigger, player) {
+				event.result = await player
+					.chooseTarget({
+						prompt: get.prompt(event.skill),
+						prompt2: "将一名角色的至多X张手牌标记为应机牌",
+						filterTarget(card, player, target) {
+							return target.hasCards("h");
+						},
+						ai(target) {
+							const player = get.player();
+							return get.effect(target, { name: "guohe_copy", position: "h" }, player, player) * (target.countCards("h") - target.countCards("h", card => card.hasGaintag("potshanxi_tag")));
+						},
+					})
+					.forResult();
+			},
+			async content(event, trigger, player) {
+				const target = event.targets[0];
+				//"此牌使用者"＝把那张牌放进你场上的角色（延时锦囊的使用者；自己装备时就是你）
+				const user = trigger.getParent("useCard")?.player;
+				const num = player.countCards("ej") + (user && user != player ? user.countCards("ej") : 0);
+				if (num < 1) {
+					return;
+				}
+				const result = await player
+					.choosePlayerCard({
+						prompt: `将${get.translation(target)}的至多${get.cnNumber(num)}张手牌标记为应机牌`,
+						target,
+						forced: true,
+						position: "h",
+						selectButton: [1, num],
+						ai(button) {
+							if (button.link.name == "sha") {
+								return 2 + Math.random();
+							}
+							return 1 + Math.random();
+						},
+					})
+					.forResult();
+				if (result?.bool && result.links?.length) {
+					const cards = result.links;
+					target.addGaintag(cards, "potshanxi_tag");
+					const counts = {};
+					cards.forEach(card => (counts[get.name(card)] = (counts[get.name(card)] || 0) + 1));
+					const sha = counts.sha || 0;
+					if (sha > 0 && sha >= Math.max(...Object.values(counts))) {
+						player
+							.when({ player: "old_potqizhouAfter" })
+							.filter(evt => evt != event)
+							.step(async (event, trigger, player) => {
+								await player.draw({ num, gaintag: ["potshanxi_tag"] });
+							});
+					}
+				}
+			},
+			locked: false,
+			//应机牌仅对自己可见所以只给自己加个ai
+			mod: {
+				aiOrder(player, card, num) {
+					if (get.itemtype(card) == "card" && card.hasGaintag("potshanxi_tag")) {
+						return num + 0.1;
+					}
+				},
+				aiValue(player, card, num) {
+					if (get.itemtype(card) == "card" && card.hasGaintag("potshanxi_tag")) {
+						return num / 114514;
+					}
+				},
+				aiUseful() {
+					return lib.skill.old_potqizhou.mod.aiValue.apply(this, arguments);
+				},
+			},
+			group: ["old_potqizhou_draw"],
+			subSkill: {
+				draw: {
+					audio: "potqizhou",
+					forced: true,
+					locked: false,
+					trigger: { player: "phaseDrawBegin2" },
+					filter(event, player) {
+						return !event.numFixed;
+					},
+					async content(event, trigger, player) {
+						await player.draw({ num: 2, gaintag: ["potshanxi_tag"] });
+					},
+				},
+			},
+		},
+
 		//势鲁肃
 		old_pothaoshi: {
 			audio: "pothaoshi",
@@ -30480,6 +30633,12 @@ const lmCharacter = {
 		old_sbtianxiang_info: "①出牌阶段限三次，你可以交给一名没有“天香”标记的其他角色一张红色牌，然后令其获得此牌花色的“天香”标记。②当你受到伤害时，你可以移去一名角色的“天香”标记，若此“天香”标记为：红桃，你防止此伤害，其受到伤害来源对其造成的1点伤害（若没有伤害来源则改为无来源伤害）；方片，其交给你两张牌。③准备阶段，你移去场上所有的“天香”标记，然后摸X张牌（X为移去的“天香”标记数+3）。",
 
 		//兵势篇
+		old_pot_heqi: "旧势贺齐",
+		old_pot_heqi_prefix: "旧|势",
+		old_potshanxi: "闪袭",
+		old_potshanxi_info: `出牌阶段每名角色限一次，若你${get.poptip("potshanxi_yingji")}的数量大于其他手牌数，你可将任意张${get.poptip("potshanxi_yingji")}当【决斗】对其使用，且造成的伤害值改为本次转化牌的数量。`,
+		old_potqizhou: "绮胄",
+		old_potqizhou_info: `当有牌进入你的场上后，你可将一名角色的至多X张手牌标记为${get.poptip("potshanxi_yingji")}（X为你与此牌使用者场上牌数量的和）。若本次被标记牌中【杀】最多，下次发动此技能后，你摸X张${get.poptip("potshanxi_yingji")}。摸牌阶段，你额外摸两张${get.poptip("potshanxi_yingji")}。`,
 
 		old_pot_lusu: "旧势鲁肃",
 		old_pot_lusu_prefix: "旧|势",

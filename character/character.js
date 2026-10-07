@@ -1270,6 +1270,14 @@ const characters = {
 	},
 
 	//兵势篇
+	old_pot_heqi: {
+		sex: "male",
+		group: "wu",
+		hp: 4,
+		skills: ["old_potshanxi", "potdimeng"],
+		img: "image/character/pot_heqi.jpg",
+		dieAudios: ["pot_heqi"],
+	},
 	old_pot_lusu: {
 		sex: "male",
 		group: "wu",

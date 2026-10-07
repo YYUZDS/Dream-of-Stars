@@ -32,6 +32,7 @@ const characterReplaces = {
 	guojia: ["old_sb_guojia"],
 	guozhao: ["old_mb_guozhao"],
 	handang: ["old_sb_handang"],
+	heqi: ["old_pot_heqi"],
 	huangfusong: ["old_wu_huangfusong", "old_tw_huangfusong", "old_jsrg_huangfusong"],
 	huanggai: ["old_sb_huanggai"],
 	huangzhong: ["old_sb_huangzhong"],
