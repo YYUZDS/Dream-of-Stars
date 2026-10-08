@@ -1278,6 +1278,14 @@ const characters = {
 	},
 
 	//兵势篇
+	old_pot_chenqun: {
+		sex: "male",
+		group: "wei",
+		hp: 3,
+		skills: ["old_potfaen", "old_potdingpin"],
+		img: "image/character/pot_chenqun.jpg",
+		dieAudios: ["pot_chenqun"],
+	},
 	old_pot_heqi: {
 		sex: "male",
 		group: "wu",

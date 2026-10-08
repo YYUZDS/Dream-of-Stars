@@ -11,6 +11,7 @@ const characterReplaces = {
 	caopi: ["old_sb_caopi"],
 	caorui: ["old_re_caorui"],
 	chengpu: ["old_ol_chengpu"],
+	chenqun: ["old_pot_chenqun"],
 	chengui: ["old_chengui", "old_mb_chengui"],
 	chendao: ["old_pot_chendao"],
 	dc_chenzhi: ["old_dc_chenzhi", "old_mb_chenzhi"],

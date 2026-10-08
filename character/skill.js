@@ -22673,6 +22673,145 @@ const lmCharacter = {
 		},
 
 		//兵势篇
+		//势陈群
+		old_potfaen: {
+			audio: "potfaen", //复用核心【法恩】语音（改名后必须写引用，见说明1）
+			logAudio: () => 2,
+			trigger: { global: "useCard" },
+			filter(event, player) {
+				const history = game.getAllGlobalHistory("useCard");
+				const index = history.indexOf(event);
+				if (!event.player?.isIn()) {
+					return false;
+				}
+				if (index > 0) {
+					return history[index - 1].player == player;
+				}
+				return false;
+			},
+			async cost(event, trigger, player) {
+				const target = trigger.player;
+				const list = [`令${get.translation(target)}摸一张牌`];
+				if (target.countDiscardableCards(target, "he")) {
+					list.push(`令${get.translation(target)}弃一张牌`);
+				}
+				list.push("cancel2");
+				const result = await player
+					.chooseControl({
+						controls: list,
+						prompt: "法恩：你可以选择一项",
+						ai() {
+							const { player, target, controls } = get.event();
+							if (get.attitude(player, target) > 0) {
+								controls.remove(controls[1]);
+							}
+							return controls.slice(0).remove("cancel2").randomGet();
+						},
+					})
+					.set("target", target)
+					.forResult();
+				if (typeof result?.control == "string" && result.control != "cancel2") {
+					event.result = {
+						bool: true,
+						cost_data: result.control,
+					};
+				}
+			},
+			logTarget: "player",
+			async content(event, trigger, player) {
+				const {
+					cost_data: link,
+					targets: [target],
+				} = event;
+				if (link == `令${get.translation(target)}摸一张牌`) {
+					await target.draw({ num: 1 });
+				} else {
+					if (target.countDiscardableCards(target, "he")) {
+						await target.chooseToDiscard({ forced: true, position: "he" });
+					}
+				}
+				player.addTempSkill(event.name + "_effect");
+				player.markAuto(event.name + "_effect", [link == `令${get.translation(target)}摸一张牌` ? "discard" : "draw"]);
+			},
+			subSkill: {
+				effect: {
+					audio: "potfaen",
+					logAudio: () => ["potfaen3.mp3", "potfaen4.mp3"],
+					charlotte: true,
+					forced: true,
+					onremove: true,
+					firstDo: true,
+					intro: {
+						content(storage, player) {
+							return "本回合下一张牌被使用时，使用者须" + (storage.includes("draw") ? "摸" : "") + (storage.includes("discard") ? "弃" : "") + "一张牌";
+						},
+					},
+					trigger: { global: "useCard" },
+					filter(event, player) {
+						return player.getStorage("old_potfaen_effect").length && event.player?.isIn();
+					},
+					logTarget: "player",
+					async content(event, trigger, player) {
+						const {
+							targets: [target],
+						} = event;
+						const storage = player.getStorage(event.name).slice();
+						player.removeSkill(event.name);
+						if (storage.includes("draw")) {
+							await target.draw({ num: 1 });
+						}
+						if (storage.includes("discard") && target.countDiscardableCards(target, "he")) {
+							await target.chooseToDiscard({ forced: true, position: "he" });
+						}
+					},
+				},
+			},
+		},
+
+		old_potdingpin: {
+			audio: "potdingpin", //复用核心【定品】语音
+			round: 1,
+			trigger: { global: "phaseEnd" },
+			filter(event, player) {
+				return game.hasPlayer(current => current.hasHistory("lose", evt => evt.cards2?.length));
+			},
+			async cost(event, trigger, player) {
+				let maxLose = 0,
+					targets = [];
+				for (const target of game.filterPlayer()) {
+					const lose = target
+						.iterHistory("lose", evt => evt.cards2?.length)
+						.map(evt => evt.cards2.length)
+						.reduce((sum, len) => sum + len, 0);
+					if (lose > maxLose) {
+						maxLose = lose;
+						targets = [target];
+					} else if (lose === maxLose) {
+						targets.push(target);
+					}
+				}
+				event.result = await player
+					.chooseTarget({
+						prompt: get.prompt2(event.skill),
+						filterTarget(card, player, target) {
+							return get.event().targets.includes(target);
+						},
+						ai(target) {
+							return get.effect(target, { name: "draw" }, get.player(), get.player());
+						},
+					})
+					.set("targets", targets)
+					.forResult();
+			},
+			async content(event, trigger, player) {
+				const {
+					targets: [target],
+				} = event;
+				//令其执行一次额外的摸牌阶段
+				await target.phaseDraw();
+			},
+		},
+
 		//势贺齐
 		old_potshanxi: {
 			audio: "potshanxi",
@@ -30707,6 +30846,13 @@ const lmCharacter = {
 		old_sbtianxiang_info: "①出牌阶段限三次，你可以交给一名没有“天香”标记的其他角色一张红色牌，然后令其获得此牌花色的“天香”标记。②当你受到伤害时，你可以移去一名角色的“天香”标记，若此“天香”标记为：红桃，你防止此伤害，其受到伤害来源对其造成的1点伤害（若没有伤害来源则改为无来源伤害）；方片，其交给你两张牌。③准备阶段，你移去场上所有的“天香”标记，然后摸X张牌（X为移去的“天香”标记数+3）。",
 
 		//兵势篇
+		old_pot_chenqun: "旧势陈群",
+		old_pot_chenqun_prefix: "旧|势",
+		old_potfaen: "法恩",
+		old_potfaen_info: "有角色使用牌时，若上一张牌的使用者为你，你可选择：1.令其摸一张牌；2.令其弃置一张牌。若如此做，本回合下一张牌被使用时，使用者将额外执行另一项。",
+		old_potdingpin: "定品",
+		old_potdingpin_info: "每轮限一次，每回合结束时，你可令本回合失去牌最多的一名角色执行一次额外的摸牌阶段。",
+
 		old_pot_heqi: "旧势贺齐",
 		old_pot_heqi_prefix: "旧|势",
 		old_potshanxi: "闪袭",
