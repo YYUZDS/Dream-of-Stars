@@ -17808,7 +17808,7 @@ const lmCharacter = {
 					},
 				},
 			},
-			group: "old_sbxingshang_gain",
+			group: ["old_sbxingshang_gain", "old_sbxingshang_window"],
 			subSkill: {
 				aiSkill: {},
 				backup: {},
@@ -17819,15 +17819,28 @@ const lmCharacter = {
 						if (player.countMark("old_sbxingshang") >= get.info("old_sbxingshang").getLimit) {
 							return false;
 						}
-						return event.name === "die" || !player.getHistory("custom", evt => evt.old_sbxingshang).length;
+						return event.name === "die" || !player.getStorage("old_sbxingshang_damage", false);
 					},
 					forced: true,
 					locked: false,
 					async content(event, trigger, player) {
 						player.addMark("old_sbxingshang", Math.min(2, get.info("old_sbxingshang").getLimit - player.countMark("old_sbxingshang")));
 						if (trigger.name === "damage") {
-							player.getHistory("custom").push({ old_sbxingshang: true });
+							player.setStorage("old_sbxingshang_damage", true);
 						}
+					},
+				},
+				//伤害记账窗口：每轮结束时开一个新窗口（随后的“轮开始”仍在这个窗口里），每个回合正式开始后再开一个
+				window: {
+					charlotte: true,
+					silent: true,
+					popup: false,
+					forced: true,
+					firstDo: true,
+					priority: 100,
+					trigger: { global: ["roundEnd", "phaseBeginStart"] },
+					async content(event, trigger, player) {
+						player.setStorage("old_sbxingshang_damage", false);
 					},
 				},
 			},
