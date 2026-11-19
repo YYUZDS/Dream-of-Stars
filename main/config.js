@@ -72,16 +72,6 @@ export let config = {
 			2: "十周年阶段提示",
 		},
 	},
-	handcountRight: {
-		name: "手机版手牌数靠右",
-		init: true,
-		intro: "手机版（默认/宽屏布局）把自己的手牌数角标改到右下角，体力列同步上移让位。",
-		onclick: function (bool) {
-			game.saveConfig("extension_星之梦_handcountRight", bool);
-			//只切本机 body 上的类，不广播；客机不会跟着变
-			if (lib.xzmApplyHandcountRight) lib.xzmApplyHandcountRight();
-		},
-	},
 	shoushalog: {
 		//搬运自手杀ui
 		init: true,
@@ -201,7 +191,7 @@ export let config = {
 	banDefaultNickname: {
 		name: "禁止默认昵称加入",
 		init: true,
-		intro: "开启后，昵称为“无名玩家”、“请修改昵称”或“点击修改昵称”的玩家无法加入你创建的房间。",
+		intro: "开启后，昵称为“无名玩家”、“请修改昵称”或“点击修改昵称”的玩家无法加入你创建的房间。<br>仅房主需要开启此项，客机无需安装本扩展。",
 	},
 	fileimport: {
 		name: "导入交互素材",
@@ -264,7 +254,7 @@ export let config = {
 	},
 	initCardNum: {
 		name: "初始手牌数",
-		intro: "设置所有玩家的初始手牌数，可填0-10，默认为4。<br>特殊规则保持不变。",
+		intro: "设置所有玩家的初始手牌数，可填0-10，默认为4。<br>只替换本体的4张基准，如单挑模式按体力上限摸牌、斗地主叫地主多摸牌等特殊规则保持不变。",
 		init: "4",
 		input: true,
 		onblur: function () {

@@ -5,18 +5,6 @@ import {} from "../js/pause.js";
 import {} from "../js/connect.js";
 import {} from "../js/broadcast.js";
 import {} from "../js/private.js";
-//手机版布局：自己的手牌数角标从屏幕左下角改到武将牌右下角（扩展设置-美化相关可开关，样式在 css/player.css）
-//只改本机页面：开关读的是本机 lib.config，不广播，联机时客机仍按自己的设置显示
-function xzmApplyHandcountRight() {
-	if (!document.body) return;
-	//新装的扩展还没有这个配置项时按“开”处理，和 config.js 里的默认值一致
-	const enabled = lib.config.extension_星之梦_handcountRight;
-	document.body.classList.toggle("xzm-handcount-right", enabled !== false);
-}
-lib.xzmApplyHandcountRight = xzmApplyHandcountRight;
-xzmApplyHandcountRight();
-lib.arenaReady.push(xzmApplyHandcountRight);
-lib.init.css(lib.assetURL + "extension/星之梦/css", "player");
 export async function precontent(config, pack) {
 	{
 		//本体版本检测：最低适配 1.11.5，1.11.5.x / 1.11.6 / 更高的版本都视为通过
