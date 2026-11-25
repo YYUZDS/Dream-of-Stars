@@ -119,7 +119,7 @@ const characterReplaces = {
 	zhonghui: ["old_clan_zhonghui", "old_xin_zhonghui"],
 	zhoubuyi: ["old_yj_zhoubuyi"],
 	zhugeguo: ["old_huan_zhugeguo"],
-	zhugejin: ["old_zhugejin", "old_sb_zhugejin"],
+	zhugejin: ["old_zhugejin", "old_star_zhugejin", "old_sb_zhugejin"],
 	tw_zhugejun: ["old_dc_zhugejun"],
 	sp_zhugeliang: ["old_sb_sp_zhugeliang", "oldx_sb_sp_zhugeliang"],
 	zhugeliang: ["old_dc_sb_zhugeliang", "old_wu_zhugeliang", "old_huan_zhugeliang"],

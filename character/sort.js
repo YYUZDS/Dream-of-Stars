@@ -16,7 +16,7 @@ const characterSorts = {
 		//群英荟萃
 		huicui_old: ["old_dc_zhangmancheng", "old_dc_muludawang", "old_dc_weifeng", "old_chengui", "old_dc_zhugejun", "old_dc_xiahouxuan", "old_dc_sp_zhurong", "old_yue_miheng", "old_dc_liuli", "old_yuechen"],
 		//系列专属
-		sp2_old: ["old_hansong", "old_star_dingfeng", "old_star_fazheng"],
+		sp2_old: ["old_hansong", "old_star_dingfeng", "old_star_fazheng", "old_star_zhugejin"],
 		//限定专属
 		xianding_old: ["old_lizhaoyi", "old_caofang", "old_dc_zhushuo", "old_liufuren", "old_renwan", "oldx_renwan", "old_dc_tengfanglan", "old_liujinliupei", "old_pangfengyi", "old_zhugejing", "old_bailingyun", "old_ruanyu", "old_xurong", "old_yuanji", "old_dc_chenzhi", "old_v_guanyinping", "old_v_machao", "old_v_zhangxingcai", "old_dc_sb_zhugeliang", "old_dc_sb_xunyu", "old_dc_sb_luxun", "old_dc_sb_hulie", "old_dc_sb_xuyou", "old_dc_sb_zhuran", "old_dc_sb_dengai", "old_dc_sb_guanyu", "old_dc_sb_xusheng", "old_wu_zhugeliang", "old_wu_guanyu", "old_wu_huangfusong", "old_wu_lukang", "old_dc_shen_zhangliao", "old_dc_shen_sunquan", "old_dc_shen_huatuo"],
 

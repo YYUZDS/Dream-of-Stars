@@ -491,6 +491,14 @@ const characters = {
 		img: "image/character/star_fazheng.jpg",
 		dieAudios: ["star_fazheng"],
 	},
+	old_star_zhugejin: {
+		sex: "male",
+		group: "shu",
+		hp: 3,
+		skills: ["old_starzunjian", "old_starhongya"],
+		img: "image/character/star_zhugejin.jpg",
+		dieAudios: ["star_zhugejin"],
+	},
 
 	//限定专属
 	old_lizhaoyi: {

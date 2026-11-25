@@ -69,6 +69,7 @@ const characterTitles = {
 	old_hansong: "楚国之望",
 	old_star_dingfeng: "廓清阶陛",
 	old_star_fazheng: "定军佐功",
+	old_star_zhugejin: "怀玉之臣",
 
 	//限定专属
 	old_lizhaoyi: "贞骨陨玉",
