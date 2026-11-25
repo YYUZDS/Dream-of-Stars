@@ -1027,6 +1027,15 @@ const characters = {
 		img: "image/character/xin_zhuzhi.jpg",
 		dieAudios: ["xin_zhuzhi"],
 	},
+	old_mb_shen_lvbu: {
+		sex: "male",
+		group: "shen",
+		hp: 5,
+		skills: ["baonu", "mbwumou", "old_mbwuqian", "ol_shenfen"],
+		img: "image/character/mb_shen_lvbu.jpg",
+		groupInGuozhan: "qun",
+		dieAudios: ["shen_lvbu"],
+	},
 
 	//谋攻篇
 	old_sb_caopi: {

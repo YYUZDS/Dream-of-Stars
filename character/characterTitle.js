@@ -139,6 +139,7 @@ const characterTitles = {
 	old_fuqian: "危汉绝勇",
 	old_mb_sp_zhenji: "明珠锦玉",
 	old_mb_zhuzhi: "功崇信重",
+	old_mb_shen_lvbu: "修罗之道",
 
 	//谋攻篇
 	old_sb_caopi: "魏文帝",

@@ -196,7 +196,7 @@ const characterReplaces = {
 	shen_ganning: ["sw_ganning"],
 
 	shen_huatuo: ["old_dc_shen_huatuo"],
-	shen_lvbu: ["sw_lvbu"],
+	shen_lvbu: ["old_mb_shen_lvbu", "sw_lvbu"],
 	shen_zhangjiao: ["sw_zhangjiao"],
 	shen_diaochan: ["sw_diaochan"],
 };
