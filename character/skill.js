@@ -30434,8 +30434,8 @@ const lmCharacter = {
 		old_staranji: "谙计",
 		old_staranji_info: "锁定技，一名角色使用牌时，若此花色的牌本轮游戏使用的最少，则你摸一张牌。",
 
-		old_star_zhugejin: "星诸葛瑾",
-		old_star_zhugejin_prefix: "星",
+		old_star_zhugejin: "旧星诸葛瑾",
+		old_star_zhugejin_prefix: "旧|星",
 		old_starzunjian: "尊谏",
 		old_starzunjian_info: "出牌阶段每种花色限一次，你可以弃置一种花色的所有手牌并令一名角色摸X张牌（X为你手牌中缺少的花色数），然后若其手牌数为全场唯一最多，其可以交给你至多两张手牌；若其体力值全场唯一最少，你可令其回复一点体力。",
 		old_starhongya: "弘雅",
