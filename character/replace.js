@@ -154,6 +154,7 @@ const characterReplaces = {
 	clan_xunshuang: ["old_clan_xunshuang", "clan_xunshuang"],
 	xunyuxunyou: ["old_xunyuxunyou", "xunyuxunyou"],
 	xurong: ["old_xurong", "lm_xurong", "xurong"],
+	xusheng: ["old_dc_sb_xusheng"],
 	yinfuren: ["old_yinfuren", "yinfuren"],
 	zhangbu: ["old_zhangbu", "zhangbu"],
 	tw_zhanghong: ["old_tw_zhanghong", "tw_zhanghong"],
