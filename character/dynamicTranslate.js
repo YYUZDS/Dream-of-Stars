@@ -1,6 +1,21 @@
 import { lib, game, ui, get, ai, _status } from "../../../noname.js";
 const dynamicTranslates = {
 	//动态翻译
+	//内部大致按照OL，新杀，手杀，外服，线下，DIY，怀旧的顺序排列。（同服按标，界，谋，sp）
+
+	//OL武将
+	old_luochong(player) {
+		const storage = player.getStorage("old_luochong");
+		const choiceList = ["1、令一名角色回复1点体力；", "2、令一名角色失去1点体力；", "3、令一名角色弃置两张牌；", "4、令一名角色摸两张牌并可以将这些牌分配任意名角色"];
+		for (let i = 0; i < 4; i++) {
+			if (storage.includes(i)) {
+				choiceList[i] = `<span style="text-decoration: line-through;">${choiceList[i]}</span>`;
+			}
+		}
+		return `准备阶段或当你受到伤害后，你可以选择一项：${choiceList.join("")}（每轮每项各限一次）。`;
+	},
+
+	//新杀武将
 	old_dcporui(player) {
 		return "每轮限" + (player.hasMark("old_dcgonghu_basic") ? "两" : "一") + "次。其他角色的结束阶段，你可以弃置一张牌并选择一名于此回合内失去过牌的其他角色，你视为对其依次使用X+1张【杀】" + (player.hasMark("old_dcgonghu_damage") ? "" : "，然后你交给其X张手牌") + "（（X为你的体力值，手牌不足X张则全给））。";
 	},
@@ -19,10 +34,14 @@ const dynamicTranslates = {
 		return `${start}阳：${yang}；阴：${yin}${end}`;
 	},
 
+	//手杀武将
 	old_sblongdan(player) {
-		if (player.hasSkill("old_sblongdan_mark", null, null, false)) return "蓄力技（1/4）。①你可以消耗1点蓄力值，将【杀】当做【闪】或将【闪】当做【杀】使用或打出，然后摸一张牌。②一名角色的回合结束时，你获得1点蓄力值。";
-		return "蓄力技（1/4）。①你可以消耗1点蓄力值，将【杀】当做【闪】或将【闪】当做【杀】使用或打出，然后若你以此法使用牌，你摸一张牌。②一名角色的回合结束时，你获得1点蓄力值。";
+		if (player.hasSkill("old_sblongdan_mark", null, null, false)) {
+			return "蓄力技（1/4）。①你可以消耗1点蓄力值，将一张基本牌当做任意基本牌使用或打出，然后你摸一张牌。<br>②一名角色的回合结束时，你获得1点蓄力值。";
+		}
+		return "蓄力技（1/4）。①你可以消耗1点蓄力值，将【杀】当做【闪】或将【闪】当做【杀】使用或打出，然后你摸一张牌。<br>②一名角色的回合结束时，你获得1点蓄力值。";
 	},
+
 	old_sbwansha(player) {
 		const storage = player.storage.old_sbwansha;
 		var str = "①你的回合内，不处于濒死状态的其他角色不能使用【桃】。②一名角色进入濒死状态时，你可以观看其手牌并选择其";

@@ -21861,24 +21861,27 @@ const lmCharacter = {
 			audio: "sblongdan",
 			enable: ["chooseToUse", "chooseToRespond"],
 			chargeSkill: 4,
+			init(player) {
+				player.addCharge(1, false);
+			},
 			filter(event, player) {
-				if (event.type == "wuxie" || !player.countCharge()) {
+				if (event.type === "wuxie" || !player.countCharge()) {
 					return false;
 				}
-				var marked = player.hasSkill("old_sblongdan_mark", null, null, false);
-				for (var name of lib.inpile) {
-					if (!marked && name != "sha" && name != "shan") {
+				const marked = player.hasSkill("old_sblongdan_mark", null, null, false);
+				for (const name of lib.inpile) {
+					if (!marked && name !== "sha" && name !== "shan") {
 						continue;
 					}
-					if (get.type(name) != "basic") {
+					if (get.type(name) !== "basic") {
 						continue;
 					}
 					if (player.hasCard(lib.skill.old_sblongdan.getFilter(name, player), "hs")) {
 						if (event.filterCard(get.autoViewAs({ name }, "unsure"), player, event)) {
 							return true;
 						}
-						if (marked && name == "sha") {
-							for (var nature of lib.inpile_nature) {
+						if (marked && name === "sha") {
+							for (const nature of lib.inpile_nature) {
 								if (event.filterCard(get.autoViewAs({ name, nature }, "unsure"), player, event)) {
 									return true;
 								}
@@ -21890,21 +21893,21 @@ const lmCharacter = {
 			},
 			chooseButton: {
 				dialog(event, player) {
-					var list = [];
-					var marked = player.hasSkill("old_sblongdan_mark", null, null, false);
-					for (var name of lib.inpile) {
-						if (!marked && name != "sha" && name != "shan") {
+					const list = [];
+					const marked = player.hasSkill("old_sblongdan_mark", null, null, false);
+					for (const name of lib.inpile) {
+						if (!marked && name !== "sha" && name !== "shan") {
 							continue;
 						}
-						if (get.type(name) != "basic") {
+						if (get.type(name) !== "basic") {
 							continue;
 						}
 						if (player.hasCard(lib.skill.old_sblongdan.getFilter(name, player), "hs")) {
 							if (event.filterCard(get.autoViewAs({ name }, "unsure"), player, event)) {
 								list.push(["基本", "", name]);
 							}
-							if (marked && name == "sha") {
-								for (var nature of lib.inpile_nature) {
+							if (marked && name === "sha") {
+								for (const nature of lib.inpile_nature) {
 									if (event.filterCard(get.autoViewAs({ name, nature }, "unsure"), player, event)) {
 										list.push(["基本", "", name, nature]);
 									}
@@ -21917,12 +21920,12 @@ const lmCharacter = {
 					return dialog;
 				},
 				check(button) {
-					if (_status.event.getParent().type != "phase") {
+					if (_status.event.getParent().type !== "phase") {
 						return 1;
 					}
-					var player = _status.event.player,
-						card = { name: button.link[2], nature: button.link[3] };
-					if (card.name == "jiu" && Math.min(player.countMark("charge"), player.countCards("h", { type: "basic" })) < 2) {
+					const player = _status.event.player;
+					const card = { name: button.link[2], nature: button.link[3] };
+					if (card.name === "jiu" && Math.min(player.countMark("charge"), player.countCards("h", { type: "basic" })) < 2) {
 						return 0;
 					}
 					return player.getUseValue(card, null, true);
@@ -21940,31 +21943,31 @@ const lmCharacter = {
 						check(card) {
 							return 6 / Math.max(1, get.value(card));
 						},
-						precontent() {
+						async precontent(event, trigger, player) {
 							player.removeCharge();
 							player.addTempSkill("old_sblongdan_draw");
 						},
 					};
 				},
 				prompt(links, player) {
-					var marked = player.hasSkill("old_sblongdan_mark", null, null, false);
-					var card = {
+					const marked = player.hasSkill("old_sblongdan_mark", null, null, false);
+					const card = {
 						name: links[0][2],
 						nature: links[0][3],
 						isCard: true,
 					};
 					if (marked) {
-						return "将一张基本牌当做" + get.translation(card) + "使用";
+						return `将一张基本牌当做${get.translation(card)}使用`;
 					}
-					return "将一张" + (card.name == "sha" ? "闪" : "杀") + "当做" + get.translation(card) + "使用";
+					return `将一张${card.name === "sha" ? "闪" : "杀"}当做${get.translation(card)}使用`;
 				},
 			},
 			hiddenCard(player, name) {
-				if (get.type(name) != "basic" || !player.countCharge()) {
+				if (get.type(name) !== "basic" || !player.countCharge()) {
 					return false;
 				}
-				var marked = player.hasSkill("old_sblongdan_mark", null, null, false);
-				if (!marked && name != "sha" && name != "shan") {
+				const marked = player.hasSkill("old_sblongdan_mark", null, null, false);
+				if (!marked && name !== "sha" && name !== "shan") {
 					return false;
 				}
 				return player.hasCard(lib.skill.old_sblongdan.getFilter(name, player), "hs");
@@ -21973,7 +21976,7 @@ const lmCharacter = {
 				respondSha: true,
 				respondShan: true,
 				skillTagFilter(player, tag) {
-					return lib.skill.old_sblongdan.hiddenCard(player, tag == "respondSha" ? "sha" : "shan");
+					return lib.skill.old_sblongdan.hiddenCard(player, tag === "respondSha" ? "sha" : "shan");
 				},
 				order: 9,
 				result: {
@@ -21987,10 +21990,10 @@ const lmCharacter = {
 			},
 			getFilter(name, player) {
 				if (!player.hasSkill("old_sblongdan_mark", null, null, false)) {
-					if (name == "sha") {
+					if (name === "sha") {
 						return { name: "shan" };
 					}
-					if (name == "shan") {
+					if (name === "shan") {
 						return { name: "sha" };
 					}
 					return () => false;
@@ -22011,26 +22014,22 @@ const lmCharacter = {
 					forced: true,
 					popup: false,
 					filter(event, player) {
-						return event.skill == "old_sblongdan_backup";
+						return event.skill === "old_sblongdan_backup";
 					},
-					content() {
-						player.draw();
+					async content(event, trigger, player) {
+						await player.draw();
 					},
 				},
 				charge: {
 					audio: "sblongdan",
 					trigger: {
-						global: ["phaseBefore", "phaseEnd"],
-						player: "enterGame",
+						global: "phaseEnd",
 					},
 					forced: true,
-					filter(event, player, name) {
-						if (!player.countCharge(true)) {
-							return false;
-						}
-						return name != "phaseBefore" || game.phaseNumber == 0;
+					filter(event, player) {
+						return player.countCharge(true);
 					},
-					content() {
+					async content(event, trigger, player) {
 						player.addCharge();
 					},
 				},
@@ -22042,8 +22041,8 @@ const lmCharacter = {
 			trigger: { player: "phaseZhunbeiBegin" },
 			async cost(event, trigger, player) {
 				event.result = await player
-					.chooseTarget(lib.filter.notMe, get.prompt(event.skill), "和一名其他角色进行“协力”")
-					.set("ai", function (target) {
+					.chooseTarget({ filterTarget: lib.filter.notMe, prompt: get.prompt(event.skill), prompt2: "和一名其他角色进行“协力”" })
+					.set("ai", target => {
 						return get.threaten(target) * Math.sqrt(1 + target.countCards("h")) * (target.isTurnedOver() || target.hasJudge("lebu") ? 0.1 : 1);
 					})
 					.forResult();
@@ -22052,8 +22051,8 @@ const lmCharacter = {
 				const target = event.targets[0];
 				await player
 					.chooseCooperationFor(target, "old_sbjizhu")
-					.set("ai", function (button) {
-						var base = 0;
+					.set("ai", button => {
+						let base = 0;
 						switch (button.link) {
 							case "cooperation_damage":
 								base = 0.1;
@@ -22084,10 +22083,10 @@ const lmCharacter = {
 					filter(event, player) {
 						return player.checkCooperationStatus(event.player, "old_sbjizhu") && ["old_sblongdan", "jdlongdan"].some(skill => player.hasSkill(skill, null, null, false));
 					},
-					content() {
+					async content(event, trigger, player) {
 						game.log(player, "和", trigger.player, "的协力成功");
-						player.addTempSkill("old_sblongdan_mark", player.hasSkill("jdlongdan", null, null, false) ? { player: "phaseAfter" } : { player: "phaseJieshuBegin" });
-						game.delayx();
+						player.addTempSkill("old_sblongdan_mark", { player: "phaseAfter" });
+						await game.delayx();
 					},
 				},
 			},
@@ -31010,11 +31009,11 @@ const lmCharacter = {
 		old_sb_zhaoyun: "旧谋赵云",
 		old_sb_zhaoyun_prefix: "旧|谋",
 		old_sblongdan: "龙胆",
-		old_sblongdan_info: "蓄力技（1/4）。①你可以消耗1点蓄力值，将【杀】当做【闪】或将【闪】当做【杀】使用或打出，然后摸一张牌。<br>②一名角色的回合结束时，你获得1点蓄力值。",
+		old_sblongdan_info: "蓄力技（1/4）。①你可以消耗1点蓄力值，将【杀】当做【闪】或将【闪】当做【杀】使用或打出，然后你摸一张牌。<br>②一名角色的回合结束时，你获得1点蓄力值。",
 		old_sbjizhu: "积著",
-		old_sbjizhu_info: `准备阶段开始时，你可以和一名其他角色进行${get.poptip("rule_xieli")}。其的下个结束阶段开始时，若你与其${get.poptip("rule_xieli")}成功，则你修改${get.poptip("old_sblongdan_shabi")}直到你的下个结束阶段开始。`,
+		old_sbjizhu_info: `准备阶段开始时，你可以和一名其他角色进行${get.poptip("rule_xieli")}。其的下个结束阶段开始时，若你与其${get.poptip("rule_xieli")}成功，则你修改${get.poptip("old_sblongdan_shabi")}直到你的下个回合结束后。`,
 		old_sblongdan_shabi: "龙胆",
-		old_sblongdan_shabi_info: "蓄力技（1/4）。①你可以消耗1点蓄力值，将一张基本牌当做任意基本牌使用或打出，然后摸一张牌。<br>②一名角色的回合结束时，你获得1点蓄力值。",
+		old_sblongdan_shabi_info: "蓄力技（1/4）。①你可以消耗1点蓄力值，将一张基本牌当做任意基本牌使用或打出，然后你摸一张牌。<br>②一名角色的回合结束时，你获得1点蓄力值。",
 
 		old_sb_fazheng: "旧谋法正",
 		old_sb_fazheng_prefix: "旧|谋",
