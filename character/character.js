@@ -722,7 +722,7 @@ const characters = {
 		sex: "male",
 		group: "wu",
 		hp: 4,
-		skills: ["old_dcsbqinqiang", "dcyizhen"],
+		skills: ["old_dcsbqinqiang", "dcsbyizhen"],
 		img: "image/character/dc_sb_xusheng.jpg",
 		dieAudios: ["dc_sb_xusheng"],
 	},
